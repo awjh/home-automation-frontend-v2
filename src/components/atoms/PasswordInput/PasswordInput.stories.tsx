@@ -1,7 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import PasswordInput from './PasswordInput'
 import { Flex } from '@chakra-ui/react'
 import { useState } from 'react'
+import { expect, userEvent } from 'storybook/test'
 
 const meta: Meta<typeof PasswordInput> = {
     title: 'Atoms/PasswordInput',
@@ -46,5 +47,23 @@ export const WithError: Story = {
                 errorMessage="Password does not meet requirements"
             />
         )
+    },
+}
+
+export const ShowsPassword: Story = {
+    render: (args) => {
+        const [value, setValue] = useState('supersecret123')
+        return <PasswordInput {...args} value={value} onChange={setValue} />
+    },
+    play: async ({ canvas }) => {
+        const input = canvas.getByLabelText(/example label/i) as HTMLInputElement
+        expect(input).toHaveAttribute('type', 'password')
+
+        const toggleButton = canvas.getByLabelText(/toggle password visibility/i)
+        expect(toggleButton).toBeInTheDocument()
+
+        await userEvent.click(toggleButton)
+
+        expect(input).toHaveAttribute('type', 'text')
     },
 }

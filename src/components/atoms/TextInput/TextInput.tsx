@@ -23,6 +23,7 @@ export default function TextInput({ type, label, required }: TextInputProps) {
                 borderWidth={2}
                 borderRadius={0}
                 color={keyColors.primary}
+                pl={4}
             />
             <Field.ErrorText />
         </Field.Root>

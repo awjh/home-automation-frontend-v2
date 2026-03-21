@@ -29,17 +29,17 @@ export default function PasswordInput({
                 <Field.RequiredIndicator />
             </Field.Label>
             <InputGroup
+                endElementProps={{ px: '1' }}
                 endElement={
                     <IconButton
                         tabIndex={-1}
-                        me="-2"
                         aspectRatio="square"
                         size="sm"
                         variant="ghost"
                         height="calc(100% - {spacing.2})"
                         aria-label="Toggle password visibility"
                         color={keyColors.primary}
-                        _hover={{ bg: keyColors.iconButtonHoverBg }}
+                        _hover={{ bg: keyColors.subtle }}
                         onPointerDown={(e) => {
                             e.preventDefault()
                             setVisible(!visible)
@@ -58,6 +58,7 @@ export default function PasswordInput({
                     value={value ?? ''}
                     onChange={(e) => onChange?.(e.target.value)}
                     onBlur={onBlur}
+                    pl={4}
                 />
             </InputGroup>
             {errorMessage && <Field.ErrorText>{errorMessage}</Field.ErrorText>}

@@ -42,9 +42,7 @@ export interface StytchMockClient {
 const mockClient: StytchMockClient = {
     parseAuthenticateUrl: () => ({ token: 'mock-token' }),
     passwords: {
-        resetByEmail: async () => {
-            alert('Mock password reset complete!')
-        },
+        resetByEmail: async () => {},
         authenticate: async () => {},
         create: async () => {},
         strengthCheck: async () => {},

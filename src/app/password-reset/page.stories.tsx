@@ -1,9 +1,17 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import PasswordReset from './page'
 
 const meta: Meta<typeof PasswordReset> = {
     title: 'Pages/PasswordReset',
     component: PasswordReset,
+    parameters: {
+        nextjs: {
+            appDirectory: true,
+            navigation: {
+                push: () => {},
+            },
+        },
+    },
     decorators: [(Story) => <Story />],
     args: {},
 }

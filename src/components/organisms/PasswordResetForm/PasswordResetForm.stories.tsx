@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import PasswordResetForm from './PasswordResetForm'
 
 const meta: Meta<typeof PasswordResetForm> = {

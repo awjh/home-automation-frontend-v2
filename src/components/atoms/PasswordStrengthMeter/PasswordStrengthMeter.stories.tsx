@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import PasswordStrengthMeter from './PasswordStrengthMeter'
 import { Flex, Stack } from '@chakra-ui/react'
 

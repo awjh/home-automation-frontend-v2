@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Home Automation Frontend
+
+A [Next.js](https://nextjs.org) frontend for home automation, built with Chakra UI and Storybook.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Storybook
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+yarn storybook
+```
 
-## Learn More
+Opens Storybook at [http://localhost:6006](http://localhost:6006) for component development and testing.
 
-To learn more about Next.js, take a look at the following resources:
+## Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Interaction Tests (Storybook)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Interaction tests are written as `play` functions inside `.stories.tsx` files and run via [Vitest](https://vitest.dev/) with a real Playwright browser. They verify component behaviour such as user clicks, form submission, and callback invocations.
 
-## Deploy on Vercel
+```bash
+yarn test-storybook
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Results are also shown live in the **Tests** panel inside Storybook.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Visual Regression Tests (Lost Pixel)
+
+Visual/snapshot tests are run locally using [Lost Pixel OSS](https://github.com/lost-pixel/lost-pixel). Baseline screenshots are stored in `.lostpixel/baseline/` and committed to git. On each run, Lost Pixel screenshots every story and diffs them against the baseline, failing if anything has changed unexpectedly.
+
+```bash
+# Build Storybook first, then run visual regression
+yarn build-storybook && yarn lost-pixel
+```
+
+To accept intentional visual changes and update the baselines:
+
+```bash
+yarn lost-pixel:update
+```
+
+To run or update against a specific component only, use the `LOST_PIXEL_FILTER` env var with any substring of the story ID (e.g. `atoms-button--default`):
+
+```bash
+LOST_PIXEL_FILTER=calendar yarn lost-pixel
+LOST_PIXEL_FILTER=calendar yarn lost-pixel:update
+```
+
+#### Reviewing failures
+
+When a test fails, three folders are populated for comparison:
+
+| Folder                   | Contents                                         |
+| ------------------------ | ------------------------------------------------ |
+| `.lostpixel/baseline/`   | Committed reference screenshots                  |
+| `.lostpixel/current/`    | Screenshots from the latest run                  |
+| `.lostpixel/difference/` | Red-highlighted diff images showing what changed |
+
+Open the difference folder in Finder to quickly review failures:
+
+```bash
+open .lostpixel/difference/
+```
+
+Only `.lostpixel/baseline/` is committed to git. The `current/` and `difference/` folders are gitignored as they are regenerated on each run.

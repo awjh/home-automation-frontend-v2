@@ -1,12 +1,10 @@
-import { ClientOnly, IconButton, IconButtonProps, Skeleton } from '@chakra-ui/react'
+import { ClientOnly, IconButton, Skeleton } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 import React from 'react'
 import { LuMoon, LuSun } from 'react-icons/lu'
 
-interface ColorModeButtonProps {}
-
-export default function ColorModeButton(props: ColorModeButtonProps) {
-    const { toggleColorMode, colorMode } = useColorMode()
+export default function ColorModeButton() {
+    const { toggleColorMode, colorMode, keyColors } = useColorMode()
     return (
         <ClientOnly fallback={<Skeleton boxSize="9" />}>
             <IconButton
@@ -14,6 +12,8 @@ export default function ColorModeButton(props: ColorModeButtonProps) {
                 variant="ghost"
                 aria-label="Toggle color mode"
                 size="sm"
+                color={keyColors.primary}
+                _hover={{ bg: keyColors.subtle }}
                 css={{
                     _icon: {
                         width: '5',

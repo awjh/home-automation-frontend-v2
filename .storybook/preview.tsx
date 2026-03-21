@@ -1,34 +1,46 @@
-import { withThemeByClassName } from '@storybook/addon-themes'
-import type { Preview } from '@storybook/react'
+import Toaster from '../src/components/atoms/Toaster/Toaster'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { ThemeProvider } from 'next-themes'
+import { withThemeByClassName } from '@storybook/addon-themes'
+import type { Preview } from '@storybook/react-vite'
 import { StytchProvider } from '@stytch/react'
+import { ThemeProvider, useTheme } from 'next-themes'
+import { useEffect } from 'react'
+import '@fontsource/inter'
+
+/**
+ * Syncs the Storybook toolbar theme selection into next-themes by calling
+ * setTheme whenever the toolbar value changes. Rendered inside ThemeProvider
+ * so it has access to the context. This allows:
+ *  - The toolbar to control the theme for any story (without forcedTheme locking it)
+ *  - The ToggleColorMode button to still call setTheme freely
+ */
+function StorybookThemeSync({ theme }: { theme: string }) {
+    const { setTheme } = useTheme()
+    useEffect(() => {
+        setTheme(theme)
+    }, [theme])
+    return null
+}
 
 const preview: Preview = {
     decorators: [
-        // Apply the class-based theme wrapper first so the document/class is
-        // present before our Provider mounts and reads the theme.
+        // Apply the class-based theme wrapper so Storybook's toolbar UI
+        // reflects the selected theme. StorybookThemeSync (below) ensures
+        // next-themes internal state stays in sync with the toolbar selection.
         withThemeByClassName({
             defaultTheme: 'light',
             themes: { light: '', dark: 'dark' },
         }),
-        // Pass Storybook's selected theme into our Provider so next-themes
-        // sees the active theme as `forcedTheme`. The withThemeByClassName
-        // decorator adds a `theme` global (keys from the `themes` map),
-        // so read it from the context and forward it.
         (Story, context) => {
-            const sbTheme = context?.globals?.theme
-            // Normalize to 'dark' | 'light' (fallback to 'light')
-            const forcedTheme = sbTheme === 'dark' ? 'dark' : 'light'
+            const sbTheme = context?.globals?.theme === 'dark' ? 'dark' : 'light'
             return (
                 <ChakraProvider value={defaultSystem}>
                     <StytchProvider>
-                        <ThemeProvider
-                            attribute="class"
-                            disableTransitionOnChange
-                            forcedTheme={forcedTheme}
-                        >
+                        <ThemeProvider attribute="class" disableTransitionOnChange>
+                            {/* Sync toolbar → next-themes without locking it via forcedTheme */}
+                            <StorybookThemeSync theme={sbTheme} />
                             <Story />
+                            <Toaster />
                         </ThemeProvider>
                     </StytchProvider>
                 </ChakraProvider>

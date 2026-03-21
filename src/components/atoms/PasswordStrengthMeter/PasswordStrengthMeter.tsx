@@ -1,6 +1,6 @@
 import { Box, HStack, Stack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import zxcvbn from 'zxcvbn'
 
 interface PasswordStrengthMeterProps {
@@ -10,16 +10,9 @@ interface PasswordStrengthMeterProps {
 export default function PasswordStrengthMeter(props: PasswordStrengthMeterProps) {
     const { keyColors } = useColorMode()
 
-    const [strength, setStrength] = useState(-1)
-
-    useEffect(() => {
-        if (props.passwordValue === '') {
-            setStrength(-1)
-            return
-        }
-        const result = zxcvbn(props.passwordValue)
-
-        setStrength(result.score)
+    const strength = useMemo(() => {
+        if (props.passwordValue === '') return -1
+        return zxcvbn(props.passwordValue).score
     }, [props.passwordValue])
 
     if (strength === -1) {

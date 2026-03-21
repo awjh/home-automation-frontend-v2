@@ -6,7 +6,6 @@ interface UseColorModeReturn {
     keyColors: {
         primary: string
         buttonHoverBg: string
-        iconButtonHoverBg: string
         secondary: string
         subtle: string
     }
@@ -46,7 +45,6 @@ export default function useColorMode(): UseColorModeReturn {
         keyColors: {
             primary: colorMode === 'dark' ? 'teal.400' : 'teal.600',
             buttonHoverBg: colorMode === 'dark' ? 'teal.200' : 'teal.500',
-            iconButtonHoverBg: colorMode === 'dark' ? 'teal.700' : 'teal.100',
             secondary: colorMode === 'dark' ? 'black' : 'white',
             subtle: colorMode === 'dark' ? 'teal.800' : 'teal.100',
         },
