@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import MealPlannerCalendar from './MealPlannerCalendar'
-import { expect, within } from 'storybook/test'
+import { expect, fn, within } from 'storybook/test'
 import { Canvas } from 'storybook/internal/csf'
 import MockDate from 'mockdate'
 
@@ -8,7 +8,9 @@ const meta: Meta<typeof MealPlannerCalendar> = {
     title: 'Organisms/MealPlannerCalendar',
     component: MealPlannerCalendar,
     decorators: [(Story) => <Story />],
-    args: {},
+    args: {
+        onDateRangeSelected: fn(),
+    },
 }
 
 export default meta

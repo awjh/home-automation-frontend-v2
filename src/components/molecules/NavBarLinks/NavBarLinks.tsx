@@ -2,7 +2,7 @@ import NavBarLink from '@atoms/NavBarLink/NavBarLink'
 import { Flex, IconButton, Stack, VStack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 import { LuMenu } from 'react-icons/lu'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 
 interface NavBarLinksProps {
     links: { href: string; label: string }[]
@@ -34,12 +34,13 @@ export default function NavBarLinks({ links }: NavBarLinksProps) {
             </IconButton>
             <Stack
                 position={{ base: 'absolute', md: 'inherit' }}
+                zIndex={99}
                 top={{ base: 10, md: 0 }}
                 right={'0'}
                 direction={{ base: 'column', md: 'row' }}
                 p={{ base: 2, md: 0 }}
                 gap={{ base: 2, md: 4 }}
-                w={{ base: 'calc(100vw - 32px)', md: 'auto' }}
+                w={{ base: 'calc(100vw - 31px)', md: 'auto' }}
                 alignItems={{ base: 'flex-start', md: 'center' }}
                 justifyContent={'flex-end'}
                 display={{ base: isOpen ? 'flex' : 'none', md: 'flex' }}
@@ -52,7 +53,7 @@ export default function NavBarLinks({ links }: NavBarLinksProps) {
                 mt={{ base: isOpen ? '-2px' : '-0.5', md: 0 }}
             >
                 {links.map((link, idx) => (
-                    <>
+                    <Fragment key={`nav-link-${idx}`}>
                         <NavBarLink key={idx} href={link.href}>
                             {link.label}
                         </NavBarLink>
@@ -64,7 +65,7 @@ export default function NavBarLinks({ links }: NavBarLinksProps) {
                                 backgroundColor={keyColors.primary}
                             />
                         )}
-                    </>
+                    </Fragment>
                 ))}
             </Stack>
         </VStack>

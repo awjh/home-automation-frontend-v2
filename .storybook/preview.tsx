@@ -2,7 +2,6 @@ import Toaster from '../src/components/atoms/Toaster/Toaster'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { withThemeByClassName } from '@storybook/addon-themes'
 import type { Preview } from '@storybook/react-vite'
-import { StytchProvider } from '@stytch/react'
 import { ThemeProvider, useTheme } from 'next-themes'
 import { useEffect } from 'react'
 import '@fontsource/inter'
@@ -35,14 +34,12 @@ const preview: Preview = {
             const sbTheme = context?.globals?.theme === 'dark' ? 'dark' : 'light'
             return (
                 <ChakraProvider value={defaultSystem}>
-                    <StytchProvider>
-                        <ThemeProvider attribute="class" disableTransitionOnChange>
-                            {/* Sync toolbar → next-themes without locking it via forcedTheme */}
-                            <StorybookThemeSync theme={sbTheme} />
-                            <Story />
-                            <Toaster />
-                        </ThemeProvider>
-                    </StytchProvider>
+                    <ThemeProvider attribute="class" disableTransitionOnChange>
+                        {/* Sync toolbar → next-themes without locking it via forcedTheme */}
+                        <StorybookThemeSync theme={sbTheme} />
+                        <Story />
+                        <Toaster />
+                    </ThemeProvider>
                 </ChakraProvider>
             )
         },

@@ -21,10 +21,14 @@ const config: StorybookConfig = {
         config.resolve = config.resolve ?? {}
         config.resolve.alias = {
             ...config.resolve.alias,
-            '@stytch/react': path.resolve(__dirname, '../src/__mocks__/@stytch/react.tsx'),
             'next/navigation': require.resolve('@storybook/nextjs-vite/navigation.mock'),
         }
         return config
+    },
+    refs: {
+        '@chakra-ui/react': {
+            disable: true,
+        },
     },
 }
 export default config

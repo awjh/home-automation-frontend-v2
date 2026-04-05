@@ -10,18 +10,37 @@ export interface NonSubmitButtonProps {
     onClick: () => void
 }
 
-export interface BaseButtonProps {
-    children: React.ReactNode
+export interface NormalButtonProps {
     colorStyle?: 'primary' | 'secondary'
     w?: string | number
     size?: 'sm' | 'md' | 'lg'
 }
 
-export type ButtonProps = BaseButtonProps & (SubmitButtonProps | NonSubmitButtonProps)
+export interface LinkButtonProps {
+    colorStyle: 'link'
+}
+
+export interface BaseButtonProps {
+    children: React.ReactNode
+    loading?: boolean
+    loadingText?: string
+}
+
+export type ButtonProps = BaseButtonProps &
+    (SubmitButtonProps | NonSubmitButtonProps) &
+    (NormalButtonProps | LinkButtonProps)
 
 export default function Button(props: ButtonProps) {
     const { keyColors } = useColorMode()
-    const { type, children, colorStyle = 'primary', w, size } = props
+    const { type, children, colorStyle = 'primary' } = props
+
+    let w: string | number | undefined = undefined
+    let size: 'sm' | 'md' | 'lg' | undefined = undefined
+
+    if (colorStyle === 'primary' || colorStyle === 'secondary') {
+        w = (props as NormalButtonProps).w
+        size = (props as NormalButtonProps).size
+    }
 
     let onClick: (() => void) | undefined = undefined
 
@@ -32,15 +51,25 @@ export default function Button(props: ButtonProps) {
     return (
         <ChakraButton
             type={type}
-            borderColor={keyColors.primary}
-            borderWidth={2}
-            bg={colorStyle === 'primary' ? keyColors.primary : keyColors.secondary}
+            borderColor={colorStyle === 'link' ? 'transparent' : keyColors.primary}
+            borderWidth={colorStyle === 'link' ? 0 : 2}
+            bg={colorStyle === 'primary' ? keyColors.primary : 'transparent'}
             color={colorStyle === 'primary' ? keyColors.secondary : keyColors.primary}
-            _hover={{ bg: keyColors.buttonHoverBg, color: keyColors.secondary }}
+            textDecoration={colorStyle === 'link' ? 'underline' : 'none'}
+            p={colorStyle === 'link' ? 0 : 2}
+            _hover={{
+                bg: colorStyle === 'link' ? 'transparent' : keyColors.buttonHoverBg,
+                color: colorStyle === 'link' ? keyColors.primary : keyColors.secondary,
+                textDecoration: colorStyle === 'link' ? 'underline' : 'none',
+            }}
             borderRadius={0}
+            verticalAlign={colorStyle === 'link' ? 'baseline' : undefined}
             w={w}
             onClick={onClick}
             size={size}
+            fontSize={colorStyle === 'link' ? 'inherit' : undefined}
+            loading={props.loading}
+            loadingText={props.loadingText}
         >
             {children}
         </ChakraButton>

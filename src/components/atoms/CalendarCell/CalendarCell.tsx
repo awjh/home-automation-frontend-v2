@@ -1,9 +1,8 @@
 import { GridItem, GridItemProps, Text } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 
-const cellWidth = { base: undefined, sm: 12, lg: 16 }
 const cellHeight = {
-    base: 'calc(((100vw - 32px - 4pt - 16px) / 7) / 1.33333)',
+    base: 8,
     sm: 9,
     lg: 12,
 }
@@ -19,13 +18,41 @@ interface CalendarCellPropsSpacer {
     variant: Extract<CalendarCellVariant, 'spacer'>
 }
 
+type BackgroundStyle = 'normal' | 'subtle'
+
 interface CalendarCellPropsNonSpacer {
+    backgroundStyle:
+        | BackgroundStyle
+        | {
+              base?: BackgroundStyle
+              sm?: BackgroundStyle
+              md?: BackgroundStyle
+              lg?: BackgroundStyle
+          }
     day: number
     variant: Exclude<CalendarCellVariant, 'spacer'>
     onClick: () => void | Promise<void>
 }
 
 type CalendarCellProps = CalendarCellPropsNonSpacer | CalendarCellPropsSpacer
+
+function calcHighlightedColor(
+    backgroundStyle: CalendarCellPropsNonSpacer['backgroundStyle'],
+    keyColors: ReturnType<typeof useColorMode>['keyColors'],
+) {
+    if (typeof backgroundStyle === 'object') {
+        return Object.entries(backgroundStyle).reduce(
+            (acc, [breakpoint, style]) => {
+                acc[breakpoint as keyof typeof backgroundStyle] =
+                    style === 'normal' ? keyColors.subtle : keyColors.lessSubtle
+                return acc
+            },
+            {} as Record<string, string>,
+        )
+    }
+
+    return backgroundStyle === 'normal' ? keyColors.subtle : keyColors.lessSubtle
+}
 
 export default function CalendarCell(props: CalendarCellProps) {
     const { keyColors } = useColorMode()
@@ -36,19 +63,21 @@ export default function CalendarCell(props: CalendarCellProps) {
 
     switch (props.variant) {
         case 'default':
-            backgroundColor = keyColors.secondary
+            backgroundColor = 'transparent'
             textColor = keyColors.primary
-            borderColor = keyColors.secondary
+            borderColor = 'transparent'
             break
         case 'selected':
-            backgroundColor = keyColors.secondary
+            backgroundColor = 'transparent'
             textColor = keyColors.primary
             borderColor = keyColors.primary
             break
         case 'highlighted':
-            backgroundColor = keyColors.subtle
+            const highlightedColor = calcHighlightedColor(props.backgroundStyle, keyColors)
+
+            backgroundColor = highlightedColor
             textColor = keyColors.primary
-            borderColor = keyColors.subtle
+            borderColor = highlightedColor
             break
         case 'selected-highlighted':
             backgroundColor = keyColors.primary
@@ -58,7 +87,7 @@ export default function CalendarCell(props: CalendarCellProps) {
     }
 
     if (props.variant === 'spacer') {
-        return <GridItem width={cellWidth} height={cellHeight} />
+        return <GridItem height={cellHeight} />
     }
 
     return (
@@ -69,7 +98,6 @@ export default function CalendarCell(props: CalendarCellProps) {
             borderWidth={2}
             boxSizing={'border-box'}
             cursor={'pointer'}
-            width={cellWidth}
             height={cellHeight}
             onClick={props.onClick}
             data-variant={props.variant}

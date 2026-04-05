@@ -2,7 +2,11 @@ import { Heading, HStack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 import NavBarLinks from '@molecules/NavBarLinks/NavBarLinks'
 
-export default function NavBar() {
+interface NavBarProps {
+    showLinks?: boolean
+}
+
+export default function NavBar({ showLinks = true }: NavBarProps) {
     const { keyColors } = useColorMode()
 
     return (
@@ -13,7 +17,8 @@ export default function NavBar() {
             py={{ base: 2, sm: 4, md: 6 }}
             justifyContent={'start'}
             w={'full'}
-            mb={6}
+            mb={{ base: 1, sm: 2, md: 4 }}
+            boxSizing={'border-box'}
         >
             <Heading
                 as={'h1'}
@@ -23,14 +28,16 @@ export default function NavBar() {
             >
                 Home Automation
             </Heading>
-            <NavBarLinks
-                links={[
-                    { href: '/recipes', label: 'recipes' },
-                    { href: '/meal-planner', label: 'meal planner' },
-                    { href: '/records', label: 'records' },
-                    { href: '/logout', label: 'logout' },
-                ]}
-            />
+            {showLinks && (
+                <NavBarLinks
+                    links={[
+                        { href: '/recipes', label: 'recipes' },
+                        { href: '/meal-plans', label: 'meal plans' },
+                        { href: '/records', label: 'records' },
+                        { href: '/logout', label: 'logout' },
+                    ]}
+                />
+            )}
         </HStack>
     )
 }

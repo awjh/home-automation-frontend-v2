@@ -30,6 +30,8 @@ function getCalandarCellVariant({
     return variant
 }
 
+type BackgroundStyle = 'normal' | 'subtle'
+
 export interface CalendarProps {
     month: number // 0-indexed e.g. 0 for January, 1 for February, etc.
     year: number
@@ -39,6 +41,14 @@ export interface CalendarProps {
     }
     selectedDay?: number
     onSelect: (selectedDate: Date) => void | Promise<void>
+    backgroundStyle:
+        | BackgroundStyle
+        | {
+              base?: BackgroundStyle
+              sm?: BackgroundStyle
+              md?: BackgroundStyle
+              lg?: BackgroundStyle
+          }
 }
 
 export default function Calendar(props: CalendarProps) {
@@ -62,9 +72,8 @@ export default function Calendar(props: CalendarProps) {
             <Grid
                 templateColumns={'repeat(7, 1fr)'}
                 templateRows={`repeat(${numWeeks}, 1fr)`}
-                w={{
-                    base: 'full',
-                }}
+                w={'full'}
+                gap={0}
             >
                 {new Array(firstOfMonth.getDay()).fill(undefined).map((_, idx) => (
                     <CalendarCell
@@ -86,6 +95,7 @@ export default function Calendar(props: CalendarProps) {
                             day={renderingDate.getDate()}
                             variant={variant}
                             onClick={() => props.onSelect(renderingDate)}
+                            backgroundStyle={props.backgroundStyle}
                         />
                     )
                 })}

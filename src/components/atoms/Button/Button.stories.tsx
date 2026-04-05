@@ -29,6 +29,12 @@ export const Secondary: Story = {
     },
 }
 
+export const Link: Story = {
+    args: {
+        colorStyle: 'link',
+    },
+}
+
 export const SubmitsForm: Story = {
     args: {
         type: 'submit',

@@ -16,10 +16,9 @@
             "@atoms/*": ["../src/components/atoms/*"],
             "@molecules/*": ["../src/components/molecules/*"],
             "@organisms/*": ["../src/components/organisms/*"],
+            "@templates/*": ["../src/components/templates/*"],
             "@hooks/*": ["../src/hooks/*"],
-            "@defs/*": ["../src/defs/*"],
-            "@/__mocks__/*": ["../src/__mocks__/*"],
-            "@stytch/react": ["../src/__mocks__/@stytch/react.tsx"]
+            "@defs/*": ["../src/defs/*"]
         }
     },
     "include": ["./**/*.ts", "./**/*.tsx"]

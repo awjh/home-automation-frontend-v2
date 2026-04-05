@@ -10,6 +10,62 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
+## Authentication flow
+
+Protected routes use a two-step auth check:
+
+1. A proxy-level check in [src/proxy.ts](src/proxy.ts) runs before the request reaches the page.
+2. A server-side validation in [src/utils/requireAuth.ts](src/utils/requireAuth.ts) runs from the protected layout in [src/app/(protected)/layout.tsx](src/app/%28protected%29/layout.tsx).
+
+### 1. Proxy guard
+
+The `proxy()` function in [src/proxy.ts](src/proxy.ts#L5-L31) is responsible for a lightweight first-pass check on protected routes matched by [src/proxy.ts](src/proxy.ts#L34-L36).
+
+It:
+
+- reads the `stytch_session_jwt` cookie
+- builds a `/login?redirect=...` redirect URL so the app can remember the original destination
+- redirects immediately if the JWT is missing
+- decodes the JWT and checks that `exp` exists
+- redirects if the token is expired
+- allows the request through only when the token is present and appears non-expired
+
+This keeps obviously unauthenticated or expired requests from reaching protected pages.
+
+### 2. Server-side token validation
+
+The actual token validation happens in `reqStorybook uireAuth()` in [src/utils/requireAuth.ts](src/utils/requireAuth.ts#L10-L27).
+
+`requireAuth()`:
+
+- reads the `stytch_session_jwt` cookie on the server
+- redirects to `/login` if the cookie is missing
+- calls `stytchClient.sessions.authenticateJwt()` to validate the JWT with Stytch
+- returns the authenticated session when valid
+- redirects to `/login` if validation fails for any reason
+
+### 3. Protected layout enforcement
+
+The protected app layout in [src/app/(protected)/layout.tsx](src/app/%28protected%29/layout.tsx#L1-L7) calls `await requireAuth()` before rendering children.
+
+That means every page nested under the protected route group gets a server-side auth check automatically:
+
+- invalid or missing tokens are redirected away
+- valid tokens are allowed to render the protected UI
+
+### Summary
+
+In practice, auth works like this:
+
+- the proxy blocks requests that have no JWT or an already expired JWT
+- the protected layout calls `requireAuth()`
+- `requireAuth()` performs the authoritative Stytch JWT validation
+- only valid sessions are allowed to render protected routesProject structure
+
+## Project structure
+
+This project follows atomic design. Templates are used for full page view and then referenced via the page itself. This means we can do storybook testing without needing to use the real methods for things like validating login etc, we can just mock all that to ensure the page works and renders neatly. You should have no storybook file in the pages folder. These can be tested via E2E testing instead.
+
 ## Storybook
 
 ```bash

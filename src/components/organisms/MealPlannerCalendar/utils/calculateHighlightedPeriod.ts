@@ -1,7 +1,13 @@
 import { CalendarProps } from '@molecules/Calendar/Calendar'
 
-type HighlightedPeriod = {
-    [s: string]: CalendarProps['highlightPeriod']
+export type HighlightedPeriod = {
+    fullSpan: {
+        startDate: Date
+        endDate: Date
+    }
+    breakdown: {
+        [s: string]: CalendarProps['highlightPeriod']
+    }
 }
 
 export function calculateHighlightedPeriod(selectedDate: Date): HighlightedPeriod {
@@ -10,6 +16,19 @@ export function calculateHighlightedPeriod(selectedDate: Date): HighlightedPerio
         selectedDate.getMonth() + 1,
         0,
     ).getDate()
+
+    const fullSpan = {
+        startDate: new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate() - selectedDate.getDay(),
+        ),
+        endDate: new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate() + (6 - selectedDate.getDay()),
+        ),
+    }
 
     const startOfSelectedWeek = selectedDate.getDate() - selectedDate.getDay()
     const endOfSelectedWeek = startOfSelectedWeek + 6
@@ -23,13 +42,16 @@ export function calculateHighlightedPeriod(selectedDate: Date): HighlightedPerio
         ).getDate()
 
         return {
-            [`${selectedDate.getMonth()}-${selectedDate.getFullYear()}`]: {
-                startDay: 1,
-                endDay: endOfSelectedWeek,
-            },
-            [`${previousMonth.getMonth()}-${previousMonth.getFullYear()}`]: {
-                startDay: previousMonthLength + startOfSelectedWeek,
-                endDay: previousMonthLength,
+            fullSpan,
+            breakdown: {
+                [`${selectedDate.getMonth()}-${selectedDate.getFullYear()}`]: {
+                    startDay: 1,
+                    endDay: endOfSelectedWeek,
+                },
+                [`${previousMonth.getMonth()}-${previousMonth.getFullYear()}`]: {
+                    startDay: previousMonthLength + startOfSelectedWeek,
+                    endDay: previousMonthLength,
+                },
             },
         }
     }
@@ -38,20 +60,26 @@ export function calculateHighlightedPeriod(selectedDate: Date): HighlightedPerio
         const nextMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1)
 
         return {
-            [`${selectedDate.getMonth()}-${selectedDate.getFullYear()}`]: {
-                startDay: startOfSelectedWeek,
-                endDay: selectedMonthLength,
-            },
-            [`${nextMonth.getMonth()}-${nextMonth.getFullYear()}`]: {
-                startDay: 1,
-                endDay: endOfSelectedWeek - selectedMonthLength,
+            fullSpan,
+            breakdown: {
+                [`${selectedDate.getMonth()}-${selectedDate.getFullYear()}`]: {
+                    startDay: startOfSelectedWeek,
+                    endDay: selectedMonthLength,
+                },
+                [`${nextMonth.getMonth()}-${nextMonth.getFullYear()}`]: {
+                    startDay: 1,
+                    endDay: endOfSelectedWeek - selectedMonthLength,
+                },
             },
         }
     }
     return {
-        [`${selectedDate.getMonth()}-${selectedDate.getFullYear()}`]: {
-            startDay: startOfSelectedWeek,
-            endDay: endOfSelectedWeek,
+        fullSpan,
+        breakdown: {
+            [`${selectedDate.getMonth()}-${selectedDate.getFullYear()}`]: {
+                startDay: startOfSelectedWeek,
+                endDay: endOfSelectedWeek,
+            },
         },
     }
 }

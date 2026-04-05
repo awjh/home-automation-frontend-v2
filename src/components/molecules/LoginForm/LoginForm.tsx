@@ -3,6 +3,7 @@ import PasswordInput from '@atoms/PasswordInput/PasswordInput'
 import TextInput from '@atoms/TextInput/TextInput'
 import { Fieldset, Link, Stack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
 type LoginFormValues = {
@@ -16,6 +17,7 @@ type LoginFormProps = {
 
 export default function LoginForm({ onSubmit }: LoginFormProps) {
     const { keyColors } = useColorMode()
+    const [isLoading, setIsLoading] = useState(false)
     const {
         control,
         handleSubmit,
@@ -25,8 +27,19 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
         mode: 'onTouched',
     })
 
+    const submitHandler = async (input: LoginFormValues) => {
+        setIsLoading(true)
+        try {
+            await onSubmit(input.email, input.password)
+        } catch {
+            // parent should handle error
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
-        <form onSubmit={handleSubmit((input) => onSubmit(input.email, input.password))}>
+        <form noValidate onSubmit={handleSubmit(submitHandler)}>
             <Fieldset.Root size={'lg'} maxW={'md'}>
                 <Stack gap={6}>
                     <Fieldset.Legend color={keyColors.primary} fontSize={'2xl'} fontWeight={'bold'}>
@@ -48,17 +61,31 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
                                 },
                             }}
                             render={({ field }) => (
-                                <TextInput label="Email" type="email" required {...field} />
+                                <TextInput
+                                    label="Email"
+                                    type="email"
+                                    required
+                                    errorMessage={errors.email?.message}
+                                    {...field}
+                                />
                             )}
                         />
                         <Controller
                             name="password"
                             control={control}
                             rules={{ required: 'Password is required' }}
-                            render={({ field }) => <PasswordInput label="Password" {...field} />}
+                            render={({ field }) => (
+                                <PasswordInput
+                                    label="Password"
+                                    errorMessage={errors.password?.message}
+                                    {...field}
+                                />
+                            )}
                         />
                     </Fieldset.Content>
-                    <Button type={'submit'}>Log In</Button>
+                    <Button type={'submit'} loading={isLoading} loadingText="Logging in">
+                        Log In
+                    </Button>
                     <Link
                         href="/forgot-password"
                         color={keyColors.primary}
