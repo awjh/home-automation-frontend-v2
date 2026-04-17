@@ -1,6 +1,7 @@
 type AddMealPlanStep =
     | 'primary'
     | 'details'
+    | 'leftovers'
     | 'book'
     | 'online'
     | 'magazine'

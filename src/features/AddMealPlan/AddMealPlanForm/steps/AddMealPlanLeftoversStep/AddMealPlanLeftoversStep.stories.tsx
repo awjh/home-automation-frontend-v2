@@ -1,26 +1,18 @@
-import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Flex, VStack } from '@chakra-ui/react'
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, waitFor } from 'storybook/test'
-import { useForm } from 'react-hook-form'
-import AddMealPlanTitleAuthorStep from './AddMealPlanTitleAuthorStep'
 import AddMealPlanFormValues from '@features/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useForm } from 'react-hook-form'
+import { expect, fn, waitFor } from 'storybook/test'
+import AddMealPlanLeftoversStep from './AddMealPlanLeftoversStep'
 
-const submitDetailsStep = fn()
+const submitLeftoversStep = fn()
 
 interface StoryWrapperProps {
     onBack?: () => void
     defaultValues?: Partial<AddMealPlanFormValues>
-    authorLabel?: string
-    showAuthor?: boolean
 }
 
-function StoryWrapper({
-    onBack = fn(),
-    defaultValues,
-    authorLabel,
-    showAuthor,
-}: StoryWrapperProps) {
+function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
     const {
         control,
         handleSubmit,
@@ -55,26 +47,20 @@ function StoryWrapper({
                 style={{ width: '100%' }}
                 onSubmit={(event) => {
                     event.preventDefault()
-                    void handleSubmit((values) => submitDetailsStep(values))()
+                    void handleSubmit((values) => submitLeftoversStep(values))()
                 }}
             >
                 <VStack w={'full'} alignItems={'stretch'} gap={4}>
-                    <AddMealPlanTitleAuthorStep
-                        control={control}
-                        errors={errors}
-                        onBack={onBack}
-                        authorLabel={authorLabel}
-                        showAuthor={showAuthor}
-                    />
+                    <AddMealPlanLeftoversStep control={control} errors={errors} onBack={onBack} />
                 </VStack>
             </form>
         </Flex>
     )
 }
 
-const meta: Meta<typeof AddMealPlanTitleAuthorStep> = {
-    title: 'Features/AddMealPlan/AddMealPlanForm/Steps/AddMealPlanTitleAuthorStep',
-    component: AddMealPlanTitleAuthorStep,
+const meta: Meta<typeof AddMealPlanLeftoversStep> = {
+    title: 'Features/AddMealPlan/AddMealPlanForm/Steps/AddMealPlanLeftoversStep',
+    component: AddMealPlanLeftoversStep,
     render: (args) => <StoryWrapper {...args} />,
     args: {
         onBack: fn(),
@@ -82,31 +68,31 @@ const meta: Meta<typeof AddMealPlanTitleAuthorStep> = {
 }
 
 export default meta
-type Story = StoryObj<typeof AddMealPlanTitleAuthorStep>
+type Story = StoryObj<typeof AddMealPlanLeftoversStep>
 
 export const Default: Story = {}
 
-export const FreezerOmitsAuthorField: Story = {
+export const WithValue: Story = {
     render: (args) => (
         <StoryWrapper
             {...args}
-            defaultValues={{ source: SourceType.FREEZER, title: 'Chicken Satay' }}
-            showAuthor={false}
+            defaultValues={{
+                fromDate: '2026-04-03',
+            }}
         />
     ),
     play: async ({ canvas, userEvent }) => {
-        submitDetailsStep.mockClear()
+        submitLeftoversStep.mockClear()
 
-        expect(canvas.queryByLabelText(/author/i)).not.toBeInTheDocument()
         await userEvent.click(canvas.getByRole('button', { name: /next/i }))
 
         await waitFor(() => {
-            expect(submitDetailsStep).toHaveBeenCalledWith({
+            expect(submitLeftoversStep).toHaveBeenCalledWith({
                 mealTime: '',
-                source: SourceType.FREEZER,
-                title: 'Chicken Satay',
+                source: '',
+                title: '',
                 author: '',
-                fromDate: '',
+                fromDate: '2026-04-03',
                 bookTitle: '',
                 pageNumber: '',
                 series: '',
@@ -123,21 +109,12 @@ export const FreezerOmitsAuthorField: Story = {
     },
 }
 
-export const ReadyPreparedUsesProducerLabel: Story = {
-    render: (args) => (
-        <StoryWrapper
-            {...args}
-            defaultValues={{ source: SourceType.READY_PREPARED }}
-            authorLabel={'Producer'}
-        />
-    ),
+export const RequiresOriginalMealDate: Story = {
     play: async ({ canvas, userEvent }) => {
         await userEvent.click(canvas.getByRole('button', { name: /next/i }))
 
         await waitFor(() => {
-            expect(canvas.getByLabelText(/producer/i)).toBeInTheDocument()
-            expect(canvas.getByText(/title is required/i)).toBeInTheDocument()
-            expect(canvas.getByText(/producer is required/i)).toBeInTheDocument()
+            expect(canvas.getByText(/original meal date is required/i)).toBeInTheDocument()
         })
     },
 }

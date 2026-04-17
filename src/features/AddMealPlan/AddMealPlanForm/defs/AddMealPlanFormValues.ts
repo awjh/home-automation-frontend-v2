@@ -5,6 +5,7 @@ interface AddMealPlanFormValues {
     source: SourceType | ''
     title: string
     author: string
+    fromDate: string
     bookTitle: string
     pageNumber: string
     series: string

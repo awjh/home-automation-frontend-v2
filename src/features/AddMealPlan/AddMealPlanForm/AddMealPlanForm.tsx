@@ -33,6 +33,7 @@ export default function AddMealPlanForm({
             source: '',
             title: '',
             author: '',
+            fromDate: '',
             bookTitle: '',
             pageNumber: '',
             series: '',

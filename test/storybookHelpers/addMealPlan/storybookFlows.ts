@@ -33,6 +33,7 @@ export const bookFlowValues = {
     source: SourceType.BOOK,
     title: 'Traybake',
     author: 'Rukmini Iyer',
+    fromDate: '',
     bookTitle: 'The Roasting Tin',
     pageNumber: '86',
     series: 'Simple Suppers',
@@ -51,6 +52,7 @@ export const onlineFlowValues = {
     source: SourceType.ONLINE,
     title: 'Gnocchi with Roast Pepper Sauce',
     author: 'BBC Good Food',
+    fromDate: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -69,6 +71,7 @@ export const onlineFlowUsingExtractedValues = {
     source: SourceType.ONLINE,
     title: extractedOnlineRecipe.title,
     author: 'BBC Good Food',
+    fromDate: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -87,6 +90,7 @@ export const magazineFlowValues = {
     source: SourceType.MAGAZINE,
     title: 'Beef Wellington',
     author: 'Gordon Ramsay',
+    fromDate: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -105,6 +109,7 @@ export const internalRecipeFlowValues = {
     source: SourceType.INTERNAL_RECIPE,
     title: 'Spaghetti Carbonara',
     author: 'Andrew Hurt',
+    fromDate: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -123,6 +128,7 @@ export const internalRecipeTitleSearchFlowValues = {
     source: SourceType.INTERNAL_RECIPE,
     title: 'Spaghetti Bolognese',
     author: 'Andrew Hurt',
+    fromDate: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -141,6 +147,7 @@ export const freezerFlowValues = {
     source: SourceType.FREEZER,
     title: 'Chicken Satay',
     author: '',
+    fromDate: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -159,6 +166,7 @@ export const leftoversFlowValues = {
     source: SourceType.LEFTOVERS,
     title: 'Roast Chicken Pasta Bake',
     author: 'Andrew Hurt',
+    fromDate: '2026-04-03',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -177,6 +185,7 @@ export const readyPreparedFlowValues = {
     source: SourceType.READY_PREPARED,
     title: 'Chicken Flatties',
     author: 'M&S',
+    fromDate: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -462,6 +471,8 @@ export async function playLeftoversFlow(
 
     await selectPrimaryDetails(canvas, userEvent, SourceType.LEFTOVERS)
     await fillTitleAuthorDetails(canvas, userEvent, leftoversFlowValues)
+    await fillTextInput(canvas, userEvent, /original meal date/i, leftoversFlowValues.fromDate)
+    await userEvent.click(canvas.getByRole('button', { name: /next/i }))
     await fillDurations(canvas, userEvent, leftoversFlowValues)
 
     await expectSubmitted(args, leftoversFlowValues)

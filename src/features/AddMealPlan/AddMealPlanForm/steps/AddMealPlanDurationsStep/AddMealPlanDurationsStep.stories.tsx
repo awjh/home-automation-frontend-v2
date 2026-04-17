@@ -21,6 +21,9 @@ function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
         defaultValues: {
             mealTime: '',
             source: '',
+            title: '',
+            author: '',
+            fromDate: '',
             bookTitle: '',
             pageNumber: '',
             series: '',
@@ -89,6 +92,9 @@ export const WithValues: Story = {
             expect(submitDurationsStep).toHaveBeenCalledWith({
                 mealTime: '',
                 source: '',
+                title: '',
+                author: '',
+                fromDate: '',
                 bookTitle: '',
                 pageNumber: '',
                 series: '',

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { fn } from 'storybook/test'
+import { expect, fn } from 'storybook/test'
 import AreYouSure from './AreYouSure'
 
 const meta: Meta<typeof AreYouSure> = {
@@ -18,3 +18,13 @@ export default meta
 type Story = StoryObj<typeof AreYouSure>
 
 export const Default: Story = {}
+
+export const FiresConfirmAndCancelHandlers: Story = {
+    play: async ({ canvas, args, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: /cancel/i }))
+        await userEvent.click(canvas.getByRole('button', { name: /confirm/i }))
+
+        expect(args.onCancel).toHaveBeenCalledOnce()
+        expect(args.onConfirm).toHaveBeenCalledOnce()
+    },
+}

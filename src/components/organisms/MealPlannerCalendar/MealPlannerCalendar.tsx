@@ -21,11 +21,12 @@ function formatDate(date: Date) {
 }
 
 interface MealPlannerCalendarsProps {
+    initialDate: Date
     onDateRangeSelected: (startDate: Date, endDate: Date) => void
 }
 
 export default function MealPlannerCalendars(props: MealPlannerCalendarsProps) {
-    const today = new Date()
+    const today = props.initialDate
 
     const { keyColors } = useColorMode()
 

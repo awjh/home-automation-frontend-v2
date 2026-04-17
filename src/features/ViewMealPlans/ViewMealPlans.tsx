@@ -9,6 +9,7 @@ import MealPlan from '@defs/MealPlan'
 import AddMealPlan from '@features/AddMealPlan/AddMealPlan'
 import AddMealPlanFormValues from '@features/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import { SearchInternalRecipes } from '@features/AddMealPlan/AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
+import createMealPlanFromFormValues from '@features/AddMealPlan/utils/createMealPlanFromFormValues'
 import useColorMode from '@hooks/useColorMode'
 import AreYouSure from '@molecules/AreYouSure/AreYouSure'
 import DaysMeals from '@organisms/DaysMeals/DaysMeals'
@@ -20,9 +21,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 interface MealPlansViewProps {
     getMealPlansForDateRange: (startDate: Date, endDate: Date) => Promise<MealPlan[]>
     initialMeals?: MealPlan[]
+    initialDate: Date
     extractTitleFromOnlineSource?: (url: string) => Promise<GetExtractedExternalRecipeResponse>
     searchInternalRecipes?: SearchInternalRecipes
-    onAddMealSubmit?: (values: AddMealPlanFormValues) => Promise<void>
+    onAddMealSubmit: (date: string, values: AddMealPlanFormValues) => Promise<unknown>
     onDeleteMealSubmit?: (mealPlan: MealPlan) => Promise<void> | void
 }
 
@@ -37,10 +39,6 @@ const defaultExtractTitleFromOnlineSource =
     })
 
 const defaultSearchInternalRecipes: SearchInternalRecipes = async () => []
-
-const defaultOnAddMealSubmit = async (_: AddMealPlanFormValues) => {
-    void _
-}
 
 const defaultOnDeleteMealSubmit = async (_: MealPlan) => {
     void _
@@ -77,9 +75,10 @@ function formatMealsForSelectedDateRange(
 export default function MealPlansView({
     getMealPlansForDateRange,
     initialMeals = [],
+    initialDate,
     extractTitleFromOnlineSource = defaultExtractTitleFromOnlineSource,
     searchInternalRecipes = defaultSearchInternalRecipes,
-    onAddMealSubmit = defaultOnAddMealSubmit,
+    onAddMealSubmit,
     onDeleteMealSubmit = defaultOnDeleteMealSubmit,
 }: MealPlansViewProps) {
     const { keyColors } = useColorMode()
@@ -87,9 +86,8 @@ export default function MealPlansView({
     const [mealPlanPendingDelete, setMealPlanPendingDelete] = useState<MealPlan | null>(null)
 
     const [meals, setMeals] = useState<[Date, MealPlan[]][]>(() => {
-        const now = new Date()
-        const startOfWeek = new Date(now)
-        startOfWeek.setDate(now.getDate() - now.getDay())
+        const startOfWeek = new Date(initialDate)
+        startOfWeek.setDate(initialDate.getDate() - initialDate.getDay())
         const endDate = new Date(startOfWeek)
         endDate.setDate(startOfWeek.getDate() + 6)
         return formatMealsForSelectedDateRange(initialMeals, { startDate: startOfWeek, endDate })
@@ -124,10 +122,26 @@ export default function MealPlansView({
 
     const handleAddMealSubmit = useCallback(
         async (values: AddMealPlanFormValues) => {
-            await onAddMealSubmit(values)
+            if (!addMealDate) {
+                return
+            }
+
+            const mealDate = formatDate(addMealDate)
+
+            await onAddMealSubmit(mealDate, values)
+
+            const newMealPlan = createMealPlanFromFormValues(mealDate, values)
+
+            setMeals((currentMeals) =>
+                currentMeals.map(([day, dayMeals]) =>
+                    formatDate(day) === mealDate
+                        ? [day, [...dayMeals, newMealPlan]]
+                        : [day, dayMeals],
+                ),
+            )
             setAddMealDate(null)
         },
-        [onAddMealSubmit],
+        [addMealDate, onAddMealSubmit],
     )
 
     const onDeleteMeal = useCallback((mealPlan: MealPlan) => {
@@ -202,7 +216,10 @@ export default function MealPlansView({
                 boxSizing={'border-box'}
                 direction={{ base: 'column', lg: 'row' }}
             >
-                <MealPlannerCalendars onDateRangeSelected={onDateRangeSelected} />
+                <MealPlannerCalendars
+                    initialDate={initialDate}
+                    onDateRangeSelected={onDateRangeSelected}
+                />
                 <Flex
                     display={{ base: 'none', md: 'flex' }}
                     w={0.5}

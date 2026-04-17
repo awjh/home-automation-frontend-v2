@@ -32,6 +32,14 @@ const SourceFlowRuleOverrides: Partial<Record<SourceType, FlowRuleOverrides>> = 
             4: 'durations',
         },
     },
+    [SourceType.LEFTOVERS]: {
+        stepMap: {
+            1: 'primary',
+            2: 'details',
+            3: 'leftovers',
+            4: 'durations',
+        },
+    },
     [SourceType.FREEZER]: {
         titleAuthor: {
             showAuthor: false,

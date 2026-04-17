@@ -1,0 +1,1400 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "home-automation-api-v2-dev",
+    "version" : "2026-04-05T17:32:30Z"
+  },
+  "servers" : [ {
+    "url" : "https://api.home-automation.dev.andrewhurt.co.uk"
+  } ],
+  "paths" : {
+    "/meal-plans" : {
+      "get" : {
+        "operationId" : "GetMealPlans",
+        "parameters" : [ {
+          "name" : "endDate",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "startDate",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "400 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetMealPlansSuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "home-automation-api-v2-basic-user-authorizer-dev" : [ ]
+        }, {
+          "api_key" : [ ]
+        } ],
+        "x-amazon-apigateway-request-validator" : "get-meal-plans-request-validator-dev",
+        "x-amazon-apigateway-integration" : {
+          "credentials" : "arn:aws:iam::558946902552:role/get-meal-plans-integration-role-dev",
+          "uri" : "arn:aws:apigateway:eu-west-1:dynamodb:action/Query",
+          "httpMethod" : "POST",
+          "responses" : {
+            "400" : {
+              "statusCode" : "400",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to query DynamoDB to retrieve MealPlan\",\"reason\":\"bad_request\"}"
+              }
+            },
+            "5\\d{2}" : {
+              "statusCode" : "500",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to query DynamoDB to retrieve MealPlan\",\"reason\":\"internal_server_error\"}"
+              }
+            },
+            "2\\d{2}" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'"
+              },
+              "responseTemplates" : {
+                "application/json" : "\n        \n\n        \n        #set($items = $input.path('$.Items'))\n        [\n            #foreach($dynamoResponse in $items)\n                {\n        \n\n        \n            \"author\": \"$dynamoResponse.author.S\"\n            ,\n        \n            \"course\": \"$dynamoResponse.course.S\"\n            ,\n        \n            \"date\": \"$dynamoResponse.date.S\"\n            ,\n        \n            \"mealTime\": \"$dynamoResponse.mealTime.S\"\n            ,\n        \n            \"source\": \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey('type'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == \"book\")\n                    {\n        \n#set($dynamoResponse.source.M_has_series = $dynamoResponse.source.M.containsKey('series'))\n\n        \n            \"type\": \"$dynamoResponse.source.M.type.S\"\n            ,\n        \n            \"title\": \"$dynamoResponse.source.M.title.S\"\n            ,\n        \n            \"page\": $dynamoResponse.source.M.page.N\n            #if($dynamoResponse.source.M_has_series),#end\n        \n                #if($dynamoResponse.source.M_has_series)\n                    \"series\": \"$dynamoResponse.source.M.series.S\"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey('type'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == \"online\")\n                    {\n        \n\n        \n            \"type\": \"$dynamoResponse.source.M.type.S\"\n            ,\n        \n            \"url\": \"$dynamoResponse.source.M.url.S\"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey('type'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == \"magazine\")\n                    {\n        \n\n        \n            \"type\": \"$dynamoResponse.source.M.type.S\"\n            ,\n        \n            \"title\": \"$dynamoResponse.source.M.title.S\"\n            ,\n        \n            \"issue\": \"$dynamoResponse.source.M.issue.S\"\n            ,\n        \n            \"page\": $dynamoResponse.source.M.page.N\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey('type'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == \"internal\")\n                    {\n        \n\n        \n            \"type\": \"$dynamoResponse.source.M.type.S\"\n            ,\n        \n            \"recipeId\": \"$dynamoResponse.source.M.recipeId.S\"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey('type'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == \"leftovers\")\n                    {\n        \n\n        \n            \"type\": \"$dynamoResponse.source.M.type.S\"\n            ,\n        \n            \"fromDate\": \"$dynamoResponse.source.M.fromDate.S\"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey('type'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == \"freezer\")\n                    {\n        \n\n        \n            \"type\": \"$dynamoResponse.source.M.type.S\"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey('type'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == \"ready_prepared\")\n                    {\n        \n\n        \n            \"type\": \"$dynamoResponse.source.M.type.S\"\n            \n        \n    }\n                #end\n            \n            ,\n        \n            \"title\": \"$dynamoResponse.title.S\"\n            ,\n        \n            \"duration\": {\n        \n\n        \n            \"prepDuration\": $dynamoResponse.duration.M.prepDuration.N\n            ,\n        \n            \"cookingDuration\": $dynamoResponse.duration.M.cookingDuration.N\n            ,\n        \n            \"standingTime\": $dynamoResponse.duration.M.standingTime.N\n            \n        \n    }\n            \n        \n    }\n\n                #if($foreach.hasNext)\n                    ,\n                #end\n            #end\n        ]\n    \n    "
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"TableName\":\"home-automation-read-store-v2-dev\",\"KeyConditionExpression\":\"#pk = :pk AND #sk BETWEEN :startSk AND :endSk\",\"ExpressionAttributeNames\":{\"#pk\":\"pk\",\"#sk\":\"sk\"},\"ExpressionAttributeValues\":{\":pk\":{\"S\":\"MEAL_PLAN~$context.authorizer.userId\"},\":startSk\":{\"S\":\"$input.params('startDate')~breakfast\"},\":endSk\":{\"S\":\"$input.params('endDate')~lunch\"}}}"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "aws"
+        }
+      },
+      "post" : {
+        "operationId" : "PostMealPlan",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PostMealPlanBodyModel"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "400 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PostMealPlanSuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "home-automation-api-v2-basic-user-authorizer-dev" : [ ]
+        }, {
+          "api_key" : [ ]
+        } ],
+        "x-amazon-apigateway-request-validator" : "post-meal-plan-request-validator-dev",
+        "x-amazon-apigateway-integration" : {
+          "credentials" : "arn:aws:iam::558946902552:role/post-meal-plan-integration-role-dev",
+          "uri" : "arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem",
+          "httpMethod" : "POST",
+          "responses" : {
+            "400" : {
+              "statusCode" : "400",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to put item in DynamoDB to create MealPlan\",\"reason\":\"bad_request\"}"
+              }
+            },
+            "5\\d{2}" : {
+              "statusCode" : "500",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to put item in DynamoDB to create MealPlan\",\"reason\":\"internal_server_error\"}"
+              }
+            },
+            "2\\d{2}" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'POST,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'"
+              },
+              "responseTemplates" : {
+                "application/json" : "\n        \n        \n        #set($body = $util.parseJson($context.requestOverride.path.body))\n        \n        {\"date\":\"$body.date\",\"mealTime\":\"$body.mealTime\"}\n    "
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "\n        #set($context.requestOverride.path.body = $input.body)\n\n        \n        #set($data = $input.path('$'))\n        {\n            \"TableName\": \"home-automation-read-store-v2-dev\",\n            \"Item\": {\n        \"pk\": {\"S\": \"MEAL_PLAN~$context.authorizer.userId\"},\n        \"sk\": {\"S\": \"$data.date~$data.mealTime\"},\n        \n        \n        \n            \"author\": { \"S\": \"$data.author\" }\n            ,\n        \n            \"course\": { \"S\": \"$data.course\" }\n            ,\n        \n            \"date\": { \"S\": \"$data.date\" }\n            ,\n        \n            \"mealTime\": { \"S\": \"$data.mealTime\" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"book\")\n                    \"source\": { \"M\": {\n        \n#set($data_source_has_series = $data.source.containsKey('series'))\n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"title\": { \"S\": \"$data.source.title\" }\n            ,\n        \n            \"page\": { \"N\": \"$data.source.page\" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    \"series\": { \"S\": \"$data.source.series\" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"online\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"url\": { \"S\": \"$data.source.url\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"magazine\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"title\": { \"S\": \"$data.source.title\" }\n            ,\n        \n            \"issue\": { \"S\": \"$data.source.issue\" }\n            ,\n        \n            \"page\": { \"N\": \"$data.source.page\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"internal\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"recipeId\": { \"S\": \"$data.source.recipeId\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"leftovers\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"fromDate\": { \"S\": \"$data.source.fromDate\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"freezer\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"ready_prepared\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            \"title\": { \"S\": \"$data.title\" }\n            ,\n        \n            \"duration\": { \"M\": {\n        \n        \n            \"prepDuration\": { \"N\": \"$data.duration.prepDuration\" }\n            ,\n        \n            \"cookingDuration\": { \"N\": \"$data.duration.cookingDuration\" }\n            ,\n        \n            \"standingTime\": { \"N\": \"$data.duration.standingTime\" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            \"ConditionExpression\": \"attribute_not_exists(pk) AND attribute_not_exists(sk)\"\n        }\n    "
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "aws"
+        }
+      },
+      "options" : {
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Vary" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,POST,PUT,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'",
+                "method.response.header.Vary" : "'Origin'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/meal-plans/{date}/{mealTime}" : {
+      "put" : {
+        "operationId" : "PutMealPlan",
+        "parameters" : [ {
+          "name" : "date",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "mealTime",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PutMealPlanBodyModel"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "400 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PutMealPlanSuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "home-automation-api-v2-basic-user-authorizer-dev" : [ ]
+        }, {
+          "api_key" : [ ]
+        } ],
+        "x-amazon-apigateway-request-validator" : "put-meal-plan-request-validator-dev",
+        "x-amazon-apigateway-integration" : {
+          "credentials" : "arn:aws:iam::558946902552:role/put-meal-plan-integration-role-dev",
+          "uri" : "arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem",
+          "httpMethod" : "POST",
+          "responses" : {
+            "400" : {
+              "statusCode" : "400",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to put item in DynamoDB to update MealPlan\",\"reason\":\"bad_request\"}"
+              }
+            },
+            "5\\d{2}" : {
+              "statusCode" : "500",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to put item in DynamoDB to update MealPlan\",\"reason\":\"internal_server_error\"}"
+              }
+            },
+            "2\\d{2}" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'POST,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'"
+              },
+              "responseTemplates" : {
+                "application/json" : "\n        \n        \n        #set($date = $context.requestOverride.path.date)\n        #set($mealTime = $context.requestOverride.path.mealTime)\n        \n        {\"date\":\"$date\",\"mealTime\":\"$mealTime\"}\n    "
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "\n    \n    #set($date = $input.params('date'))\n    #set($mealTime = $input.params('mealTime'))\n\n    #set($context.requestOverride.path.date = $date)\n    #set($context.requestOverride.path.mealTime = $mealTime)\n\n        #if(!$date.matches('^\\d{4}-\\d{2}-\\d{2}$'))\n            #set($context.responseOverride.status = 400)\n            \n            {\"message\":\"Invalid date format. Expected 'YYYY-MM-DD'. Got '$date'.\",\"reason\":\"bad_request\"}\n        #elseif($mealTime != 'breakfast' && $mealTime != 'lunch' && $mealTime != 'dinner')\n            #set($context.responseOverride.status = 400)\n            \n            {\"message\":\"Invalid meal time.\",\"reason\":\"bad_request\"}\n        #else\n            \n        #set($data = $input.path('$'))\n\n        #set($data.date = $input.params('date'))\n#set($data.mealTime = $input.params('mealTime'))\n\n        {\n            \"TableName\": \"home-automation-read-store-v2-dev\",\n            \"Item\": {\n        \"pk\": {\"S\": \"MEAL_PLAN~$context.authorizer.userId\"},\n        \"sk\": {\"S\": \"$data.date~$data.mealTime\"},\n        \n        \n        \n            \"author\": { \"S\": \"$data.author\" }\n            ,\n        \n            \"course\": { \"S\": \"$data.course\" }\n            ,\n        \n            \"date\": { \"S\": \"$data.date\" }\n            ,\n        \n            \"mealTime\": { \"S\": \"$data.mealTime\" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"book\")\n                    \"source\": { \"M\": {\n        \n#set($data_source_has_series = $data.source.containsKey('series'))\n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"title\": { \"S\": \"$data.source.title\" }\n            ,\n        \n            \"page\": { \"N\": \"$data.source.page\" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    \"series\": { \"S\": \"$data.source.series\" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"online\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"url\": { \"S\": \"$data.source.url\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"magazine\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"title\": { \"S\": \"$data.source.title\" }\n            ,\n        \n            \"issue\": { \"S\": \"$data.source.issue\" }\n            ,\n        \n            \"page\": { \"N\": \"$data.source.page\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"internal\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"recipeId\": { \"S\": \"$data.source.recipeId\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"leftovers\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"fromDate\": { \"S\": \"$data.source.fromDate\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"freezer\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"ready_prepared\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            \"title\": { \"S\": \"$data.title\" }\n            ,\n        \n            \"duration\": { \"M\": {\n        \n        \n            \"prepDuration\": { \"N\": \"$data.duration.prepDuration\" }\n            ,\n        \n            \"cookingDuration\": { \"N\": \"$data.duration.cookingDuration\" }\n            ,\n        \n            \"standingTime\": { \"N\": \"$data.duration.standingTime\" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            \"ConditionExpression\": \"attribute_exists(pk) AND attribute_exists(sk)\"\n        }\n    \n        #end"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "aws"
+        }
+      },
+      "options" : {
+        "parameters" : [ {
+          "name" : "date",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "mealTime",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Vary" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,POST,PUT,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'",
+                "method.response.header.Vary" : "'Origin'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/recipes/external" : {
+      "options" : {
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Vary" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,POST,PUT,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'",
+                "method.response.header.Vary" : "'Origin'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/meal-plans/{date}" : {
+      "options" : {
+        "parameters" : [ {
+          "name" : "date",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Vary" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,POST,PUT,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'",
+                "method.response.header.Vary" : "'Origin'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/recipes" : {
+      "options" : {
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Vary" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,POST,PUT,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'",
+                "method.response.header.Vary" : "'Origin'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/recipes/external/extract" : {
+      "get" : {
+        "operationId" : "GetExtractedExternalRecipe",
+        "parameters" : [ {
+          "name" : "url",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "400 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetExtractedExternalRecipe"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "home-automation-api-v2-basic-user-authorizer-dev" : [ ]
+        }, {
+          "api_key" : [ ]
+        } ],
+        "x-amazon-apigateway-request-validator" : "get-extracted-external-recipe-request-validator-dev",
+        "x-amazon-apigateway-integration" : {
+          "uri" : "https://api.spoonacular.com/recipes/extract",
+          "httpMethod" : "GET",
+          "responses" : {
+            "4\\d{2}" : {
+              "statusCode" : "400",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to extract recipe from Spoonacular\",\"reason\":\"bad_request\"}"
+              }
+            },
+            "5\\d{2}" : {
+              "statusCode" : "500",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to extract recipe from Spoonacular\",\"reason\":\"internal_server_error\"}"
+              }
+            },
+            "2\\d{2}" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'"
+              },
+              "responseTemplates" : {
+                "application/json" : "\n        #set($preparationMinutes = $input.path('$.preparationMinutes'))\n        #set($cookingMinutes = $input.path('$.cookingMinutes'))\n        {\n          \"title\": $input.json('$.title'),\n          \"duration\": {\n            \"prepDuration\": #if(!$preparationMinutes)0#{else}$preparationMinutes#end,\n            \"cookingDuration\": #if(!$cookingMinutes)0#{else}$cookingMinutes#end,\n            \"standingTime\": 0\n          }\n        }\n    "
+              }
+            }
+          },
+          "requestParameters" : {
+            "integration.request.querystring.url" : "method.request.querystring.url",
+            "integration.request.querystring.apiKey" : "'3992c4c9a5544a89820805fbad0dc85e'"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "http"
+        }
+      },
+      "options" : {
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Vary" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,POST,PUT,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'",
+                "method.response.header.Vary" : "'Origin'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/" : {
+      "options" : {
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Vary" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,POST,PUT,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'",
+                "method.response.header.Vary" : "'Origin'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "GetExtractedExternalRecipe" : {
+        "title" : "GetExtractedExternalRecipe",
+        "required" : [ "duration", "title" ],
+        "type" : "object",
+        "properties" : {
+          "duration" : {
+            "required" : [ "cookingDuration", "prepDuration", "standingTime" ],
+            "type" : "object",
+            "properties" : {
+              "prepDuration" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the active time spent preparing the recipe, e.g. chopping and mixing"
+              },
+              "cookingDuration" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the time spent cooking the recipe, e.g. baking or simmering"
+              },
+              "standingTime" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling"
+              }
+            },
+            "additionalProperties" : false
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "PostMealPlanSuccessResponse" : {
+        "title" : "PostMealPlanSuccessResponse",
+        "required" : [ "date", "mealTime" ],
+        "type" : "object",
+        "properties" : {
+          "date" : {
+            "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+            "type" : "string"
+          },
+          "mealTime" : {
+            "type" : "string",
+            "enum" : [ "breakfast", "lunch", "dinner" ]
+          }
+        },
+        "additionalProperties" : false
+      },
+      "PostMealPlanBodyModel" : {
+        "title" : "PostMealPlanBodyModel",
+        "required" : [ "author", "course", "date", "duration", "mealTime", "source", "title" ],
+        "type" : "object",
+        "properties" : {
+          "date" : {
+            "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+            "type" : "string"
+          },
+          "duration" : {
+            "required" : [ "cookingDuration", "prepDuration", "standingTime" ],
+            "type" : "object",
+            "properties" : {
+              "prepDuration" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the active time spent preparing the recipe, e.g. chopping and mixing"
+              },
+              "cookingDuration" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the time spent cooking the recipe, e.g. baking or simmering"
+              },
+              "standingTime" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling"
+              }
+            },
+            "additionalProperties" : false
+          },
+          "mealTime" : {
+            "type" : "string",
+            "enum" : [ "breakfast", "lunch", "dinner" ]
+          },
+          "author" : {
+            "type" : "string",
+            "description" : "Use Freezer when source is freezer"
+          },
+          "course" : {
+            "type" : "string",
+            "enum" : [ "starter", "main", "dessert", "side" ]
+          },
+          "source" : {
+            "anyOf" : [ {
+              "required" : [ "page", "title", "type" ],
+              "type" : "object",
+              "properties" : {
+                "series" : {
+                  "type" : "string",
+                  "description" : "The series the book belongs to, e.g. \"Pinch of Nom\""
+                },
+                "page" : {
+                  "type" : "number"
+                },
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "book" ]
+                },
+                "title" : {
+                  "type" : "string"
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "type", "url" ],
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "online" ]
+                },
+                "url" : {
+                  "type" : "string"
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "issue", "page", "title", "type" ],
+              "type" : "object",
+              "properties" : {
+                "issue" : {
+                  "type" : "string"
+                },
+                "page" : {
+                  "type" : "number"
+                },
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "magazine" ]
+                },
+                "title" : {
+                  "type" : "string"
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "recipeId", "type" ],
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "internal" ]
+                },
+                "recipeId" : {
+                  "pattern" : "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type" : "string"
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "fromDate", "type" ],
+              "type" : "object",
+              "properties" : {
+                "fromDate" : {
+                  "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "leftovers" ]
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "type" ],
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "freezer" ]
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "type" ],
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "ready_prepared" ]
+                }
+              },
+              "additionalProperties" : false
+            } ]
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "PutMealPlanBodyModel" : {
+        "title" : "PutMealPlanBodyModel",
+        "required" : [ "author", "course", "duration", "source", "title" ],
+        "type" : "object",
+        "properties" : {
+          "duration" : {
+            "required" : [ "cookingDuration", "prepDuration", "standingTime" ],
+            "type" : "object",
+            "properties" : {
+              "prepDuration" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the active time spent preparing the recipe, e.g. chopping and mixing"
+              },
+              "cookingDuration" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the time spent cooking the recipe, e.g. baking or simmering"
+              },
+              "standingTime" : {
+                "maximum" : 9007199254740991,
+                "minimum" : 0,
+                "type" : "integer",
+                "description" : "In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling"
+              }
+            },
+            "additionalProperties" : false
+          },
+          "author" : {
+            "type" : "string",
+            "description" : "Use Freezer when source is freezer"
+          },
+          "course" : {
+            "type" : "string",
+            "enum" : [ "starter", "main", "dessert", "side" ]
+          },
+          "source" : {
+            "anyOf" : [ {
+              "required" : [ "page", "title", "type" ],
+              "type" : "object",
+              "properties" : {
+                "series" : {
+                  "type" : "string",
+                  "description" : "The series the book belongs to, e.g. \"Pinch of Nom\""
+                },
+                "page" : {
+                  "type" : "number"
+                },
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "book" ]
+                },
+                "title" : {
+                  "type" : "string"
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "type", "url" ],
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "online" ]
+                },
+                "url" : {
+                  "type" : "string"
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "issue", "page", "title", "type" ],
+              "type" : "object",
+              "properties" : {
+                "issue" : {
+                  "type" : "string"
+                },
+                "page" : {
+                  "type" : "number"
+                },
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "magazine" ]
+                },
+                "title" : {
+                  "type" : "string"
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "recipeId", "type" ],
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "internal" ]
+                },
+                "recipeId" : {
+                  "pattern" : "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type" : "string"
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "fromDate", "type" ],
+              "type" : "object",
+              "properties" : {
+                "fromDate" : {
+                  "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "leftovers" ]
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "type" ],
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "freezer" ]
+                }
+              },
+              "additionalProperties" : false
+            }, {
+              "required" : [ "type" ],
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "enum" : [ "ready_prepared" ]
+                }
+              },
+              "additionalProperties" : false
+            } ]
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "GetMealPlansSuccessResponse" : {
+        "title" : "GetMealPlansSuccessResponse",
+        "type" : "array",
+        "items" : {
+          "required" : [ "author", "course", "date", "duration", "mealTime", "source", "title" ],
+          "type" : "object",
+          "properties" : {
+            "date" : {
+              "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+              "type" : "string"
+            },
+            "duration" : {
+              "required" : [ "cookingDuration", "prepDuration", "standingTime" ],
+              "type" : "object",
+              "properties" : {
+                "prepDuration" : {
+                  "maximum" : 9007199254740991,
+                  "minimum" : 0,
+                  "type" : "integer",
+                  "description" : "In minutes the active time spent preparing the recipe, e.g. chopping and mixing"
+                },
+                "cookingDuration" : {
+                  "maximum" : 9007199254740991,
+                  "minimum" : 0,
+                  "type" : "integer",
+                  "description" : "In minutes the time spent cooking the recipe, e.g. baking or simmering"
+                },
+                "standingTime" : {
+                  "maximum" : 9007199254740991,
+                  "minimum" : 0,
+                  "type" : "integer",
+                  "description" : "In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling"
+                }
+              },
+              "additionalProperties" : false
+            },
+            "mealTime" : {
+              "type" : "string",
+              "enum" : [ "breakfast", "lunch", "dinner" ]
+            },
+            "author" : {
+              "type" : "string",
+              "description" : "Use Freezer when source is freezer"
+            },
+            "course" : {
+              "type" : "string",
+              "enum" : [ "starter", "main", "dessert", "side" ]
+            },
+            "source" : {
+              "anyOf" : [ {
+                "required" : [ "page", "title", "type" ],
+                "type" : "object",
+                "properties" : {
+                  "series" : {
+                    "type" : "string",
+                    "description" : "The series the book belongs to, e.g. \"Pinch of Nom\""
+                  },
+                  "page" : {
+                    "type" : "number"
+                  },
+                  "type" : {
+                    "type" : "string",
+                    "enum" : [ "book" ]
+                  },
+                  "title" : {
+                    "type" : "string"
+                  }
+                },
+                "additionalProperties" : false
+              }, {
+                "required" : [ "type", "url" ],
+                "type" : "object",
+                "properties" : {
+                  "type" : {
+                    "type" : "string",
+                    "enum" : [ "online" ]
+                  },
+                  "url" : {
+                    "type" : "string"
+                  }
+                },
+                "additionalProperties" : false
+              }, {
+                "required" : [ "issue", "page", "title", "type" ],
+                "type" : "object",
+                "properties" : {
+                  "issue" : {
+                    "type" : "string"
+                  },
+                  "page" : {
+                    "type" : "number"
+                  },
+                  "type" : {
+                    "type" : "string",
+                    "enum" : [ "magazine" ]
+                  },
+                  "title" : {
+                    "type" : "string"
+                  }
+                },
+                "additionalProperties" : false
+              }, {
+                "required" : [ "recipeId", "type" ],
+                "type" : "object",
+                "properties" : {
+                  "type" : {
+                    "type" : "string",
+                    "enum" : [ "internal" ]
+                  },
+                  "recipeId" : {
+                    "pattern" : "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                    "type" : "string"
+                  }
+                },
+                "additionalProperties" : false
+              }, {
+                "required" : [ "fromDate", "type" ],
+                "type" : "object",
+                "properties" : {
+                  "fromDate" : {
+                    "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+                    "type" : "string"
+                  },
+                  "type" : {
+                    "type" : "string",
+                    "enum" : [ "leftovers" ]
+                  }
+                },
+                "additionalProperties" : false
+              }, {
+                "required" : [ "type" ],
+                "type" : "object",
+                "properties" : {
+                  "type" : {
+                    "type" : "string",
+                    "enum" : [ "freezer" ]
+                  }
+                },
+                "additionalProperties" : false
+              }, {
+                "required" : [ "type" ],
+                "type" : "object",
+                "properties" : {
+                  "type" : {
+                    "type" : "string",
+                    "enum" : [ "ready_prepared" ]
+                  }
+                },
+                "additionalProperties" : false
+              } ]
+            },
+            "title" : {
+              "type" : "string"
+            }
+          },
+          "additionalProperties" : false
+        }
+      },
+      "HomeAutomationApiV2ErrorResponseModel" : {
+        "title" : "HomeAutomationApiV2ErrorResponseModel",
+        "required" : [ "message", "reason" ],
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "enum" : [ "not_found", "bad_request", "internal_server_error", "multiple_items_found" ]
+          },
+          "message" : {
+            "type" : "string"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "PutMealPlanSuccessResponse" : {
+        "title" : "PutMealPlanSuccessResponse",
+        "required" : [ "date", "mealTime" ],
+        "type" : "object",
+        "properties" : {
+          "date" : {
+            "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+            "type" : "string"
+          },
+          "mealTime" : {
+            "type" : "string",
+            "enum" : [ "breakfast", "lunch", "dinner" ]
+          }
+        },
+        "additionalProperties" : false
+      }
+    },
+    "securitySchemes" : {
+      "api_key" : {
+        "type" : "apiKey",
+        "name" : "x-api-key",
+        "in" : "header"
+      },
+      "home-automation-api-v2-basic-user-authorizer-dev" : {
+        "type" : "apiKey",
+        "name" : "Authorization",
+        "in" : "header",
+        "x-amazon-apigateway-authtype" : "custom",
+        "x-amazon-apigateway-authorizer" : {
+          "authorizerUri" : "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:home-automation-api-v2-basic-user-authorizer-lambda-dev/invocations",
+          "authorizerResultTtlInSeconds" : 0,
+          "identitySource" : "method.request.header.Authorization",
+          "type" : "request"
+        }
+      }
+    }
+  },
+  "x-amazon-apigateway-security-policy" : "TLS_1_0",
+  "x-amazon-apigateway-gateway-responses" : {
+    "DEFAULT_4XX" : { }
+  },
+  "x-amazon-apigateway-request-validators" : {
+    "put-meal-plan-request-validator-dev" : {
+      "validateRequestParameters" : false,
+      "validateRequestBody" : true
+    },
+    "post-meal-plan-request-validator-dev" : {
+      "validateRequestParameters" : false,
+      "validateRequestBody" : true
+    },
+    "get-extracted-external-recipe-request-validator-dev" : {
+      "validateRequestParameters" : true,
+      "validateRequestBody" : false
+    },
+    "get-meal-plans-request-validator-dev" : {
+      "validateRequestParameters" : true,
+      "validateRequestBody" : false
+    }
+  }
+}

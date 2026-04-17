@@ -8,6 +8,9 @@ import AddMealPlanDurationsStep, {
 import AddMealPlanInternalRecipeStep, {
     AddMealPlanInternalRecipeStepProps,
 } from './AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
+import AddMealPlanLeftoversStep, {
+    AddMealPlanLeftoversStepProps,
+} from './AddMealPlanLeftoversStep/AddMealPlanLeftoversStep'
 import AddMealPlanMagazineStep, {
     AddMealPlanMagazineStepProps,
 } from './AddMealPlanMagazineStep/AddMealPlanMagazineStep'
@@ -25,6 +28,7 @@ type StepComponentProps = AddMealPlanBookStepProps &
     AddMealPlanPrimaryStepProps &
     AddMealPlanDurationsStepProps &
     AddMealPlanInternalRecipeStepProps &
+    AddMealPlanLeftoversStepProps &
     AddMealPlanMagazineStepProps &
     AddMealPlanOnlineStepProps &
     AddMealPlanTitleAuthorStepProps & {
@@ -45,6 +49,8 @@ export default function AddMealPlanStepComponent(props: StepComponentProps) {
             return <AddMealPlanDurationsStep {...props} />
         case 'internalRecipe':
             return <AddMealPlanInternalRecipeStep {...props} />
+        case 'leftovers':
+            return <AddMealPlanLeftoversStep {...props} />
         case 'magazine':
             return <AddMealPlanMagazineStep {...props} />
         case 'online':

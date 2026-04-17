@@ -1,5 +1,5 @@
 import ViewMealPlans from '@features/ViewMealPlans/ViewMealPlans'
-import { getMealPlans } from './actions'
+import { addMealPlan, getMealPlans } from './actions'
 
 export default async function MealPlans() {
     const today = new Date()
@@ -16,5 +16,12 @@ export default async function MealPlans() {
 
     const initialMeals = await getMealPlans(startDate, endDate)
 
-    return <ViewMealPlans getMealPlansForDateRange={getMealPlans} initialMeals={initialMeals} />
+    return (
+        <ViewMealPlans
+            getMealPlansForDateRange={getMealPlans}
+            initialMeals={initialMeals}
+            initialDate={today}
+            onAddMealSubmit={addMealPlan}
+        />
+    )
 }

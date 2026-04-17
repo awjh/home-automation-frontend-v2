@@ -6,6 +6,7 @@ import FreezerMealPlan from '@test/mockData/mealPlans/FreezerMealPlan'
 import MagazineMealPlan from '@test/mockData/mealPlans/MagazineMealPlan'
 import OnlineMealPlan from '@test/mockData/mealPlans/OnlineMealPlan'
 import {
+    bookFlowValues,
     createAddMealPlanStoryArgs,
     playBookFlow,
 } from '@test/storybookHelpers/addMealPlan/storybookFlows'
@@ -32,11 +33,12 @@ const meta: Meta<typeof MealPlansView> = {
     title: 'Features/ViewMealPlans',
     component: MealPlansView,
     args: {
+        initialDate: startOfWeek,
         initialMeals: defaultInitialMeals,
         getMealPlansForDateRange: async () => [],
         extractTitleFromOnlineSource: addMealPlanStoryArgs.extractTitleFromOnlineSource,
         searchInternalRecipes: addMealPlanStoryArgs.searchInternalRecipes,
-        onAddMealSubmit: addMealPlanStoryArgs.onSubmit,
+        onAddMealSubmit: fn().mockResolvedValue(undefined),
         onDeleteMealSubmit: fn().mockResolvedValue(undefined),
     },
 }
@@ -55,10 +57,21 @@ export const OpensAddMealPlanAndSubmits: Story = {
 
         expect(addMealPopup).not.toBeNull()
 
+        const submitFromPopup = fn(async (values) => {
+            await args.onAddMealSubmit(formatDate(startOfWeek), values)
+        })
+
         await playBookFlow(within(addMealPopup!), userEvent, {
             extractTitleFromOnlineSource: args.extractTitleFromOnlineSource,
-            onSubmit: args.onAddMealSubmit,
+            onSubmit: submitFromPopup,
             searchInternalRecipes: args.searchInternalRecipes,
+        })
+
+        await waitFor(() => {
+            expect(args.onAddMealSubmit).toHaveBeenCalledWith(
+                formatDate(startOfWeek),
+                bookFlowValues,
+            )
         })
     },
 }
