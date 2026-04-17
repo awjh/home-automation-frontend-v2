@@ -11,11 +11,11 @@ type PasswordResetFormValues = {
     confirmPassword: string
 }
 
-interface PasswordResetFormProps {
+interface PasswordResetProps {
     onSubmit: (password: string) => void
 }
 
-export default function PasswordResetForm({ onSubmit }: PasswordResetFormProps) {
+export default function PasswordReset({ onSubmit }: PasswordResetProps) {
     const { keyColors } = useColorMode()
     const {
         control,

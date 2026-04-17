@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import PasswordResetForm from './PasswordResetForm'
+import PasswordReset from './PasswordReset'
 
-const meta: Meta<typeof PasswordResetForm> = {
+const meta: Meta<typeof PasswordReset> = {
     title: 'Features/PasswordReset/PasswordResetForm',
-    component: PasswordResetForm,
+    component: PasswordReset,
     decorators: [(Story) => <Story />],
     args: {
         onSubmit: (password: string) => alert(`Password submitted: ${password}`),
@@ -11,6 +11,6 @@ const meta: Meta<typeof PasswordResetForm> = {
 }
 
 export default meta
-type Story = StoryObj<typeof PasswordResetForm>
+type Story = StoryObj<typeof PasswordReset>
 
 export const Default: Story = {}

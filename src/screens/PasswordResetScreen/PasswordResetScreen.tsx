@@ -2,7 +2,7 @@
 
 import { Box, Heading, Text, VStack } from '@chakra-ui/react'
 import NavBar from '@features/NavBar/NavBar'
-import PasswordResetForm from '@features/PasswordResetForm/PasswordResetForm'
+import PasswordReset from '@features/PasswordReset/PasswordReset'
 import useToaster from '@hooks/useToaster'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -106,7 +106,7 @@ export default function PasswordResetScreen({
             <VStack flex={1} width={'full'} justifyContent={'center'} px={4} pb={6}>
                 <Box width={'full'} maxWidth={'md'}>
                     {isValidLink ? (
-                        <PasswordResetForm onSubmit={handleSubmit} />
+                        <PasswordReset onSubmit={handleSubmit} />
                     ) : (
                         <VStack alignItems={'start'} gap={3}>
                             <Heading size={'lg'}>Invalid password reset link</Heading>
