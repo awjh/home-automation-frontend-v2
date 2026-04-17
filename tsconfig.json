@@ -22,7 +22,7 @@
             "@atoms/*": ["./src/components/atoms/*"],
             "@molecules/*": ["./src/components/molecules/*"],
             "@organisms/*": ["./src/components/organisms/*"],
-            "@templates/*": ["./src/components/templates/*"],
+            "@features/*": ["./src/features/*"],
             "@constants/*": ["./src/constants/*"],
             "@hooks/*": ["./src/hooks/*"],
             "@defs/*": ["./src/defs/*"],

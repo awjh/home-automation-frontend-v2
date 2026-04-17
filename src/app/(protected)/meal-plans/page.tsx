@@ -1,4 +1,4 @@
-import MealPlansTemplate from '@templates/MealPlans/MealPlans'
+import ViewMealPlans from '@features/ViewMealPlans/ViewMealPlans'
 import { getMealPlans } from './actions'
 
 export default async function MealPlans() {
@@ -16,5 +16,5 @@ export default async function MealPlans() {
 
     const initialMeals = await getMealPlans(startDate, endDate)
 
-    return <MealPlansTemplate getMealPlansForDateRange={getMealPlans} initialMeals={initialMeals} />
+    return <ViewMealPlans getMealPlansForDateRange={getMealPlans} initialMeals={initialMeals} />
 }

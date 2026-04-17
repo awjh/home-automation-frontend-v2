@@ -5,6 +5,7 @@ import useColorMode from '@hooks/useColorMode'
 interface AreYouSureProps {
     title: string
     message: string
+    onCancel: () => void
     onConfirm: () => void | Promise<void>
 }
 
@@ -50,8 +51,7 @@ export default function AreYouSure(props: AreYouSureProps) {
                     {props.message}
                 </Text>
                 <HStack w={'full'} justifyContent={'space-between'} p={2}>
-                    {/* TODO - hide on click */}
-                    <Button type="button" colorStyle={'secondary'} onClick={() => undefined}>
+                    <Button type="button" colorStyle={'secondary'} onClick={props.onCancel}>
                         Cancel
                     </Button>
                     <Button type="button" onClick={props.onConfirm}>

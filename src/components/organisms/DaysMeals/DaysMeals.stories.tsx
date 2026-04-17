@@ -14,6 +14,9 @@ const meta: Meta<typeof DaysMeals> = {
     args: {
         day: new Date('2026-04-01'),
         meals: [OnlineMealPlan],
+        onAddMeal: () => undefined,
+        onDeleteMeal: () => undefined,
+        onEditMeal: () => undefined,
     },
 }
 

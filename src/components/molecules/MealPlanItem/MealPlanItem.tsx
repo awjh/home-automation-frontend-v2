@@ -87,16 +87,19 @@ export default function MealPlanItem(props: MealPlanItemProps) {
                         }}
                         background={keyColors.secondary}
                         borderRadius={0}
+                        onClick={() => props.onEdit(props.mealPlan)}
                     >
                         <LuSquarePen />
                     </IconButton>
                     <IconButton
+                        aria-label={'delete meal'}
                         color={keyColors.primary}
                         _hover={{
                             bg: keyColors.subtle,
                         }}
                         background={keyColors.secondary}
                         borderRadius={0}
+                        onClick={() => props.onDelete(props.mealPlan)}
                     >
                         <LuTrash2 />
                     </IconButton>

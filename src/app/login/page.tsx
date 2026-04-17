@@ -1,8 +1,7 @@
 'use client'
 
-import LoginTemplate from '@templates/Login/Login'
+import LoginFeature from '@features/Login/Login'
 import { useStytch } from '@stytch/nextjs'
-import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function Login() {
     const stytch = useStytch()
@@ -15,5 +14,5 @@ export default function Login() {
         })
     }
 
-    return <LoginTemplate onSubmit={authenticate} />
+    return <LoginFeature onSubmit={authenticate} />
 }

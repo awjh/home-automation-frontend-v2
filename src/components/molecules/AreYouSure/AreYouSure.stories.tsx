@@ -9,6 +9,7 @@ const meta: Meta<typeof AreYouSure> = {
     args: {
         title: 'Do an action',
         message: 'Are you sure you wish to perform this action? This cannot be undone.',
+        onCancel: fn(),
         onConfirm: fn(),
     },
 }

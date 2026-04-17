@@ -1,7 +1,7 @@
 'use client'
 
 import { useStytch } from '@stytch/nextjs'
-import PasswordResetTemplate from '@templates/PasswordReset/PasswordReset'
+import PasswordResetFeature from '@features/PasswordReset/PasswordReset'
 import { useEffect, useState } from 'react'
 
 export default function PasswordReset() {
@@ -23,7 +23,7 @@ export default function PasswordReset() {
     }
 
     return (
-        <PasswordResetTemplate
+        <PasswordResetFeature
             isValidLink={isValidLink}
             onSubmit={handlePasswordReset}
             redirectOnSuccess="/login"

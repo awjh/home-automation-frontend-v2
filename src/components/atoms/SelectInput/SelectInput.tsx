@@ -1,11 +1,13 @@
 import { Field, Select, createListCollection } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 
+export interface SelectItem {
+    label: string
+    value: string
+}
+
 export interface SelectInputProps {
-    options: {
-        label: string
-        value: string
-    }[]
+    options: SelectItem[]
     label: string
     value?: string
     required?: boolean

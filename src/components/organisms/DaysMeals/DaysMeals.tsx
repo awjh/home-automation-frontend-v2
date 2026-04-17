@@ -9,6 +9,9 @@ import { useMemo } from 'react'
 interface DaysMealsProps {
     day: Date
     meals: MealPlan[]
+    onAddMeal: (day: Date) => void
+    onDeleteMeal: (mealPlan: MealPlan) => void
+    onEditMeal: (mealPlan: MealPlan) => void
 }
 
 const mealTimeOrder: Record<MealTime, number> = {
@@ -124,8 +127,8 @@ export default function DaysMeals(props: DaysMealsProps) {
                                 key={`${mealTime}-${props.day.getTime()}-meal-${idx}`}
                                 mealPlan={meal}
                                 lastItem={idx === meals.length - 1}
-                                onDelete={() => {}}
-                                onEdit={() => {}}
+                                onDelete={props.onDeleteMeal}
+                                onEdit={props.onEditMeal}
                             />
                         ))}
                     </VStack>
@@ -141,7 +144,11 @@ export default function DaysMeals(props: DaysMealsProps) {
                     fontSize={{ base: 'md', md: 'lg' }}
                 >
                     No meals planned.&nbsp;
-                    <Button type="button" colorStyle="link" onClick={() => {}}>
+                    <Button
+                        type="button"
+                        colorStyle="link"
+                        onClick={() => props.onAddMeal(props.day)}
+                    >
                         Add a meal
                     </Button>
                 </Text>

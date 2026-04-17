@@ -10,6 +10,7 @@ interface TextInputProps {
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
     onBlur?: () => void
     errorMessage?: string
+    reserveErrorSpace?: boolean
 }
 
 export default function TextInput({
@@ -20,6 +21,7 @@ export default function TextInput({
     onChange,
     onBlur,
     errorMessage,
+    reserveErrorSpace = false,
 }: TextInputProps) {
     const { keyColors } = useColorMode()
 
@@ -40,7 +42,11 @@ export default function TextInput({
                 onChange={onChange}
                 onBlur={onBlur}
             />
-            {errorMessage && <Field.ErrorText>{errorMessage}</Field.ErrorText>}
+            {(reserveErrorSpace || errorMessage) && (
+                <Field.ErrorText visibility={errorMessage ? 'visible' : 'hidden'} minH={'5'}>
+                    {errorMessage ?? ' '}
+                </Field.ErrorText>
+            )}
         </Field.Root>
     )
 }
