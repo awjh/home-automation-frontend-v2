@@ -4,11 +4,14 @@ import { expect, fn, within } from 'storybook/test'
 import { Canvas } from 'storybook/internal/csf'
 import MockDate from 'mockdate'
 
+const mockingDate = new Date(2026, 3, 7) // April 7, 2026
+
 const meta: Meta<typeof MealPlannerCalendar> = {
     title: 'Organisms/MealPlannerCalendar',
     component: MealPlannerCalendar,
     decorators: [(Story) => <Story />],
     args: {
+        initialDate: mockingDate,
         onDateRangeSelected: fn(),
     },
 }
@@ -50,8 +53,6 @@ function validateMonthDays(
         }
     }
 }
-
-const mockingDate = new Date(2026, 3, 7) // April 7, 2026
 
 export const Default: Story = {
     play: async ({ canvas, mount }) => {

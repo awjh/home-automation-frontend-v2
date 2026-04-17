@@ -1,6 +1,6 @@
 import { Flex, VStack } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, waitFor } from 'storybook/test'
+import { expect, fn, waitFor, within } from 'storybook/test'
 import { useForm } from 'react-hook-form'
 import AddMealPlanInternalRecipeStep, {
     SearchInternalRecipes,
@@ -150,9 +150,14 @@ export const SubmitsSelectedRecipe: Story = {
             expect(canvas.getByText(/spicy meatballs/i)).toBeInTheDocument()
         })
 
-        const selectButtons = canvas.getAllByRole('button', { name: /select/i })
+        const spaghettiCarbonara = canvas.getByText(/spaghetti carbonara/i)
+        const spaghettiCarbonaraCard = spaghettiCarbonara.closest('div')?.parentElement
 
-        await userEvent.click(selectButtons[1])
+        expect(spaghettiCarbonaraCard).toBeInstanceOf(HTMLElement)
+
+        await userEvent.click(
+            within(spaghettiCarbonaraCard as HTMLElement).getByRole('button', { name: /select/i }),
+        )
 
         await waitFor(() => {
             expect(
@@ -164,9 +169,10 @@ export const SubmitsSelectedRecipe: Story = {
 
         await waitFor(() => {
             expect(submitSpy).toHaveBeenCalledTimes(1)
-            expect(submitSpy).toHaveBeenCalledWith({
+            expect(submitSpy.mock.calls[0]?.[0]).toEqual({
                 mealTime: '',
                 source: '',
+                author: 'Andrew Hurt',
                 bookTitle: '',
                 pageNumber: '',
                 series: '',

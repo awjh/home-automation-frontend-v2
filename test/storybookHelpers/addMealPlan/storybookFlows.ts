@@ -1,6 +1,6 @@
 import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
 import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
-import { expect, fn, type Mock, waitFor } from 'storybook/test'
+import { expect, fn, type Mock, waitFor, within } from 'storybook/test'
 import type AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import type { InternalRecipeSearchResult } from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
 
@@ -236,6 +236,17 @@ export function resetAddMealPlanMocks(args: AddMealPlanStoryArgs) {
     ;(args.searchInternalRecipes as Mock).mockClear()
 }
 
+function getRecipeResultSelectButton(canvas: StoryCanvas, recipeTitle: string | RegExp) {
+    const recipeTitleElement = canvas.getByText(recipeTitle)
+    const recipeResultCard = recipeTitleElement.closest('div')?.parentElement
+
+    if (!(recipeResultCard instanceof HTMLElement)) {
+        throw new Error(`Could not find recipe result card for ${recipeTitle.toString()}`)
+    }
+
+    return within(recipeResultCard).getByRole('button', { name: /select/i })
+}
+
 async function selectPrimaryDetails(
     canvas: StoryCanvas,
     userEvent: StoryUserEvent,
@@ -447,7 +458,7 @@ export async function playInternalRecipeTitleSearchFlow(
         expect(canvas.getByText(/spaghetti bolognese/i)).toBeInTheDocument()
     })
 
-    await userEvent.click(canvas.getByRole('button', { name: /select/i }))
+    await userEvent.click(getRecipeResultSelectButton(canvas, /spaghetti bolognese/i))
     await userEvent.click(canvas.getByRole('button', { name: /submit/i }))
 
     await expectSubmitted(args, internalRecipeTitleSearchFlowValues)
