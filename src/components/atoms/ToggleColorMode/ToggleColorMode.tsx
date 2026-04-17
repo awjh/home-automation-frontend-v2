@@ -3,7 +3,7 @@ import useColorMode from '@hooks/useColorMode'
 import React from 'react'
 import { LuMoon, LuSun } from 'react-icons/lu'
 
-export default function ColorModeButton() {
+export default function ToggleColorMode() {
     const { toggleColorMode, colorMode, keyColors } = useColorMode()
     return (
         <ClientOnly fallback={<Skeleton boxSize="9" />}>

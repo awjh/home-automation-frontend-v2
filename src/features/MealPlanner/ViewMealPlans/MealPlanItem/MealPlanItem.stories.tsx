@@ -10,7 +10,7 @@ import ReadyPreparedMealPlan from '@test/mockData/mealPlans/ReadyPreparedMealPla
 import MealPlanItem from './MealPlanItem'
 
 const meta: Meta<typeof MealPlanItem> = {
-    title: 'Molecules/MealPlanItem',
+    title: 'Features/MealPlanner/ViewMealPlans/MealPlanItem',
     component: MealPlanItem,
     decorators: [
         (Story) => (

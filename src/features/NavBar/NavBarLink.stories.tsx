@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import NavBarLink from './NavBarLink'
 
 const meta: Meta<typeof NavBarLink> = {
-    title: 'Atoms/NavBarLink',
+    title: 'Features/NavBar/NavBarLink',
     component: NavBarLink,
     decorators: [(Story) => <Story />],
     args: {

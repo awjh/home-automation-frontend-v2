@@ -1,16 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import MealPlanBasicDetails from './MealPlanBasicDetails'
-import MealPlan from '@defs/MealPlan'
-import OnlineMealPlan from '@test/mockData/mealPlans/OnlineMealPlan'
-import InternalMealPlan from '@test/mockData/mealPlans/InternalMealPlan'
-import BookMealPlanWithOptional from '@test/mockData/mealPlans/BookMealPlanWithOptional'
 import BookMealPlanMissingOptional from '@test/mockData/mealPlans/BookMealPlanMissingOptional'
+import BookMealPlanWithOptional from '@test/mockData/mealPlans/BookMealPlanWithOptional'
 import FreezerMealPlan from '@test/mockData/mealPlans/FreezerMealPlan'
-import ReadyPreparedMealPlan from '@test/mockData/mealPlans/ReadyPreparedMealPlan'
+import InternalMealPlan from '@test/mockData/mealPlans/InternalMealPlan'
 import LeftoversMealPlan from '@test/mockData/mealPlans/LeftoversMealPlan'
+import OnlineMealPlan from '@test/mockData/mealPlans/OnlineMealPlan'
+import ReadyPreparedMealPlan from '@test/mockData/mealPlans/ReadyPreparedMealPlan'
+import MealPlanBasicDetails from './MealPlanBasicDetails'
 
 const meta: Meta<typeof MealPlanBasicDetails> = {
-    title: 'Atoms/MealPlanBasicDetails',
+    title: 'Features/MealPlanner/ViewMealPlans/MealPlanBasicDetails',
     component: MealPlanBasicDetails,
     decorators: [(Story) => <Story />],
     args: {

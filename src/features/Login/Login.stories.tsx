@@ -1,20 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
-import { expect, fn, screen, type Mock, waitFor } from 'storybook/test'
-import LoginFeature from './Login'
+import { expect, fn, type Mock, waitFor } from 'storybook/test'
 import fillValidCredentials, {
     ValidEmail,
     ValidPassword,
 } from '@test/storybookHelpers/loginForm/fillValidCredentials'
+import Login from './Login'
 
-const meta: Meta<typeof LoginFeature> = {
+const meta: Meta<typeof Login> = {
     title: 'Features/Login',
-    component: LoginFeature,
-    parameters: {
-        nextjs: {
-            appDirectory: true,
-        },
-    },
+    component: Login,
     decorators: [(Story) => <Story />],
     args: {
         onSubmit: fn().mockResolvedValue(undefined),
@@ -23,35 +17,75 @@ const meta: Meta<typeof LoginFeature> = {
 
 export default meta
 
-type Story = StoryObj<typeof LoginFeature>
+type Story = StoryObj<typeof Login>
 
 export const Default: Story = {}
 
-export const SuccessfulLogin: Story = {
-    play: async ({ args, canvas, userEvent }) => {
-        ;(args.onSubmit as unknown as Mock).mockResolvedValue(undefined)
-        const router = getRouter()
+export const RequiresEmailAndPassword: Story = {
+    play: async ({ canvas, args, userEvent }) => {
+        const button = canvas.getByRole('button', { name: /log in/i })
+        expect(button).toBeInTheDocument()
 
-        const submitButton = await fillValidCredentials(canvas, userEvent)
-        await userEvent.click(submitButton)
+        await userEvent.click(button)
 
-        await waitFor(() => expect(args.onSubmit).toHaveBeenCalledWith(ValidEmail, ValidPassword))
-        await waitFor(() => expect(router.push).toHaveBeenCalledWith('/'))
+        await waitFor(() => {
+            expect(canvas.getByText(/email is required/i)).toBeInTheDocument()
+            expect(canvas.getByText(/password is required/i)).toBeInTheDocument()
+        })
+        expect(args.onSubmit).not.toHaveBeenCalled()
     },
 }
 
-export const FailedLoginShowsToast: Story = {
+export const InvalidEmailShowsError: Story = {
+    play: async ({ canvas, args, userEvent }) => {
+        const emailInput = canvas.getByLabelText(/email/i, { selector: 'input' })
+        const passwordInput = canvas.getByLabelText(/password/i, { selector: 'input' })
+
+        await userEvent.type(emailInput, 'not-an-email')
+        await userEvent.type(passwordInput, 'Password123!')
+        await userEvent.click(canvas.getByRole('button', { name: /log in/i }))
+
+        await waitFor(() =>
+            expect(canvas.getByText(/please enter a valid email address/i)).toBeInTheDocument(),
+        )
+        expect(args.onSubmit).not.toHaveBeenCalled()
+    },
+}
+
+export const SubmitsAndShowsLoadingState: Story = {
     play: async ({ args, canvas, userEvent }) => {
-        ;(args.onSubmit as unknown as Mock).mockRejectedValue(new Error('Invalid credentials'))
+        ;(args.onSubmit as unknown as Mock).mockImplementation(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            return undefined
+        })
 
         const submitButton = await fillValidCredentials(canvas, userEvent)
         await userEvent.click(submitButton)
 
-        await waitFor(() => expect(args.onSubmit).toHaveBeenCalledWith(ValidEmail, ValidPassword))
-
-        const [toast] = await screen.findAllByText(
-            /please check your email and password and try again/i,
+        await waitFor(() =>
+            expect(canvas.getByRole('button', { name: /logging in/i })).toBeDisabled(),
         )
-        expect(toast).toBeInTheDocument()
+
+        await waitFor(() => expect(canvas.getByRole('button', { name: /log in/i })).toBeEnabled())
+
+        await waitFor(() => expect(args.onSubmit).toHaveBeenCalledWith(ValidEmail, ValidPassword))
+    },
+}
+
+export const StopsLoadingOnError: Story = {
+    play: async ({ canvas, args, userEvent }) => {
+        ;(args.onSubmit as unknown as Mock).mockImplementation(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            throw new Error('Invalid credentials')
+        })
+
+        const submitButton = await fillValidCredentials(canvas, userEvent)
+        await userEvent.click(submitButton)
+
+        await waitFor(() =>
+            expect(canvas.getByRole('button', { name: /logging in/i })).toBeDisabled(),
+        )
+
+        await waitFor(() => expect(canvas.getByRole('button', { name: /log in/i })).toBeEnabled())
     },
 }

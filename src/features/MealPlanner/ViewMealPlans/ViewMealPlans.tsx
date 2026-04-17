@@ -1,8 +1,8 @@
 import { Flex, Stack, VStack } from '@chakra-ui/react'
 import MealPlan from '@defs/MealPlan'
 import useColorMode from '@hooks/useColorMode'
-import DaysMeals from '@organisms/DaysMeals/DaysMeals'
-import MealPlannerCalendars from '@organisms/MealPlannerCalendar/MealPlannerCalendar'
+import MealPlannerCalendars from './MealPlannerCalendars/MealPlannerCalendars'
+import DaysMeals from './DaysMeals/DaysMeals'
 import formatMealsForSelectedDateRange from './utils/formatMealsForSelectedDateRange'
 
 interface ViewMealPlansProps {

@@ -1,8 +1,8 @@
-import NavBarLink from '@atoms/NavBarLink/NavBarLink'
 import { Flex, IconButton, Stack, VStack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
-import { LuMenu } from 'react-icons/lu'
 import { Fragment, useState } from 'react'
+import { LuMenu } from 'react-icons/lu'
+import NavBarLink from './NavBarLink'
 
 interface NavBarLinksProps {
     links: { href: string; label: string }[]
@@ -54,9 +54,7 @@ export default function NavBarLinks({ links }: NavBarLinksProps) {
             >
                 {links.map((link, idx) => (
                     <Fragment key={`nav-link-${idx}`}>
-                        <NavBarLink key={idx} href={link.href}>
-                            {link.label}
-                        </NavBarLink>
+                        <NavBarLink href={link.href}>{link.label}</NavBarLink>
                         {idx < links.length - 1 && (
                             <Flex
                                 display={{ base: 'none', md: 'flex' }}

@@ -1,6 +1,6 @@
 'use client'
 
-import LoginFeature from '@features/Login/Login'
+import LoginScreen from '@screens/LoginScreen/LoginScreen'
 import { useStytch } from '@stytch/nextjs'
 
 export default function Login() {
@@ -14,5 +14,5 @@ export default function Login() {
         })
     }
 
-    return <LoginFeature onSubmit={authenticate} />
+    return <LoginScreen onSubmit={authenticate} />
 }

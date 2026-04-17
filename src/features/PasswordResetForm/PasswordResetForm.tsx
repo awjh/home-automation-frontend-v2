@@ -1,10 +1,10 @@
 import Button from '@atoms/Button/Button'
 import PasswordInput from '@atoms/PasswordInput/PasswordInput'
-import PasswordStrengthMeter from '@atoms/PasswordStrengthMeter/PasswordStrengthMeter'
 import { Fieldset, Stack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import zxcvbn from 'zxcvbn'
+import PasswordStrengthMeter from './PasswordStrengthMeter/PasswordStrengthMeter'
 
 type PasswordResetFormValues = {
     newPassword: string
@@ -20,14 +20,13 @@ export default function PasswordResetForm({ onSubmit }: PasswordResetFormProps) 
     const {
         control,
         handleSubmit,
-        watch,
         formState: { errors },
     } = useForm<PasswordResetFormValues>({
         defaultValues: { newPassword: '', confirmPassword: '' },
         mode: 'onTouched',
     })
 
-    const newPassword = watch('newPassword')
+    const newPassword = useWatch({ control, name: 'newPassword' }) ?? ''
 
     const handleFormSubmit = (data: PasswordResetFormValues) => {
         onSubmit(data.newPassword)

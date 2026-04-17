@@ -1,3 +1,4 @@
+import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import BookMealPlanWithOptional from '@test/mockData/mealPlans/BookMealPlanWithOptional'
 import FreezerMealPlan from '@test/mockData/mealPlans/FreezerMealPlan'
@@ -5,10 +6,9 @@ import LeftoversMealPlan from '@test/mockData/mealPlans/LeftoversMealPlan'
 import MagazineMealPlan from '@test/mockData/mealPlans/MagazineMealPlan'
 import OnlineMealPlan from '@test/mockData/mealPlans/OnlineMealPlan'
 import DaysMeals from './DaysMeals'
-import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
 
 const meta: Meta<typeof DaysMeals> = {
-    title: 'Organisms/DaysMeals',
+    title: 'Features/MealPlanner/ViewMealPlans/DaysMeals',
     component: DaysMeals,
     decorators: [(Story) => <Story />],
     args: {

@@ -18,7 +18,7 @@ interface MealPlansAddProps {
     onClose: () => void
 }
 
-export default function MealPlansAdd(props: MealPlansAddProps) {
+export default function AddMealPlan(props: MealPlansAddProps) {
     const { keyColors } = useColorMode()
 
     return (

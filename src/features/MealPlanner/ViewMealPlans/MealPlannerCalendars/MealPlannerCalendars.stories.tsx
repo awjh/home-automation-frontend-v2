@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import MealPlannerCalendar from './MealPlannerCalendar'
+import MealPlannerCalendars from './MealPlannerCalendars'
 import { expect, fn, within } from 'storybook/test'
 import { Canvas } from 'storybook/internal/csf'
 import MockDate from 'mockdate'
 
 const mockingDate = new Date(2026, 3, 7) // April 7, 2026
 
-const meta: Meta<typeof MealPlannerCalendar> = {
-    title: 'Organisms/MealPlannerCalendar',
-    component: MealPlannerCalendar,
+const meta: Meta<typeof MealPlannerCalendars> = {
+    title: 'Features/MealPlanner/ViewMealPlans/MealPlannerCalendars',
+    component: MealPlannerCalendars,
     decorators: [(Story) => <Story />],
     args: {
         initialDate: mockingDate,
@@ -17,7 +17,7 @@ const meta: Meta<typeof MealPlannerCalendar> = {
 }
 
 export default meta
-type Story = StoryObj<typeof MealPlannerCalendar>
+type Story = StoryObj<typeof MealPlannerCalendars>
 
 function validateMonthDays(
     canvas: Canvas,

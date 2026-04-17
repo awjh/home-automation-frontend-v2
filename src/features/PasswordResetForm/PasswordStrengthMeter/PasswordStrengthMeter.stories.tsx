@@ -1,9 +1,9 @@
+import { Stack } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import PasswordStrengthMeter from './PasswordStrengthMeter'
-import { Flex, Stack } from '@chakra-ui/react'
 
 const meta: Meta<typeof PasswordStrengthMeter> = {
-    title: 'Atoms/PasswordStrengthMeter',
+    title: 'Features/PasswordReset/PasswordStrengthMeter',
     component: PasswordStrengthMeter,
     decorators: [
         (Story) => (
@@ -21,16 +21,19 @@ export default meta
 type Story = StoryObj<typeof PasswordStrengthMeter>
 
 export const PasswordNotSet: Story = {}
+
 export const VeryWeakPassword: Story = {
     args: {
         passwordValue: '123',
     },
 }
+
 export const WeakPassword: Story = {
     args: {
         passwordValue: 'password123!',
     },
 }
+
 export const FairPassword: Story = {
     args: {
         passwordValue: 'p@ssword123!',

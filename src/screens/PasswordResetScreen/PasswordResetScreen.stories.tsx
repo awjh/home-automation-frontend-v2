@@ -1,13 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { getRouter } from '@storybook/nextjs-vite/router.mock'
+import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
 import { expect, fn, screen, type Mock, waitFor } from 'storybook/test'
-import PasswordResetFeature from './PasswordReset'
+import PasswordResetScreen from './PasswordResetScreen'
 
 const ValidPassword = 'CorrectHorseBatteryStaple123!'
 
-const meta: Meta<typeof PasswordResetFeature> = {
-    title: 'Features/PasswordReset',
-    component: PasswordResetFeature,
+const meta: Meta<typeof PasswordResetScreen> = {
+    title: 'Screens/PasswordResetScreen',
+    component: PasswordResetScreen,
+    parameters: {
+        nextjs: {
+            appDirectory: true,
+        },
+    },
     decorators: [(Story) => <Story />],
     args: {
         isValidLink: true,
@@ -18,7 +23,7 @@ const meta: Meta<typeof PasswordResetFeature> = {
 
 export default meta
 
-type Story = StoryObj<typeof PasswordResetFeature>
+type Story = StoryObj<typeof PasswordResetScreen>
 
 export const Default: Story = {}
 

@@ -1,9 +1,9 @@
-import MealPlanBasicDetails from '@atoms/MealPlanBasicDetails/MealPlanBasicDetails'
 import { Flex, HStack, IconButton, Stack, Text, VStack } from '@chakra-ui/react'
 import MealPlan from '@defs/MealPlan'
 import useColorMode from '@hooks/useColorMode'
 import formatDuration from '@utils/formatDuration'
 import { LuSquarePen, LuTrash2 } from 'react-icons/lu'
+import MealPlanBasicDetails from '../MealPlanBasicDetails/MealPlanBasicDetails'
 
 interface MealPlanItemProps {
     mealPlan: MealPlan

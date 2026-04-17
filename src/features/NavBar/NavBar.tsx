@@ -1,6 +1,6 @@
 import { Heading, HStack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
-import NavBarLinks from '@molecules/NavBarLinks/NavBarLinks'
+import NavBarLinks from './NavBarLinks'
 
 interface NavBarProps {
     showLinks?: boolean

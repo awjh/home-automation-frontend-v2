@@ -3,8 +3,8 @@ import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import MealPlan from '@defs/MealPlan'
 import useColorMode from '@hooks/useColorMode'
-import MealPlanItem from '@molecules/MealPlanItem/MealPlanItem'
 import { useMemo } from 'react'
+import MealPlanItem from '../MealPlanItem/MealPlanItem'
 
 interface DaysMealsProps {
     day: Date

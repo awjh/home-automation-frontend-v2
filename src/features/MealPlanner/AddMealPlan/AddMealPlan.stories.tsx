@@ -14,11 +14,11 @@ import {
     playOnlineFlowLeavingExtractedDetails,
     playReadyPreparedFlow,
 } from '@test/storybookHelpers/addMealPlan/storybookFlows'
-import MealPlansAdd from './AddMealPlan'
+import AddMealPlan from './AddMealPlan'
 
-const meta: Meta<typeof MealPlansAdd> = {
+const meta: Meta<typeof AddMealPlan> = {
     title: 'Features/MealPlanner/AddMealPlan',
-    component: MealPlansAdd,
+    component: AddMealPlan,
     parameters: {
         layout: 'fullscreen',
     },
@@ -38,7 +38,7 @@ const meta: Meta<typeof MealPlansAdd> = {
 
 export default meta
 
-type Story = StoryObj<typeof MealPlansAdd>
+type Story = StoryObj<typeof AddMealPlan>
 
 export const Default: Story = {
     play: async ({ canvas, userEvent, args }) =>
