@@ -1,12 +1,15 @@
 'use server'
 
 import {
+    DeleteMealPlanResponse,
+    GetExtractedExternalRecipeResponse,
     GetMealPlansResponse,
     PostMealPlanBody,
     PostMealPlanResponse,
 } from '@awjh/home-automation-v2-api-models'
-import AddMealPlanFormValues from '@features/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
-import createMealPlanFromFormValues from '@features/AddMealPlan/utils/createMealPlanFromFormValues'
+import MealPlan from '@defs/MealPlan'
+import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
+import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
 import { formatDate } from '@utils/formatDate'
 import { cookies } from 'next/headers'
 
@@ -63,5 +66,52 @@ export async function addMealPlan(
         throw new Error('Failed to add meal plan')
     }
 
+    return mealPlan
+}
+
+export async function extractTitleFromOnlineSource(
+    url: string,
+): Promise<GetExtractedExternalRecipeResponse> {
+    const sessionJwt = await getSessionJwt()
+
+    const res = await fetch(
+        `${process.env.API_BASE_URL!}/recipes/external/extract?url=${encodeURIComponent(url)}`,
+        {
+            cache: 'no-store',
+            headers: {
+                Authorization: `Bearer ${sessionJwt}`,
+                'x-api-key': process.env.API_KEY!,
+            },
+        },
+    )
+
+    if (!res.ok) {
+        throw new Error('Failed to extract recipe details')
+    }
+
     return res.json()
+}
+
+export async function deleteMealPlan(mealPlan: MealPlan): Promise<DeleteMealPlanResponse> {
+    const sessionJwt = await getSessionJwt()
+
+    const res = await fetch(
+        `${process.env.API_BASE_URL!}/meal-plans/${encodeURIComponent(mealPlan.date)}/${encodeURIComponent(mealPlan.mealTime)}`,
+        {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${sessionJwt}`,
+                'x-api-key': process.env.API_KEY!,
+            },
+        },
+    )
+
+    if (!res.ok) {
+        throw new Error('Failed to delete meal plan')
+    }
+
+    return {
+        date: mealPlan.date,
+        mealTime: mealPlan.mealTime,
+    }
 }

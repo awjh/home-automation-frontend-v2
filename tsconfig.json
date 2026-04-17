@@ -23,6 +23,7 @@
             "@molecules/*": ["./src/components/molecules/*"],
             "@organisms/*": ["./src/components/organisms/*"],
             "@features/*": ["./src/features/*"],
+            "@screens/*": ["./src/screens/*"],
             "@constants/*": ["./src/constants/*"],
             "@hooks/*": ["./src/hooks/*"],
             "@defs/*": ["./src/defs/*"],

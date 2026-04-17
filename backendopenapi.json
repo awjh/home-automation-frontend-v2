@@ -2,7 +2,7 @@
   "openapi" : "3.0.1",
   "info" : {
     "title" : "home-automation-api-v2-dev",
-    "version" : "2026-04-05T17:32:30Z"
+    "version" : "2026-04-17T15:51:57Z"
   },
   "servers" : [ {
     "url" : "https://api.home-automation.dev.andrewhurt.co.uk"
@@ -381,6 +381,113 @@
           },
           "requestTemplates" : {
             "application/json" : "\n    \n    #set($date = $input.params('date'))\n    #set($mealTime = $input.params('mealTime'))\n\n    #set($context.requestOverride.path.date = $date)\n    #set($context.requestOverride.path.mealTime = $mealTime)\n\n        #if(!$date.matches('^\\d{4}-\\d{2}-\\d{2}$'))\n            #set($context.responseOverride.status = 400)\n            \n            {\"message\":\"Invalid date format. Expected 'YYYY-MM-DD'. Got '$date'.\",\"reason\":\"bad_request\"}\n        #elseif($mealTime != 'breakfast' && $mealTime != 'lunch' && $mealTime != 'dinner')\n            #set($context.responseOverride.status = 400)\n            \n            {\"message\":\"Invalid meal time.\",\"reason\":\"bad_request\"}\n        #else\n            \n        #set($data = $input.path('$'))\n\n        #set($data.date = $input.params('date'))\n#set($data.mealTime = $input.params('mealTime'))\n\n        {\n            \"TableName\": \"home-automation-read-store-v2-dev\",\n            \"Item\": {\n        \"pk\": {\"S\": \"MEAL_PLAN~$context.authorizer.userId\"},\n        \"sk\": {\"S\": \"$data.date~$data.mealTime\"},\n        \n        \n        \n            \"author\": { \"S\": \"$data.author\" }\n            ,\n        \n            \"course\": { \"S\": \"$data.course\" }\n            ,\n        \n            \"date\": { \"S\": \"$data.date\" }\n            ,\n        \n            \"mealTime\": { \"S\": \"$data.mealTime\" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"book\")\n                    \"source\": { \"M\": {\n        \n#set($data_source_has_series = $data.source.containsKey('series'))\n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"title\": { \"S\": \"$data.source.title\" }\n            ,\n        \n            \"page\": { \"N\": \"$data.source.page\" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    \"series\": { \"S\": \"$data.source.series\" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"online\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"url\": { \"S\": \"$data.source.url\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"magazine\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"title\": { \"S\": \"$data.source.title\" }\n            ,\n        \n            \"issue\": { \"S\": \"$data.source.issue\" }\n            ,\n        \n            \"page\": { \"N\": \"$data.source.page\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"internal\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"recipeId\": { \"S\": \"$data.source.recipeId\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"leftovers\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            ,\n        \n            \"fromDate\": { \"S\": \"$data.source.fromDate\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"freezer\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey('type'))\n                #if($data_source_M_has_type && $data.source.type == \"ready_prepared\")\n                    \"source\": { \"M\": {\n        \n        \n            \"type\": { \"S\": \"$data.source.type\" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            \"title\": { \"S\": \"$data.title\" }\n            ,\n        \n            \"duration\": { \"M\": {\n        \n        \n            \"prepDuration\": { \"N\": \"$data.duration.prepDuration\" }\n            ,\n        \n            \"cookingDuration\": { \"N\": \"$data.duration.cookingDuration\" }\n            ,\n        \n            \"standingTime\": { \"N\": \"$data.duration.standingTime\" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            \"ConditionExpression\": \"attribute_exists(pk) AND attribute_exists(sk)\"\n        }\n    \n        #end"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "aws"
+        }
+      },
+      "delete" : {
+        "operationId" : "DeleteMealPlan",
+        "parameters" : [ {
+          "name" : "date",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "mealTime",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "400 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HomeAutomationApiV2ErrorResponseModel"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteMealPlanSuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "home-automation-api-v2-basic-user-authorizer-dev" : [ ]
+        }, {
+          "api_key" : [ ]
+        } ],
+        "x-amazon-apigateway-integration" : {
+          "credentials" : "arn:aws:iam::558946902552:role/delete-meal-plan-integration-role-dev",
+          "uri" : "arn:aws:apigateway:eu-west-1:dynamodb:action/DeleteItem",
+          "httpMethod" : "POST",
+          "responses" : {
+            "400" : {
+              "statusCode" : "400",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to delete item in DynamoDB to remove MealPlan\",\"reason\":\"bad_request\"}"
+              }
+            },
+            "5\\d{2}" : {
+              "statusCode" : "500",
+              "responseTemplates" : {
+                "application/json" : "{\"message\":\"Failed to delete item in DynamoDB to remove MealPlan\",\"reason\":\"internal_server_error\"}"
+              }
+            },
+            "2\\d{2}" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'DELETE,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                "method.response.header.Access-Control-Allow-Origin" : "'http://localhost:3000'"
+              },
+              "responseTemplates" : {
+                "application/json" : "\n        \n\n        #set($date = $context.requestOverride.path.date)\n        #set($mealTime = $context.requestOverride.path.mealTime)\n\n        {\"date\":\"$date\",\"mealTime\":\"$mealTime\"}\n    "
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "\n    #set($date = $input.params('date'))\n    #set($mealTime = $input.params('mealTime'))\n\n    #set($context.requestOverride.path.date = $date)\n    #set($context.requestOverride.path.mealTime = $mealTime)\n\n        #if(!$date.matches('^\\d{4}-\\d{2}-\\d{2}$'))\n            #set($context.responseOverride.status = 400)\n\n            {\"message\":\"Invalid date format. Expected 'YYYY-MM-DD'. Got '$date'.\",\"reason\":\"bad_request\"}\n        #elseif($mealTime != 'breakfast' && $mealTime != 'lunch' && $mealTime != 'dinner')\n            #set($context.responseOverride.status = 400)\n\n            {\"message\":\"Invalid meal time.\",\"reason\":\"bad_request\"}\n        #else\n            {\n                \"TableName\": \"home-automation-read-store-v2-dev\",\n                \"Key\": {\n                    \"pk\": {\n                        \"S\": \"MEAL_PLAN~$context.authorizer.userId\"\n                    },\n                    \"sk\": {\n                        \"S\": \"$date~$mealTime\"\n                    }\n                },\n                \"ConditionExpression\": \"attribute_exists(pk) AND attribute_exists(sk)\"\n            }\n        #end"
           },
           "passthroughBehavior" : "when_no_match",
           "type" : "aws"
@@ -1014,6 +1121,22 @@
           },
           "title" : {
             "type" : "string"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "DeleteMealPlanSuccessResponse" : {
+        "title" : "DeleteMealPlanSuccessResponse",
+        "required" : [ "date", "mealTime" ],
+        "type" : "object",
+        "properties" : {
+          "date" : {
+            "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+            "type" : "string"
+          },
+          "mealTime" : {
+            "type" : "string",
+            "enum" : [ "breakfast", "lunch", "dinner" ]
           }
         },
         "additionalProperties" : false

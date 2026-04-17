@@ -1,8 +1,8 @@
 import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
 import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { expect, fn, type Mock, waitFor } from 'storybook/test'
-import type AddMealPlanFormValues from '@features/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
-import type { InternalRecipeSearchResult } from '@features/AddMealPlan/AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
+import type AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
+import type { InternalRecipeSearchResult } from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
 
 export const internalRecipeResults = [
     {
@@ -214,6 +214,7 @@ type StoryUserEvent = {
 }
 
 export interface AddMealPlanStoryArgs {
+    assertSubmitted?: (values: AddMealPlanFormValues) => Promise<void> | void
     extractTitleFromOnlineSource?: unknown
     onCancel?: unknown
     onClose?: unknown
@@ -285,6 +286,11 @@ async function fillDurations(
 }
 
 async function expectSubmitted(args: AddMealPlanStoryArgs, values: AddMealPlanFormValues) {
+    if (args.assertSubmitted) {
+        await args.assertSubmitted(values)
+        return
+    }
+
     await waitFor(() => {
         expect(args.onSubmit).toHaveBeenCalledWith(values)
     })
