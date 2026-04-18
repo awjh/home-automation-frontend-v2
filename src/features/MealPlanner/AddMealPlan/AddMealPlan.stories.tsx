@@ -31,6 +31,8 @@ const meta: Meta<typeof AddMealPlan> = {
     ],
     args: {
         date: '2026-04-05',
+        isSourceEditable: true,
+        mode: 'add',
         onClose: fn(),
         ...createAddMealPlanStoryArgs(),
     },

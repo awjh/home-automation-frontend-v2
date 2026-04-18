@@ -31,6 +31,8 @@ export const extractedOnlineRecipe = {
 export const bookFlowValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.BOOK,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: 'Traybake',
     author: 'Rukmini Iyer',
     fromDate: '',
@@ -50,6 +52,8 @@ export const bookFlowValues = {
 export const onlineFlowValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.ONLINE,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: 'Gnocchi with Roast Pepper Sauce',
     author: 'BBC Good Food',
     fromDate: '',
@@ -69,6 +73,8 @@ export const onlineFlowValues = {
 export const onlineFlowUsingExtractedValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.ONLINE,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: extractedOnlineRecipe.title,
     author: 'BBC Good Food',
     fromDate: '',
@@ -88,6 +94,8 @@ export const onlineFlowUsingExtractedValues = {
 export const magazineFlowValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.MAGAZINE,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: 'Beef Wellington',
     author: 'Gordon Ramsay',
     fromDate: '',
@@ -107,6 +115,8 @@ export const magazineFlowValues = {
 export const internalRecipeFlowValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.INTERNAL_RECIPE,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: 'Spaghetti Carbonara',
     author: 'Andrew Hurt',
     fromDate: '',
@@ -126,6 +136,8 @@ export const internalRecipeFlowValues = {
 export const internalRecipeTitleSearchFlowValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.INTERNAL_RECIPE,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: 'Spaghetti Bolognese',
     author: 'Andrew Hurt',
     fromDate: '',
@@ -145,6 +157,8 @@ export const internalRecipeTitleSearchFlowValues = {
 export const freezerFlowValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.FREEZER,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: 'Chicken Satay',
     author: '',
     fromDate: '',
@@ -164,6 +178,8 @@ export const freezerFlowValues = {
 export const leftoversFlowValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.LEFTOVERS,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: 'Roast Chicken Pasta Bake',
     author: 'Andrew Hurt',
     fromDate: '2026-04-03',
@@ -183,6 +199,8 @@ export const leftoversFlowValues = {
 export const readyPreparedFlowValues = {
     mealTime: MealTime.DINNER,
     source: SourceType.READY_PREPARED,
+    useForLeftovers: false,
+    leftoversDate: '',
     title: 'Chicken Flatties',
     author: 'M&S',
     fromDate: '',
@@ -251,12 +269,30 @@ async function selectPrimaryDetails(
     canvas: StoryCanvas,
     userEvent: StoryUserEvent,
     source: SourceType,
+    options?: { leftoversDate?: string; useForLeftovers?: boolean },
 ) {
     await userEvent.selectOptions(
         canvas.getByLabelText(/meal time/i, { selector: 'select' }),
         MealTime.DINNER,
     )
     await userEvent.selectOptions(canvas.getByLabelText(/source/i, { selector: 'select' }), source)
+
+    if (source !== SourceType.LEFTOVERS && options?.useForLeftovers) {
+        await userEvent.selectOptions(
+            canvas.getByLabelText(/use for leftovers\?/i, { selector: 'select' }),
+            'true',
+        )
+
+        if (options.leftoversDate) {
+            await fillTextInput(
+                canvas,
+                userEvent,
+                /when will the leftovers be used\?/i,
+                options.leftoversDate,
+            )
+        }
+    }
+
     await userEvent.click(canvas.getByRole('button', { name: /next/i }))
 }
 
@@ -341,6 +377,32 @@ export async function playBookFlow(
     await fillDurations(canvas, userEvent, bookFlowValues)
 
     await expectSubmitted(args, bookFlowValues)
+    expect(args.searchInternalRecipes).not.toHaveBeenCalled()
+}
+
+export async function playBookFlowMarkedForLeftovers(
+    canvas: StoryCanvas,
+    userEvent: StoryUserEvent,
+    args: AddMealPlanStoryArgs,
+) {
+    resetAddMealPlanMocks(args)
+
+    await selectPrimaryDetails(canvas, userEvent, SourceType.BOOK, {
+        useForLeftovers: true,
+        leftoversDate: '2026-04-11',
+    })
+    await fillTitleAuthorDetails(canvas, userEvent, bookFlowValues)
+    await fillTextInput(canvas, userEvent, /book title/i, bookFlowValues.bookTitle)
+    await fillTextInput(canvas, userEvent, /page number/i, bookFlowValues.pageNumber)
+    await fillTextInput(canvas, userEvent, /series/i, bookFlowValues.series)
+    await userEvent.click(canvas.getByRole('button', { name: /next/i }))
+    await fillDurations(canvas, userEvent, bookFlowValues)
+
+    await expectSubmitted(args, {
+        ...bookFlowValues,
+        useForLeftovers: true,
+        leftoversDate: '2026-04-11',
+    })
     expect(args.searchInternalRecipes).not.toHaveBeenCalled()
 }
 

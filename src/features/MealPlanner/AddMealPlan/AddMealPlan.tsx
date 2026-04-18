@@ -14,6 +14,7 @@ interface AddMealPlanProps {
     date: string
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
     initialValues?: Partial<AddMealPlanFormValues>
+    isSourceEditable: boolean
     mode: 'add' | 'edit'
     searchInternalRecipes: SearchInternalRecipes
     onSubmit: (values: AddMealPlanFormValues) => void | Promise<void>
@@ -23,7 +24,7 @@ interface AddMealPlanProps {
 export default function AddMealPlan(props: AddMealPlanProps) {
     const { keyColors } = useColorMode()
     const headingPrefix = props.mode === 'edit' ? 'Edit meal for' : 'Add meal for'
-    const formKey = `${props.mode ?? 'add'}:${props.date}:${JSON.stringify(props.initialValues ?? {})}`
+    const formKey = `${props.mode}:${props.date}:${JSON.stringify(props.initialValues ?? {})}`
 
     return (
         <Flex position={'fixed'} w={'full'} zIndex={100} justifyContent={'center'}>
@@ -78,6 +79,8 @@ export default function AddMealPlan(props: AddMealPlanProps) {
                         key={formKey}
                         initialValues={props.initialValues}
                         isMealTimeEditable={props.mode === 'add'}
+                        isSourceEditable={props.isSourceEditable}
+                        showUseForLeftoversQuestion={props.mode === 'add'}
                         searchInternalRecipes={props.searchInternalRecipes}
                         extractTitleFromOnlineSource={props.extractTitleFromOnlineSource}
                         onSubmit={props.onSubmit}

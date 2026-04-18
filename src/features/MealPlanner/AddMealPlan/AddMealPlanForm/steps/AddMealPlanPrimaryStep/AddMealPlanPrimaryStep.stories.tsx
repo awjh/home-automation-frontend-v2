@@ -19,9 +19,14 @@ const sourceItems = Object.values(SourceType).map((sourceType) => ({
 interface StoryWrapperProps {
     onBack?: () => void
     defaultValues?: Partial<AddMealPlanFormValues>
+    showUseForLeftoversQuestion?: boolean
 }
 
-function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
+function StoryWrapper({
+    onBack = fn(),
+    defaultValues,
+    showUseForLeftoversQuestion = true,
+}: StoryWrapperProps) {
     const {
         control,
         handleSubmit,
@@ -30,6 +35,8 @@ function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
         defaultValues: {
             mealTime: '',
             source: '',
+            useForLeftovers: false,
+            leftoversDate: '',
             bookTitle: '',
             pageNumber: '',
             series: '',
@@ -60,6 +67,9 @@ function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
                     <AddMealPlanPrimaryStep
                         control={control}
                         errors={errors}
+                        isMealTimeEditable={true}
+                        isSourceEditable={true}
+                        showUseForLeftoversQuestion={showUseForLeftoversQuestion}
                         mealTimeItems={mealTimeItems}
                         sourceItems={sourceItems}
                         onBack={onBack}
@@ -85,6 +95,19 @@ export const BookSource: Story = {
 
 export const NonBookSource: Story = {
     render: () => <StoryWrapper defaultValues={{ source: SourceType.ONLINE }} />,
+}
+
+export const LeftoversSourceHidesFollowUpQuestion: Story = {
+    render: () => <StoryWrapper defaultValues={{ source: SourceType.LEFTOVERS }} />,
+}
+
+export const EditModeHidesFollowUpQuestion: Story = {
+    render: () => (
+        <StoryWrapper
+            defaultValues={{ source: SourceType.BOOK }}
+            showUseForLeftoversQuestion={false}
+        />
+    ),
 }
 
 export const RequiresPrimaryFields: Story = {

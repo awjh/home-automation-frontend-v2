@@ -11,7 +11,9 @@ import { getEmptyAddMealPlanFormValues } from '../utils/createInitialFormValuesF
 export interface AddMealPlanFormProps {
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
     initialValues?: Partial<AddMealPlanFormValues>
-    isMealTimeEditable?: boolean
+    isMealTimeEditable: boolean
+    isSourceEditable: boolean
+    showUseForLeftoversQuestion: boolean
     searchInternalRecipes: SearchInternalRecipes
     onSubmit: (values: AddMealPlanFormValues) => void | Promise<void>
     onCancel: () => void
@@ -20,7 +22,9 @@ export interface AddMealPlanFormProps {
 export default function AddMealPlanForm({
     extractTitleFromOnlineSource,
     initialValues,
-    isMealTimeEditable = true,
+    isMealTimeEditable,
+    isSourceEditable,
+    showUseForLeftoversQuestion,
     searchInternalRecipes,
     onSubmit,
     onCancel,
@@ -86,6 +90,8 @@ export default function AddMealPlanForm({
             control={control}
             errors={errors}
             isMealTimeEditable={isMealTimeEditable}
+            isSourceEditable={isSourceEditable}
+            showUseForLeftoversQuestion={showUseForLeftoversQuestion}
             mealTimeItems={mealTimeItems}
             sourceItems={sourceItems}
             onBack={handleStepBack}

@@ -1,3 +1,4 @@
+import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, waitFor, within } from 'storybook/test'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
@@ -8,6 +9,7 @@ import OnlineMealPlan from '@test/mockData/mealPlans/OnlineMealPlan'
 import {
     bookFlowValues,
     createAddMealPlanStoryArgs,
+    playBookFlowMarkedForLeftovers,
     playBookFlow,
     playOnlineFlowLeavingExtractedDetails,
     onlineFlowUsingExtractedValues,
@@ -125,6 +127,94 @@ export const OpensAddMealPlanUsingExtractedOnlineTitle: Story = {
                 onlineFlowUsingExtractedValues,
             )
             expect(canvas.getByText(/gnocchi in roasted red pepper sauce/i)).toBeInTheDocument()
+        })
+    },
+}
+
+export const OpensLeftoversFollowUpAfterSuccessfulAdd: Story = {
+    play: async ({ canvas, userEvent, args }) => {
+        await userEvent.click(canvas.getAllByRole('button', { name: /add a meal/i })[0])
+
+        const addMealPopup = canvas.getByText(/add meal for/i).closest('form')
+
+        expect(addMealPopup).not.toBeNull()
+
+        const expectedDate = new Date(startOfWeek)
+        expectedDate.setDate(startOfWeek.getDate() + defaultInitialMeals.length)
+        const expectedFormattedDate = formatDate(expectedDate)
+        const leftoversDate = '2026-04-11'
+
+        await playBookFlowMarkedForLeftovers(within(addMealPopup!), userEvent, {
+            extractTitleFromOnlineSource: args.extractTitleFromOnlineSource,
+            assertSubmitted: async (values) => {
+                await waitFor(() => {
+                    expect(args.onAddMealSubmit).toHaveBeenCalledWith(expectedFormattedDate, values)
+                })
+            },
+            onSubmit: fn().mockResolvedValue(undefined),
+            searchInternalRecipes: args.searchInternalRecipes,
+        })
+
+        const leftoversPopup = within(addMealPopup!)
+        const sourceSelect = leftoversPopup.getByLabelText(/source/i, { selector: 'select' })
+
+        await waitFor(() => {
+            expect(args.onAddMealSubmit).toHaveBeenCalledWith(expectedFormattedDate, {
+                ...bookFlowValues,
+                useForLeftovers: true,
+                leftoversDate,
+            })
+            expect(sourceSelect).toBeDisabled()
+            expect(sourceSelect).toHaveValue(SourceType.LEFTOVERS)
+        })
+
+        expect(canvas.getByText(/add meal for 11\/04\/2026/i)).toBeInTheDocument()
+
+        await userEvent.selectOptions(
+            leftoversPopup.getByLabelText(/meal time/i, { selector: 'select' }),
+            MealTime.LUNCH,
+        )
+        await userEvent.click(leftoversPopup.getByRole('button', { name: /next/i }))
+
+        expect(leftoversPopup.getByLabelText(/title/i, { selector: 'input' })).toHaveValue(
+            bookFlowValues.title,
+        )
+        expect(leftoversPopup.getByLabelText(/author/i, { selector: 'input' })).toHaveValue(
+            bookFlowValues.author,
+        )
+
+        await userEvent.click(leftoversPopup.getByRole('button', { name: /next/i }))
+
+        expect(
+            leftoversPopup.getByLabelText(/original meal date/i, { selector: 'input' }),
+        ).toHaveValue(expectedFormattedDate)
+
+        await userEvent.click(leftoversPopup.getByRole('button', { name: /next/i }))
+        await userEvent.click(leftoversPopup.getByRole('button', { name: /submit/i }))
+
+        await waitFor(() => {
+            expect(args.onAddMealSubmit).toHaveBeenCalledWith(leftoversDate, {
+                mealTime: MealTime.LUNCH,
+                source: SourceType.LEFTOVERS,
+                useForLeftovers: false,
+                leftoversDate: '',
+                title: bookFlowValues.title,
+                author: bookFlowValues.author,
+                fromDate: expectedFormattedDate,
+                bookTitle: '',
+                pageNumber: '',
+                series: '',
+                recipeUrl: '',
+                magazineName: '',
+                magazineIssue: '',
+                magazinePage: '',
+                internalRecipeId: '',
+                prepDuration: bookFlowValues.prepDuration,
+                cookingDuration: bookFlowValues.cookingDuration,
+                standingTime: bookFlowValues.standingTime,
+            })
+            expect(args.onAddMealSubmit).toHaveBeenCalledTimes(2)
+            expect(canvas.getAllByText(/traybake/i)).toHaveLength(2)
         })
     },
 }

@@ -3,6 +3,8 @@ import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPl
 interface AddMealPlanFormValues {
     mealTime: MealTime | ''
     source: SourceType | ''
+    useForLeftovers: boolean
+    leftoversDate: string
     title: string
     author: string
     fromDate: string

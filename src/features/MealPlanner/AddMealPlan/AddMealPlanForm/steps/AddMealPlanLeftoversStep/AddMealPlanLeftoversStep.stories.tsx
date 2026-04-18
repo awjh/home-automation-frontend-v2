@@ -51,7 +51,12 @@ function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
                 }}
             >
                 <VStack w={'full'} alignItems={'stretch'} gap={4}>
-                    <AddMealPlanLeftoversStep control={control} errors={errors} onBack={onBack} />
+                    <AddMealPlanLeftoversStep
+                        control={control}
+                        errors={errors}
+                        showUseForLeftoversQuestion={true}
+                        onBack={onBack}
+                    />
                 </VStack>
             </form>
         </Flex>

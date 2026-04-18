@@ -10,7 +10,9 @@ import MealPlan from '@defs/MealPlan'
 import AddMealPlan from '@features/MealPlanner/AddMealPlan/AddMealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import { SearchInternalRecipes } from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
-import createInitialFormValuesFromMealPlan from '@features/MealPlanner/AddMealPlan/utils/createInitialFormValuesFromMealPlan'
+import createInitialFormValuesFromMealPlan, {
+    createInitialLeftoversFormValuesFromMealPlan,
+} from '@features/MealPlanner/AddMealPlan/utils/createInitialFormValuesFromMealPlan'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
 import NavBar from '@features/NavBar/NavBar'
 import ViewMealPlans from '@features/MealPlanner/ViewMealPlans/ViewMealPlans'
@@ -34,6 +36,18 @@ export interface MealPlansScreenProps {
 }
 
 const defaultSearchInternalRecipes: SearchInternalRecipes = async () => []
+
+interface PendingAddMealState {
+    date: Date
+    initialValues?: Partial<AddMealPlanFormValues>
+    isSourceEditable: boolean
+}
+
+function createDateFromIsoDateString(dateString: string): Date {
+    const [year, month, day] = dateString.split('-').map(Number)
+
+    return new Date(year, month - 1, day)
+}
 
 function getDateRangeForWeek(date: Date) {
     const startDate = new Date(date)
@@ -62,7 +76,7 @@ export default function MealPlansScreen({
     const [selectedDateRange, setSelectedDateRange] = useState(() =>
         getDateRangeForWeek(initialDate),
     )
-    const [addMealDate, setAddMealDate] = useState<Date | null>(null)
+    const [pendingAddMeal, setPendingAddMeal] = useState<PendingAddMealState | null>(null)
     const [mealPlanPendingEdit, setMealPlanPendingEdit] = useState<MealPlan | null>(null)
     const [mealPlanPendingDelete, setMealPlanPendingDelete] = useState<MealPlan | null>(null)
     const latestRequestId = useRef(0)
@@ -90,11 +104,14 @@ export default function MealPlansScreen({
     )
 
     const onAddMeal = useCallback((day: Date) => {
-        setAddMealDate(day)
+        setPendingAddMeal({
+            date: day,
+            isSourceEditable: true,
+        })
     }, [])
 
     const onCloseAddMeal = useCallback(() => {
-        setAddMealDate(null)
+        setPendingAddMeal(null)
     }, [])
 
     const onCloseEditMeal = useCallback(() => {
@@ -103,11 +120,11 @@ export default function MealPlansScreen({
 
     const handleAddMealSubmit = useCallback(
         async (values: AddMealPlanFormValues) => {
-            if (!addMealDate) {
+            if (!pendingAddMeal) {
                 return
             }
 
-            const mealDate = formatDate(addMealDate)
+            const mealDate = formatDate(pendingAddMeal.date)
 
             await onAddMealSubmit(mealDate, values)
 
@@ -115,9 +132,18 @@ export default function MealPlansScreen({
 
             setMeals((currentMeals) => [...currentMeals, createdMealPlan])
 
-            setAddMealDate(null)
+            if (values.source !== 'leftovers' && values.useForLeftovers) {
+                setPendingAddMeal({
+                    date: createDateFromIsoDateString(values.leftoversDate),
+                    initialValues: createInitialLeftoversFormValuesFromMealPlan(createdMealPlan),
+                    isSourceEditable: false,
+                })
+                return
+            }
+
+            setPendingAddMeal(null)
         },
-        [addMealDate, onAddMealSubmit],
+        [onAddMealSubmit, pendingAddMeal],
     )
 
     const onDeleteMeal = useCallback((mealPlan: MealPlan) => {
@@ -184,10 +210,12 @@ export default function MealPlansScreen({
 
     return (
         <VStack width={'full'} minHeight={'100vh'}>
-            {addMealDate && (
+            {pendingAddMeal && (
                 <AddMealPlan
-                    date={formatDate(addMealDate)}
+                    date={formatDate(pendingAddMeal.date)}
+                    initialValues={pendingAddMeal.initialValues}
                     extractTitleFromOnlineSource={extractTitleFromOnlineSource}
+                    isSourceEditable={pendingAddMeal.isSourceEditable}
                     searchInternalRecipes={searchInternalRecipes}
                     onSubmit={handleAddMealSubmit}
                     onClose={onCloseAddMeal}
@@ -199,6 +227,7 @@ export default function MealPlansScreen({
                     date={mealPlanPendingEdit.date}
                     mode={'edit'}
                     initialValues={createInitialFormValuesFromMealPlan(mealPlanPendingEdit)}
+                    isSourceEditable={true}
                     extractTitleFromOnlineSource={extractTitleFromOnlineSource}
                     searchInternalRecipes={searchInternalRecipes}
                     onSubmit={handleEditMealSubmit}
