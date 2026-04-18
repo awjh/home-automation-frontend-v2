@@ -11,6 +11,7 @@ export interface SelectInputProps {
     label: string
     value?: string
     required?: boolean
+    disabled?: boolean
     errorMessage?: string
     onChange?: (value: string) => void
     onBlur?: () => void
@@ -36,6 +37,7 @@ export default function SelectInput(props: SelectInputProps) {
 
             <Select.Root
                 collection={inputCollection}
+                disabled={props.disabled}
                 value={props.value ? [props.value] : []}
                 invalid={isInvalid}
                 positioning={{
@@ -50,7 +52,11 @@ export default function SelectInput(props: SelectInputProps) {
                 }}
                 onInteractOutside={() => props.onBlur?.()}
             >
-                <Select.HiddenSelect required={props.required} onBlur={() => props.onBlur?.()} />
+                <Select.HiddenSelect
+                    required={props.required}
+                    disabled={props.disabled}
+                    onBlur={() => props.onBlur?.()}
+                />
                 <Select.Label />
 
                 <Select.Control>

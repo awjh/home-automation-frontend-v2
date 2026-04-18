@@ -6,9 +6,12 @@ import AddMealPlanFormValues from './defs/AddMealPlanFormValues'
 import getFlowRules from './flows/getFlowRules'
 import { SearchInternalRecipes } from './steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
 import AddMealPlanStepComponent from './steps/AddMealPlanStepComponent'
+import { getEmptyAddMealPlanFormValues } from '../utils/createInitialFormValuesFromMealPlan'
 
 export interface AddMealPlanFormProps {
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    initialValues?: Partial<AddMealPlanFormValues>
+    isMealTimeEditable?: boolean
     searchInternalRecipes: SearchInternalRecipes
     onSubmit: (values: AddMealPlanFormValues) => void | Promise<void>
     onCancel: () => void
@@ -16,10 +19,16 @@ export interface AddMealPlanFormProps {
 
 export default function AddMealPlanForm({
     extractTitleFromOnlineSource,
+    initialValues,
+    isMealTimeEditable = true,
     searchInternalRecipes,
     onSubmit,
     onCancel,
 }: AddMealPlanFormProps) {
+    const defaultValues = {
+        ...getEmptyAddMealPlanFormValues(),
+        ...initialValues,
+    }
     const [currentStepNumber, setCurrentStepNumber] = useState(1)
     const {
         control,
@@ -28,24 +37,7 @@ export default function AddMealPlanForm({
         trigger,
         formState: { errors },
     } = useForm<AddMealPlanFormValues>({
-        defaultValues: {
-            mealTime: '',
-            source: '',
-            title: '',
-            author: '',
-            fromDate: '',
-            bookTitle: '',
-            pageNumber: '',
-            series: '',
-            recipeUrl: '',
-            magazineName: '',
-            magazineIssue: '',
-            magazinePage: '',
-            internalRecipeId: '',
-            prepDuration: '',
-            cookingDuration: '',
-            standingTime: '',
-        },
+        defaultValues,
         mode: 'onTouched',
     })
 
@@ -93,6 +85,7 @@ export default function AddMealPlanForm({
             step={currentStep}
             control={control}
             errors={errors}
+            isMealTimeEditable={isMealTimeEditable}
             mealTimeItems={mealTimeItems}
             sourceItems={sourceItems}
             onBack={handleStepBack}

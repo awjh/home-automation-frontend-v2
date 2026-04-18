@@ -13,6 +13,7 @@ export type AddMealPlanPrimaryStepProps = AddMealPlanBaseProps & {
 export default function AddMealPlanPrimaryStep({
     control,
     errors,
+    isMealTimeEditable = true,
     mealTimeItems,
     sourceItems,
     onBack,
@@ -42,6 +43,7 @@ export default function AddMealPlanPrimaryStep({
                         label={'Meal time'}
                         options={mealTimeItems}
                         required
+                        disabled={!isMealTimeEditable}
                         value={field.value}
                         onChange={(value) => field.onChange(value as MealTime)}
                         onBlur={field.onBlur}

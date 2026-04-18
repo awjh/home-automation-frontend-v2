@@ -6,6 +6,7 @@ import {
     GetMealPlansResponse,
     PostMealPlanBody,
     PostMealPlanResponse,
+    PutMealPlanResponse,
 } from '@awjh/home-automation-v2-api-models'
 import MealPlan from '@defs/MealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
@@ -67,6 +68,46 @@ export async function addMealPlan(
     }
 
     return mealPlan
+}
+
+export async function updateMealPlan(
+    existingMealPlan: MealPlan,
+    values: AddMealPlanFormValues,
+): Promise<PutMealPlanResponse> {
+    const sessionJwt = await getSessionJwt()
+    const mealPlan = createMealPlanFromFormValues(existingMealPlan.date, {
+        ...values,
+        mealTime: existingMealPlan.mealTime,
+    })
+    const mealPlanBody = {
+        author: mealPlan.author,
+        course: mealPlan.course,
+        duration: mealPlan.duration,
+        source: mealPlan.source,
+        title: mealPlan.title,
+    }
+
+    const res = await fetch(
+        `${process.env.API_BASE_URL!}/meal-plans/${encodeURIComponent(existingMealPlan.date)}/${encodeURIComponent(existingMealPlan.mealTime)}`,
+        {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${sessionJwt}`,
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.API_KEY!,
+            },
+            body: JSON.stringify(mealPlanBody),
+        },
+    )
+
+    if (!res.ok) {
+        throw new Error('Failed to update meal plan')
+    }
+
+    return {
+        date: existingMealPlan.date,
+        mealTime: existingMealPlan.mealTime,
+    }
 }
 
 export async function extractTitleFromOnlineSource(

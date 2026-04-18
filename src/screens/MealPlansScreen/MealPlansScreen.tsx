@@ -3,12 +3,14 @@
 import {
     GetExtractedExternalRecipeResponse,
     PostMealPlanResponse,
+    PutMealPlanResponse,
 } from '@awjh/home-automation-v2-api-models'
 import { Flex, Spinner, VStack } from '@chakra-ui/react'
 import MealPlan from '@defs/MealPlan'
 import AddMealPlan from '@features/MealPlanner/AddMealPlan/AddMealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import { SearchInternalRecipes } from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
+import createInitialFormValuesFromMealPlan from '@features/MealPlanner/AddMealPlan/utils/createInitialFormValuesFromMealPlan'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
 import NavBar from '@features/NavBar/NavBar'
 import ViewMealPlans from '@features/MealPlanner/ViewMealPlans/ViewMealPlans'
@@ -24,6 +26,10 @@ export interface MealPlansScreenProps {
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
     searchInternalRecipes?: SearchInternalRecipes
     onAddMealSubmit: (date: string, values: AddMealPlanFormValues) => Promise<PostMealPlanResponse>
+    onEditMealSubmit: (
+        mealPlan: MealPlan,
+        values: AddMealPlanFormValues,
+    ) => Promise<PutMealPlanResponse>
     onDeleteMealSubmit: (mealPlan: MealPlan) => Promise<Pick<MealPlan, 'date' | 'mealTime'>>
 }
 
@@ -46,6 +52,7 @@ export default function MealPlansScreen({
     extractTitleFromOnlineSource,
     searchInternalRecipes = defaultSearchInternalRecipes,
     onAddMealSubmit,
+    onEditMealSubmit,
     onDeleteMealSubmit,
 }: MealPlansScreenProps) {
     const { keyColors } = useColorMode()
@@ -56,6 +63,7 @@ export default function MealPlansScreen({
         getDateRangeForWeek(initialDate),
     )
     const [addMealDate, setAddMealDate] = useState<Date | null>(null)
+    const [mealPlanPendingEdit, setMealPlanPendingEdit] = useState<MealPlan | null>(null)
     const [mealPlanPendingDelete, setMealPlanPendingDelete] = useState<MealPlan | null>(null)
     const latestRequestId = useRef(0)
 
@@ -89,6 +97,10 @@ export default function MealPlansScreen({
         setAddMealDate(null)
     }, [])
 
+    const onCloseEditMeal = useCallback(() => {
+        setMealPlanPendingEdit(null)
+    }, [])
+
     const handleAddMealSubmit = useCallback(
         async (values: AddMealPlanFormValues) => {
             if (!addMealDate) {
@@ -113,8 +125,38 @@ export default function MealPlansScreen({
     }, [])
 
     const onEditMeal = useCallback((mealPlan: MealPlan) => {
-        void mealPlan
+        setMealPlanPendingEdit(mealPlan)
     }, [])
+
+    const handleEditMealSubmit = useCallback(
+        async (values: AddMealPlanFormValues) => {
+            if (!mealPlanPendingEdit) {
+                return
+            }
+
+            await onEditMealSubmit(mealPlanPendingEdit, values)
+
+            const updatedMealPlan = {
+                ...createMealPlanFromFormValues(mealPlanPendingEdit.date, {
+                    ...values,
+                    mealTime: mealPlanPendingEdit.mealTime,
+                }),
+                mealTime: mealPlanPendingEdit.mealTime,
+            }
+
+            setMeals((currentMeals) =>
+                currentMeals.map((mealPlan) =>
+                    mealPlan.date === mealPlanPendingEdit.date &&
+                    mealPlan.mealTime === mealPlanPendingEdit.mealTime
+                        ? updatedMealPlan
+                        : mealPlan,
+                ),
+            )
+
+            setMealPlanPendingEdit(null)
+        },
+        [mealPlanPendingEdit, onEditMealSubmit],
+    )
 
     const onCancelDeleteMeal = useCallback(() => {
         setMealPlanPendingDelete(null)
@@ -149,6 +191,18 @@ export default function MealPlansScreen({
                     searchInternalRecipes={searchInternalRecipes}
                     onSubmit={handleAddMealSubmit}
                     onClose={onCloseAddMeal}
+                    mode={'add'}
+                />
+            )}
+            {mealPlanPendingEdit && (
+                <AddMealPlan
+                    date={mealPlanPendingEdit.date}
+                    mode={'edit'}
+                    initialValues={createInitialFormValuesFromMealPlan(mealPlanPendingEdit)}
+                    extractTitleFromOnlineSource={extractTitleFromOnlineSource}
+                    searchInternalRecipes={searchInternalRecipes}
+                    onSubmit={handleEditMealSubmit}
+                    onClose={onCloseEditMeal}
                 />
             )}
             {mealPlanPendingDelete && (

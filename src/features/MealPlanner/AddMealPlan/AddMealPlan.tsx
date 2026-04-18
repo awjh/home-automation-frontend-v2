@@ -10,16 +10,20 @@ import { SearchInternalRecipes } from './AddMealPlanForm/steps/AddMealPlanIntern
 import AddMealPlanFormValues from './AddMealPlanForm/defs/AddMealPlanFormValues'
 import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
 
-interface MealPlansAddProps {
+interface AddMealPlanProps {
     date: string
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    initialValues?: Partial<AddMealPlanFormValues>
+    mode: 'add' | 'edit'
     searchInternalRecipes: SearchInternalRecipes
     onSubmit: (values: AddMealPlanFormValues) => void | Promise<void>
     onClose: () => void
 }
 
-export default function AddMealPlan(props: MealPlansAddProps) {
+export default function AddMealPlan(props: AddMealPlanProps) {
     const { keyColors } = useColorMode()
+    const headingPrefix = props.mode === 'edit' ? 'Edit meal for' : 'Add meal for'
+    const formKey = `${props.mode ?? 'add'}:${props.date}:${JSON.stringify(props.initialValues ?? {})}`
 
     return (
         <Flex position={'fixed'} w={'full'} zIndex={100} justifyContent={'center'}>
@@ -60,7 +64,7 @@ export default function AddMealPlan(props: MealPlansAddProps) {
                     p={2}
                     fontSize={{ base: 'md', md: 'lg' }}
                 >
-                    Add meal for {props.date.split('-').reverse().join('/')}
+                    {headingPrefix} {props.date.split('-').reverse().join('/')}
                 </Text>
                 <Flex
                     p={2}
@@ -71,6 +75,9 @@ export default function AddMealPlan(props: MealPlansAddProps) {
                     gap={4}
                 >
                     <AddMealPlanForm
+                        key={formKey}
+                        initialValues={props.initialValues}
+                        isMealTimeEditable={props.mode === 'add'}
                         searchInternalRecipes={props.searchInternalRecipes}
                         extractTitleFromOnlineSource={props.extractTitleFromOnlineSource}
                         onSubmit={props.onSubmit}

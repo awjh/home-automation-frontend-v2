@@ -53,8 +53,3 @@ const SourceFlowRuleOverrides: Partial<Record<SourceType, FlowRuleOverrides>> = 
 }
 
 export default SourceFlowRuleOverrides
-
-// TODO
-// I want to also add support for editing
-// I need to tidy up the features so that maybe they live under screens rather than being their own folder? Would a feature ever be shared, probs not?
-// also some things in the atoms and molecules are only use for meal plans or logins etc, so maybe they should be moved to the meal plan feature folder

@@ -42,6 +42,10 @@ const meta: Meta<typeof MealPlansScreen> = {
         extractTitleFromOnlineSource: addMealPlanStoryArgs.extractTitleFromOnlineSource,
         searchInternalRecipes: addMealPlanStoryArgs.searchInternalRecipes,
         onAddMealSubmit: fn(async (date, values) => createMealPlanFromFormValues(date, values)),
+        onEditMealSubmit: fn(async (mealPlan) => ({
+            date: mealPlan.date,
+            mealTime: mealPlan.mealTime,
+        })),
         onDeleteMealSubmit: fn(async (mealPlan) => ({
             date: mealPlan.date,
             mealTime: mealPlan.mealTime,
@@ -147,6 +151,67 @@ export const DeletesMealPlan: Story = {
             expect(canvas.queryByText(/delete meal plan\?/i)).not.toBeInTheDocument()
             expect(canvas.queryByText(/spaghetti bolognese/i)).not.toBeInTheDocument()
             expect(canvas.getAllByRole('button', { name: /delete meal/i })).toHaveLength(3)
+        })
+    },
+}
+
+export const OpensEditMealPlanWithInitialValuesAndSubmits: Story = {
+    play: async ({ canvas, userEvent, args }) => {
+        await userEvent.click(canvas.getAllByRole('button', { name: /edit meal/i })[0])
+
+        const editMealPopup = canvas.getByText(/edit meal for/i).closest('form')
+
+        expect(editMealPopup).not.toBeNull()
+
+        const popup = within(editMealPopup!)
+        const mealTimeSelect = popup.getByLabelText(/meal time/i, { selector: 'select' })
+
+        expect(mealTimeSelect).toBeDisabled()
+        expect(mealTimeSelect).toHaveValue(defaultInitialMeals[0].mealTime)
+
+        await userEvent.click(popup.getByRole('button', { name: /next/i }))
+
+        expect(popup.getByLabelText(/title/i, { selector: 'input' })).toHaveValue(
+            defaultInitialMeals[0].title,
+        )
+        expect(popup.getByLabelText(/author/i, { selector: 'input' })).toHaveValue(
+            defaultInitialMeals[0].author,
+        )
+
+        await userEvent.clear(popup.getByLabelText(/title/i, { selector: 'input' }))
+        await userEvent.type(
+            popup.getByLabelText(/title/i, { selector: 'input' }),
+            'Updated Spaghetti Bolognese',
+        )
+
+        await userEvent.click(popup.getByRole('button', { name: /next/i }))
+
+        expect(popup.getByLabelText(/book title/i, { selector: 'input' })).toHaveValue(
+            'Mary Berry Everyday',
+        )
+
+        await userEvent.click(popup.getByRole('button', { name: /next/i }))
+        await userEvent.click(popup.getByRole('button', { name: /submit/i }))
+
+        await waitFor(() => {
+            expect(args.onEditMealSubmit).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    title: 'Spaghetti Bolognese',
+                    date: formatDate(startOfWeek),
+                }),
+                expect.objectContaining({
+                    mealTime: defaultInitialMeals[0].mealTime,
+                    source: defaultInitialMeals[0].source.type,
+                    title: 'Updated Spaghetti Bolognese',
+                    author: defaultInitialMeals[0].author,
+                    bookTitle: 'Mary Berry Everyday',
+                    pageNumber: '123',
+                    prepDuration: '15',
+                    cookingDuration: '30',
+                    standingTime: '0',
+                }),
+            )
+            expect(canvas.getByText(/updated spaghetti bolognese/i)).toBeInTheDocument()
         })
     },
 }
