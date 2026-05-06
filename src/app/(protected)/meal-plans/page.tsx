@@ -3,6 +3,7 @@ import {
     addMealPlan,
     deleteMealPlan,
     extractTitleFromOnlineSource,
+    searchInternalRecipes,
     getMealPlans,
     updateMealPlan,
 } from './actions'
@@ -28,6 +29,7 @@ export default async function MealPlans() {
             initialMeals={initialMeals}
             initialDate={today}
             extractTitleFromOnlineSource={extractTitleFromOnlineSource}
+            searchInternalRecipes={searchInternalRecipes}
             onAddMealSubmit={addMealPlan}
             onEditMealSubmit={updateMealPlan}
             onDeleteMealSubmit={deleteMealPlan}

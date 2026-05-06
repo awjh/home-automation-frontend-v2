@@ -4,10 +4,12 @@ import {
     DeleteMealPlanResponse,
     GetExtractedExternalRecipeResponse,
     GetMealPlansResponse,
+    GetRecipesResponse,
     PostMealPlanBody,
     PostMealPlanResponse,
     PutMealPlanResponse,
 } from '@awjh/home-automation-v2-api-models'
+import { RecipeTags } from '@awjh/home-automation-v2-api-models/recipes'
 import MealPlan from '@defs/MealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
@@ -155,4 +157,46 @@ export async function deleteMealPlan(mealPlan: MealPlan): Promise<DeleteMealPlan
         date: mealPlan.date,
         mealTime: mealPlan.mealTime,
     }
+}
+
+export async function searchInternalRecipes(keywords: string): Promise<GetRecipesResponse> {
+    const sessionJwt = await getSessionJwt()
+
+    const params = new URLSearchParams()
+    params.set(
+        'tags',
+        JSON.stringify({
+            cuisine: [],
+            mealType: [],
+            meat: [],
+            dietary: [],
+            occasion: [],
+            equipment: [],
+        } satisfies RecipeTags),
+    )
+    params.set('filters', JSON.stringify({}))
+
+    keywords.split(' ').forEach((keyword) => {
+        if (keyword === '') {
+            return
+        }
+        params.append('keywords', keyword.trim())
+    })
+
+    const res = await fetch(
+        `${process.env.API_BASE_URL!}/recipes?${params.toString()}`,
+        {
+            cache: 'no-store',
+            headers: {
+                Authorization: `Bearer ${sessionJwt}`,
+                'x-api-key': process.env.API_KEY!,
+            },
+        },
+    )
+
+    if (!res.ok) {
+        throw new Error('Failed to search internal recipes')
+    }
+
+    return res.json()
 }

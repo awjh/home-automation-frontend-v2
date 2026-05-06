@@ -2,6 +2,7 @@
 
 import {
     GetExtractedExternalRecipeResponse,
+    GetRecipesResponse,
     PostMealPlanResponse,
     PutMealPlanResponse,
 } from '@awjh/home-automation-v2-api-models'
@@ -9,13 +10,12 @@ import { Flex, Spinner, VStack } from '@chakra-ui/react'
 import MealPlan from '@defs/MealPlan'
 import AddMealPlan from '@features/MealPlanner/AddMealPlan/AddMealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
-import { SearchInternalRecipes } from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
 import createInitialFormValuesFromMealPlan, {
     createInitialLeftoversFormValuesFromMealPlan,
 } from '@features/MealPlanner/AddMealPlan/utils/createInitialFormValuesFromMealPlan'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
-import NavBar from '@features/NavBar/NavBar'
 import ViewMealPlans from '@features/MealPlanner/ViewMealPlans/ViewMealPlans'
+import NavBar from '@features/NavBar/NavBar'
 import useColorMode from '@hooks/useColorMode'
 import AreYouSure from '@molecules/AreYouSure/AreYouSure'
 import { formatDate } from '@utils/formatDate'
@@ -26,7 +26,7 @@ export interface MealPlansScreenProps {
     initialMeals: MealPlan[]
     initialDate: Date
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
-    searchInternalRecipes?: SearchInternalRecipes
+    searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
     onAddMealSubmit: (date: string, values: AddMealPlanFormValues) => Promise<PostMealPlanResponse>
     onEditMealSubmit: (
         mealPlan: MealPlan,
@@ -34,8 +34,6 @@ export interface MealPlansScreenProps {
     ) => Promise<PutMealPlanResponse>
     onDeleteMealSubmit: (mealPlan: MealPlan) => Promise<Pick<MealPlan, 'date' | 'mealTime'>>
 }
-
-const defaultSearchInternalRecipes: SearchInternalRecipes = async () => []
 
 interface PendingAddMealState {
     date: Date
@@ -64,7 +62,7 @@ export default function MealPlansScreen({
     initialMeals = [],
     initialDate,
     extractTitleFromOnlineSource,
-    searchInternalRecipes = defaultSearchInternalRecipes,
+    searchInternalRecipes,
     onAddMealSubmit,
     onEditMealSubmit,
     onDeleteMealSubmit,

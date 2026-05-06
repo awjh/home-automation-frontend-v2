@@ -6,31 +6,14 @@ import AddMealPlanBaseProps from '@features/MealPlanner/AddMealPlan/AddMealPlanF
 import useColorMode from '@hooks/useColorMode'
 import { useState } from 'react'
 import { Controller, UseFormSetValue } from 'react-hook-form'
-
-type RecipeDurationValues = {
-    prepDuration: number
-    cookingDuration: number
-    standingTime: number
-}
-
-export type InternalRecipeSearchResult = {
-    id: string
-    title: string
-    author: string
-    duration: RecipeDurationValues
-}
+import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
 
 export type InternalRecipeSearchParams = {
-    title: string
-    author: string
+    keywords: string
 }
 
-export type SearchInternalRecipes = (
-    params: InternalRecipeSearchParams,
-) => Promise<InternalRecipeSearchResult[]>
-
 export type AddMealPlanInternalRecipeStepProps = AddMealPlanBaseProps & {
-    searchRecipes: SearchInternalRecipes
+    searchRecipes: (keywords: string) => Promise<GetRecipesResponse>
     setValue: UseFormSetValue<AddMealPlanFormValues>
 }
 
@@ -44,9 +27,8 @@ export default function AddMealPlanInternalRecipeStep({
     trigger,
 }: AddMealPlanInternalRecipeStepProps) {
     const { keyColors } = useColorMode()
-    const [titleQuery, setTitleQuery] = useState('')
-    const [authorQuery, setAuthorQuery] = useState('')
-    const [results, setResults] = useState<InternalRecipeSearchResult[]>([])
+    const [keywordsQuery, setKeywordsQuery] = useState('')
+    const [results, setResults] = useState<GetRecipesResponse>([])
     const [searchError, setSearchError] = useState<string | undefined>()
     const [searchPerformed, setSearchPerformed] = useState(false)
     const [isSearching, setIsSearching] = useState(false)
@@ -64,10 +46,10 @@ export default function AddMealPlanInternalRecipeStep({
     }
 
     const handleSearch = async () => {
-        if (!titleQuery.trim() && !authorQuery.trim()) {
+        if (!keywordsQuery.trim()) {
             setSearchPerformed(false)
             setResults([])
-            setSearchError('Enter a title or author to search')
+            setSearchError('Enter keywords to search')
             return
         }
 
@@ -75,10 +57,7 @@ export default function AddMealPlanInternalRecipeStep({
         setSearchError(undefined)
 
         try {
-            const foundRecipes = await searchRecipes({
-                title: titleQuery.trim(),
-                author: authorQuery.trim(),
-            })
+            const foundRecipes = await searchRecipes(keywordsQuery.trim())
 
             setResults(foundRecipes)
             setSearchPerformed(true)
@@ -103,17 +82,10 @@ export default function AddMealPlanInternalRecipeStep({
                     <>
                         <TextInput
                             type={'text'}
-                            label={'Search by title'}
+                            label={'Search recipes'}
                             required={false}
-                            value={titleQuery}
-                            onChange={(event) => setTitleQuery(event.target.value)}
-                        />
-                        <TextInput
-                            type={'text'}
-                            label={'Search by author'}
-                            required={false}
-                            value={authorQuery}
-                            onChange={(event) => setAuthorQuery(event.target.value)}
+                            value={keywordsQuery}
+                            onChange={(event) => setKeywordsQuery(event.target.value)}
                         />
                         <Button
                             type={'button'}
@@ -160,7 +132,7 @@ export default function AddMealPlanInternalRecipeStep({
                                                     {recipe.title}
                                                 </Text>
                                                 <Text color={keyColors.primary} fontSize={'sm'}>
-                                                    {recipe.author}
+                                                    {recipe.authors.join(', ')}
                                                 </Text>
                                             </VStack>
                                             <Button
@@ -173,7 +145,7 @@ export default function AddMealPlanInternalRecipeStep({
                                                     setValue('title', recipe.title, {
                                                         shouldDirty: true,
                                                     })
-                                                    setValue('author', recipe.author, {
+                                                    setValue('author', recipe.authors.join(', '), {
                                                         shouldDirty: true,
                                                     })
                                                     setValue(
@@ -204,7 +176,8 @@ export default function AddMealPlanInternalRecipeStep({
                         )}
                         {selectedRecipe && (
                             <Text color={keyColors.primary} fontSize={'sm'}>
-                                Selected recipe: {selectedRecipe.title} by {selectedRecipe.author}
+                                Selected recipe: {selectedRecipe.title} by{' '}
+                                {selectedRecipe.authors.join(', ')}
                             </Text>
                         )}
                         {errors.internalRecipeId?.message && (

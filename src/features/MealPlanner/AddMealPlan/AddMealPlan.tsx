@@ -3,12 +3,14 @@
 
 'use client'
 
+import {
+    GetExtractedExternalRecipeResponse,
+    GetRecipesResponse,
+} from '@awjh/home-automation-v2-api-models'
 import { chakra, Flex, Text } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 import AddMealPlanForm from './AddMealPlanForm/AddMealPlanForm'
-import { SearchInternalRecipes } from './AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
 import AddMealPlanFormValues from './AddMealPlanForm/defs/AddMealPlanFormValues'
-import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
 
 interface AddMealPlanProps {
     date: string
@@ -16,7 +18,7 @@ interface AddMealPlanProps {
     initialValues?: Partial<AddMealPlanFormValues>
     isSourceEditable: boolean
     mode: 'add' | 'edit'
-    searchInternalRecipes: SearchInternalRecipes
+    searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
     onSubmit: (values: AddMealPlanFormValues) => void | Promise<void>
     onClose: () => void
 }

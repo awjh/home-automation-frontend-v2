@@ -2,22 +2,42 @@ import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api
 import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { expect, fn, type Mock, waitFor, within } from 'storybook/test'
 import type AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
-import type { InternalRecipeSearchResult } from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
+import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
 
 export const internalRecipeResults = [
     {
         id: 'recipe-1',
         title: 'Spaghetti Bolognese',
-        author: 'Andrew Hurt',
+        authors: ['Andrew Hurt'],
+        calories: 620,
         duration: { prepDuration: 20, cookingDuration: 45, standingTime: 0 },
+        produces: { serves: 4 },
+        tags: {
+            cuisine: [],
+            mealType: [],
+            meat: [],
+            dietary: [],
+            occasion: [],
+            equipment: [],
+        },
     },
     {
         id: 'recipe-2',
         title: 'Spaghetti Carbonara',
-        author: 'Andrew Hurt',
+        authors: ['Andrew Hurt'],
+        calories: 540,
         duration: { prepDuration: 10, cookingDuration: 20, standingTime: 0 },
+        produces: { serves: 4 },
+        tags: {
+            cuisine: [],
+            mealType: [],
+            meat: [],
+            dietary: [],
+            occasion: [],
+            equipment: [],
+        },
     },
-] satisfies InternalRecipeSearchResult[]
+] satisfies GetRecipesResponse
 
 export const extractedOnlineRecipe = {
     title: 'Gnocchi in Roasted Red Pepper Sauce',
@@ -482,14 +502,11 @@ export async function playInternalRecipeFlow(
     resetAddMealPlanMocks(args)
 
     await selectPrimaryDetails(canvas, userEvent, SourceType.INTERNAL_RECIPE)
-    await fillTextInput(canvas, userEvent, /search by author/i, 'andrew')
+    await fillTextInput(canvas, userEvent, /search recipes/i, 'andrew')
     await userEvent.click(canvas.getByRole('button', { name: /search/i }))
 
     await waitFor(() => {
-        expect(args.searchInternalRecipes).toHaveBeenCalledWith({
-            title: '',
-            author: 'andrew',
-        })
+        expect(args.searchInternalRecipes).toHaveBeenCalledWith('andrew')
         expect(canvas.getByText(/spaghetti bolognese/i)).toBeInTheDocument()
         expect(canvas.getByText(/spaghetti carbonara/i)).toBeInTheDocument()
     })
@@ -509,14 +526,11 @@ export async function playInternalRecipeTitleSearchFlow(
     resetAddMealPlanMocks(args)
 
     await selectPrimaryDetails(canvas, userEvent, SourceType.INTERNAL_RECIPE)
-    await fillTextInput(canvas, userEvent, /search by title/i, 'bolognese')
+    await fillTextInput(canvas, userEvent, /search recipes/i, 'bolognese')
     await userEvent.click(canvas.getByRole('button', { name: /search/i }))
 
     await waitFor(() => {
-        expect(args.searchInternalRecipes).toHaveBeenCalledWith({
-            title: 'bolognese',
-            author: '',
-        })
+        expect(args.searchInternalRecipes).toHaveBeenCalledWith('bolognese')
         expect(canvas.getByText(/spaghetti bolognese/i)).toBeInTheDocument()
     })
 
