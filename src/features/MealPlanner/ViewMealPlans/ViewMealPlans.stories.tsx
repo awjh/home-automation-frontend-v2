@@ -141,8 +141,8 @@ export const PageLoad: Story = {}
 export const AddMealPlanCanBeClicked: Story = {
     play: async ({ args, canvas, userEvent }) => {
         const { onAddMeal } = getMockedArgs(args)
-        const addMealButtons = canvas.getAllByRole('button', { name: /add a meal/i })
-        expect(addMealButtons).toHaveLength(7 - defaultInitialMeals.length) // Should show add meal buttons for days without meals
+        const addMealButtons = canvas.getAllByRole('button', { name: /add a(nother)? meal/i })
+        expect(addMealButtons).toHaveLength(7) // even with meals added it lets you click again since you can add other courses and things
 
         await userEvent.click(addMealButtons[0])
 
@@ -151,7 +151,6 @@ export const AddMealPlanCanBeClicked: Story = {
         })
 
         const addDate = new Date(startOfWeek)
-        addDate.setDate(startOfWeek.getDate() + defaultInitialMeals.length) // The first add button should correspond to the first day without a meal
 
         const clickedDay = onAddMeal.mock.calls[0][0]
         expect(formatDate(clickedDay)).toBe(formatDate(addDate))

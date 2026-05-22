@@ -125,3 +125,25 @@ open .lostpixel/difference/
 ```
 
 Only `.lostpixel/baseline/` is committed to git. The `current/` and `difference/` folders are gitignored as they are regenerated on each run.
+
+### End-to-End Tests (Cypress)
+
+Cypress is configured for the real login flow and meal-plans backend using the credentials and API settings from `.env`.
+
+Start the app locally first:
+
+```bash
+yarn dev
+```
+
+Then run the E2E suite:
+
+```bash
+yarn cypress:run
+```
+
+Or open the Cypress runner:
+
+```bash
+yarn cypress:open
+```

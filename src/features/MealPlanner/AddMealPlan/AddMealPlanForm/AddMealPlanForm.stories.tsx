@@ -24,6 +24,7 @@ const meta: Meta<typeof AddMealPlanForm> = {
     },
     args: {
         isMealTimeEditable: true,
+        isCourseEditable: true,
         isSourceEditable: true,
         showUseForLeftoversQuestion: true,
         onCancel: fn(),

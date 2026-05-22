@@ -1,8 +1,9 @@
 import Button from '@atoms/Button/Button'
 import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
-import { Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { Container, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import MealPlan from '@defs/MealPlan'
 import useColorMode from '@hooks/useColorMode'
+import { formatDate } from '@utils/formatDate'
 import { useMemo } from 'react'
 import MealPlanItem from '../MealPlanItem/MealPlanItem'
 
@@ -50,6 +51,7 @@ function formatDayWithOrdinal(date: Date): {
 
 export default function DaysMeals(props: DaysMealsProps) {
     const { keyColors } = useColorMode()
+    const formattedDate = formatDate(props.day)
 
     const { weekday, day, suffix, month } = formatDayWithOrdinal(props.day)
 
@@ -90,6 +92,8 @@ export default function DaysMeals(props: DaysMealsProps) {
             pb={{ base: 2, md: 4 }}
             gap={0}
             alignItems={'start'}
+            data-testid={'meal-day'}
+            data-date={formattedDate}
         >
             <Heading
                 fontWeight={'normal'}
@@ -109,6 +113,9 @@ export default function DaysMeals(props: DaysMealsProps) {
                     p={{ base: 2, md: 4 }}
                     w={'full'}
                     key={`${mealTime}-${props.day.getTime()}`}
+                    data-testid={'meal-time-group'}
+                    data-date={formattedDate}
+                    data-meal-time={mealTime}
                 >
                     <HStack w={'full'}>
                         <Flex bg={keyColors.primary} height={0.5} w={16} />
@@ -143,16 +150,18 @@ export default function DaysMeals(props: DaysMealsProps) {
                     fontStyle="italic"
                     fontSize={{ base: 'md', md: 'lg' }}
                 >
-                    No meals planned.&nbsp;
-                    <Button
-                        type="button"
-                        colorStyle="link"
-                        onClick={() => props.onAddMeal(props.day)}
-                    >
-                        Add a meal
-                    </Button>
+                    No meals planned.
                 </Text>
             )}
+            <Container
+                px={{ base: 2, md: 4 }}
+                data-testid={'add-meal-button'}
+                data-date={formattedDate}
+            >
+                <Button type="button" colorStyle="link" onClick={() => props.onAddMeal(props.day)}>
+                    Add a{props.meals.length === 0 ? '' : 'nother'} meal
+                </Button>
+            </Container>
         </VStack>
     )
 }

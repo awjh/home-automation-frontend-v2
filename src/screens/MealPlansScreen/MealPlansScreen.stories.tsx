@@ -47,10 +47,12 @@ const meta: Meta<typeof MealPlansScreen> = {
         onEditMealSubmit: fn(async (mealPlan) => ({
             date: mealPlan.date,
             mealTime: mealPlan.mealTime,
+            course: mealPlan.course,
         })),
         onDeleteMealSubmit: fn(async (mealPlan) => ({
             date: mealPlan.date,
             mealTime: mealPlan.mealTime,
+            course: mealPlan.course,
         })),
     },
 }
@@ -193,8 +195,9 @@ export const OpensLeftoversFollowUpAfterSuccessfulAdd: Story = {
         await userEvent.click(leftoversPopup.getByRole('button', { name: /submit/i }))
 
         await waitFor(() => {
-            expect(args.onAddMealSubmit).toHaveBeenCalledWith(leftoversDate, {
+            expect(args.onAddMealSubmit).toHaveBeenNthCalledWith(2, leftoversDate, {
                 mealTime: MealTime.LUNCH,
+                course: bookFlowValues.course,
                 source: SourceType.LEFTOVERS,
                 useForLeftovers: false,
                 leftoversDate: '',
@@ -259,6 +262,11 @@ export const OpensEditMealPlanWithInitialValuesAndSubmits: Story = {
         expect(mealTimeSelect).toBeDisabled()
         expect(mealTimeSelect).toHaveValue(defaultInitialMeals[0].mealTime)
 
+        const courseSelect = popup.getByLabelText(/course/i, { selector: 'select' })
+
+        expect(courseSelect).toBeDisabled()
+        expect(courseSelect).toHaveValue(defaultInitialMeals[0].course)
+
         await userEvent.click(popup.getByRole('button', { name: /next/i }))
 
         expect(popup.getByLabelText(/title/i, { selector: 'input' })).toHaveValue(
@@ -291,6 +299,7 @@ export const OpensEditMealPlanWithInitialValuesAndSubmits: Story = {
                 }),
                 expect.objectContaining({
                     mealTime: defaultInitialMeals[0].mealTime,
+                    course: defaultInitialMeals[0].course,
                     source: defaultInitialMeals[0].source.type,
                     title: 'Updated Spaghetti Bolognese',
                     author: defaultInitialMeals[0].author,

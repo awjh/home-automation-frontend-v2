@@ -4,6 +4,7 @@ import AddMealPlanFormValues from '../AddMealPlanForm/defs/AddMealPlanFormValues
 
 const emptyFormValues: AddMealPlanFormValues = {
     mealTime: '',
+    course: '',
     source: '',
     useForLeftovers: false,
     leftoversDate: '',
@@ -32,6 +33,7 @@ export function createInitialLeftoversFormValuesFromMealPlan(
 ): AddMealPlanFormValues {
     return {
         ...getEmptyAddMealPlanFormValues(),
+        course: mealPlan.course,
         source: SourceType.LEFTOVERS,
         title: mealPlan.title,
         author: mealPlan.author,
@@ -48,6 +50,7 @@ export default function createInitialFormValuesFromMealPlan(
     const baseValues: AddMealPlanFormValues = {
         ...getEmptyAddMealPlanFormValues(),
         mealTime: mealPlan.mealTime,
+        course: mealPlan.course,
         source: mealPlan.source.type,
         title: mealPlan.title,
         author: mealPlan.source.type === SourceType.FREEZER ? '' : mealPlan.author,

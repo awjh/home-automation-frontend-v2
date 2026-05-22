@@ -2,6 +2,7 @@ import CalendarCell, { CalendarCellVariant } from '@atoms/CalendarCell/CalendarC
 import { Grid, Text, VStack } from '@chakra-ui/react'
 import MonthNames from '@constants/MonthNames'
 import useColorMode from '@hooks/useColorMode'
+import { formatDate } from '@utils/formatDate'
 
 function getCalandarCellVariant({
     renderingDay,
@@ -61,7 +62,15 @@ export default function Calendar(props: CalendarProps) {
     const numWeeks = Math.ceil((firstOfMonth.getDay() + lastOfMonth.getDate()) / 7)
 
     return (
-        <VStack borderWidth={2} borderColor={keyColors.primary} p={'2'} w={'full'}>
+        <VStack
+            borderWidth={2}
+            borderColor={keyColors.primary}
+            p={'2'}
+            w={'full'}
+            data-testid={'meal-plan-calendar'}
+            data-month={props.month + 1}
+            data-year={props.year}
+        >
             <Text
                 fontSize={{ base: 'lg', lg: 'xl' }}
                 color={keyColors.primary}
@@ -93,6 +102,7 @@ export default function Calendar(props: CalendarProps) {
                         <CalendarCell
                             key={`day-${idx}-${props.month}-${props.year}`}
                             day={renderingDate.getDate()}
+                            fullDate={formatDate(renderingDate)}
                             variant={variant}
                             onClick={() => props.onSelect(renderingDate)}
                             backgroundStyle={props.backgroundStyle}

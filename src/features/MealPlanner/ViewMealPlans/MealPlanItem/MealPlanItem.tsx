@@ -27,6 +27,11 @@ export default function MealPlanItem(props: MealPlanItemProps) {
             w={'full'}
             pb={props.lastItem ? 0 : 2}
             position={'relative'}
+            data-testid={'meal-plan-item'}
+            data-date={props.mealPlan.date}
+            data-meal-time={props.mealPlan.mealTime}
+            data-course={props.mealPlan.course}
+            data-title={props.mealPlan.title}
             _after={
                 props.lastItem
                     ? undefined
@@ -88,6 +93,7 @@ export default function MealPlanItem(props: MealPlanItemProps) {
                         background={keyColors.secondary}
                         borderRadius={0}
                         onClick={() => props.onEdit(props.mealPlan)}
+                        data-testid={'edit-meal-button'}
                     >
                         <LuSquarePen />
                     </IconButton>
@@ -100,6 +106,7 @@ export default function MealPlanItem(props: MealPlanItemProps) {
                         background={keyColors.secondary}
                         borderRadius={0}
                         onClick={() => props.onDelete(props.mealPlan)}
+                        data-testid={'delete-meal-button'}
                     >
                         <LuTrash2 />
                     </IconButton>

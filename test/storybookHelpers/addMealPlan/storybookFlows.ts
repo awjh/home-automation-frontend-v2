@@ -1,5 +1,5 @@
 import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
-import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
+import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { expect, fn, type Mock, waitFor, within } from 'storybook/test'
 import type AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
@@ -50,6 +50,7 @@ export const extractedOnlineRecipe = {
 
 export const bookFlowValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.BOOK,
     useForLeftovers: false,
     leftoversDate: '',
@@ -71,6 +72,7 @@ export const bookFlowValues = {
 
 export const onlineFlowValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.ONLINE,
     useForLeftovers: false,
     leftoversDate: '',
@@ -92,6 +94,7 @@ export const onlineFlowValues = {
 
 export const onlineFlowUsingExtractedValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.ONLINE,
     useForLeftovers: false,
     leftoversDate: '',
@@ -113,6 +116,7 @@ export const onlineFlowUsingExtractedValues = {
 
 export const magazineFlowValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.MAGAZINE,
     useForLeftovers: false,
     leftoversDate: '',
@@ -134,6 +138,7 @@ export const magazineFlowValues = {
 
 export const internalRecipeFlowValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.INTERNAL_RECIPE,
     useForLeftovers: false,
     leftoversDate: '',
@@ -155,6 +160,7 @@ export const internalRecipeFlowValues = {
 
 export const internalRecipeTitleSearchFlowValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.INTERNAL_RECIPE,
     useForLeftovers: false,
     leftoversDate: '',
@@ -176,6 +182,7 @@ export const internalRecipeTitleSearchFlowValues = {
 
 export const freezerFlowValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.FREEZER,
     useForLeftovers: false,
     leftoversDate: '',
@@ -197,6 +204,7 @@ export const freezerFlowValues = {
 
 export const leftoversFlowValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.LEFTOVERS,
     useForLeftovers: false,
     leftoversDate: '',
@@ -218,6 +226,7 @@ export const leftoversFlowValues = {
 
 export const readyPreparedFlowValues = {
     mealTime: MealTime.DINNER,
+    course: Course.MAIN,
     source: SourceType.READY_PREPARED,
     useForLeftovers: false,
     leftoversDate: '',
@@ -294,6 +303,10 @@ async function selectPrimaryDetails(
     await userEvent.selectOptions(
         canvas.getByLabelText(/meal time/i, { selector: 'select' }),
         MealTime.DINNER,
+    )
+    await userEvent.selectOptions(
+        canvas.getByLabelText(/course/i, { selector: 'select' }),
+        Course.MAIN,
     )
     await userEvent.selectOptions(canvas.getByLabelText(/source/i, { selector: 'select' }), source)
 

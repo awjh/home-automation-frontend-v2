@@ -9,13 +9,15 @@ const submitMagazineStep = fn()
 
 interface StoryWrapperProps {
     onBack?: () => void
+    onContinue?: () => void
     defaultValues?: Partial<AddMealPlanFormValues>
 }
 
-function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
+function StoryWrapper({ onBack = fn(), onContinue = fn(), defaultValues }: StoryWrapperProps) {
     const {
         control,
         handleSubmit,
+        trigger,
         formState: { errors },
     } = useForm<AddMealPlanFormValues>({
         defaultValues: {
@@ -51,8 +53,9 @@ function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
                     <AddMealPlanMagazineStep
                         control={control}
                         errors={errors}
-                        showUseForLeftoversQuestion={true}
                         onBack={onBack}
+                        onContinue={onContinue}
+                        trigger={trigger}
                     />
                 </VStack>
             </form>
@@ -66,6 +69,7 @@ const meta: Meta<typeof AddMealPlanMagazineStep> = {
     render: (args) => <StoryWrapper {...args} />,
     args: {
         onBack: fn(),
+        onContinue: fn(),
     },
 }
 

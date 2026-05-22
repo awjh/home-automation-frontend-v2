@@ -90,7 +90,7 @@ export async function updateMealPlan(
     }
 
     const res = await fetch(
-        `${process.env.API_BASE_URL!}/meal-plans/${encodeURIComponent(existingMealPlan.date)}/${encodeURIComponent(existingMealPlan.mealTime)}`,
+        `${process.env.API_BASE_URL!}/meal-plans/${encodeURIComponent(existingMealPlan.date)}/${encodeURIComponent(existingMealPlan.mealTime)}/${encodeURIComponent(existingMealPlan.course)}`,
         {
             method: 'PUT',
             headers: {
@@ -139,7 +139,7 @@ export async function deleteMealPlan(mealPlan: MealPlan): Promise<DeleteMealPlan
     const sessionJwt = await getSessionJwt()
 
     const res = await fetch(
-        `${process.env.API_BASE_URL!}/meal-plans/${encodeURIComponent(mealPlan.date)}/${encodeURIComponent(mealPlan.mealTime)}`,
+        `${process.env.API_BASE_URL!}/meal-plans/${encodeURIComponent(mealPlan.date)}/${encodeURIComponent(mealPlan.mealTime)}/${encodeURIComponent(mealPlan.course)}`,
         {
             method: 'DELETE',
             headers: {
@@ -156,6 +156,7 @@ export async function deleteMealPlan(mealPlan: MealPlan): Promise<DeleteMealPlan
     return {
         date: mealPlan.date,
         mealTime: mealPlan.mealTime,
+        course: mealPlan.course,
     }
 }
 
@@ -183,16 +184,13 @@ export async function searchInternalRecipes(keywords: string): Promise<GetRecipe
         params.append('keywords', keyword.trim())
     })
 
-    const res = await fetch(
-        `${process.env.API_BASE_URL!}/recipes?${params.toString()}`,
-        {
-            cache: 'no-store',
-            headers: {
-                Authorization: `Bearer ${sessionJwt}`,
-                'x-api-key': process.env.API_KEY!,
-            },
+    const res = await fetch(`${process.env.API_BASE_URL!}/recipes?${params.toString()}`, {
+        cache: 'no-store',
+        headers: {
+            Authorization: `Bearer ${sessionJwt}`,
+            'x-api-key': process.env.API_KEY!,
         },
-    )
+    })
 
     if (!res.ok) {
         throw new Error('Failed to search internal recipes')

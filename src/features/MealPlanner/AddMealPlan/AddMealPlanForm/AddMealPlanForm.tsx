@@ -1,20 +1,23 @@
-import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
-import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
+import {
+    GetExtractedExternalRecipeResponse,
+    GetRecipesResponse,
+} from '@awjh/home-automation-v2-api-models'
+import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { getEmptyAddMealPlanFormValues } from '../utils/createInitialFormValuesFromMealPlan'
 import AddMealPlanFormValues from './defs/AddMealPlanFormValues'
 import getFlowRules from './flows/getFlowRules'
-import { SearchInternalRecipes } from './steps/AddMealPlanInternalRecipeStep/AddMealPlanInternalRecipeStep'
 import AddMealPlanStepComponent from './steps/AddMealPlanStepComponent'
-import { getEmptyAddMealPlanFormValues } from '../utils/createInitialFormValuesFromMealPlan'
 
 export interface AddMealPlanFormProps {
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
     initialValues?: Partial<AddMealPlanFormValues>
     isMealTimeEditable: boolean
+    isCourseEditable: boolean
     isSourceEditable: boolean
     showUseForLeftoversQuestion: boolean
-    searchInternalRecipes: SearchInternalRecipes
+    searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
     onSubmit: (values: AddMealPlanFormValues) => void | Promise<void>
     onCancel: () => void
 }
@@ -23,6 +26,7 @@ export default function AddMealPlanForm({
     extractTitleFromOnlineSource,
     initialValues,
     isMealTimeEditable,
+    isCourseEditable,
     isSourceEditable,
     showUseForLeftoversQuestion,
     searchInternalRecipes,
@@ -50,6 +54,10 @@ export default function AddMealPlanForm({
     const mealTimeItems = Object.values(MealTime).map((mealTime) => ({
         label: mealTime.replaceAll('_', ' '),
         value: mealTime,
+    }))
+    const courseItems = Object.values(Course).map((course) => ({
+        label: course.replaceAll('_', ' '),
+        value: course,
     }))
     const sourceItems = Object.values(SourceType).map((sourceType) => ({
         label: sourceType.replaceAll('_', ' '),
@@ -90,9 +98,11 @@ export default function AddMealPlanForm({
             control={control}
             errors={errors}
             isMealTimeEditable={isMealTimeEditable}
+            isCourseEditable={isCourseEditable}
             isSourceEditable={isSourceEditable}
             showUseForLeftoversQuestion={showUseForLeftoversQuestion}
             mealTimeItems={mealTimeItems}
+            courseItems={courseItems}
             sourceItems={sourceItems}
             onBack={handleStepBack}
             onContinue={handleAdvanceStep}

@@ -1,8 +1,9 @@
-import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
+import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 
 interface AddMealPlanFormValues {
     mealTime: MealTime | ''
     source: SourceType | ''
+    course: Course | ''
     useForLeftovers: boolean
     leftoversDate: string
     title: string

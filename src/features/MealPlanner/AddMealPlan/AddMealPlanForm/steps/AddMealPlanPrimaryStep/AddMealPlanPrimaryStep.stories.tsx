@@ -11,6 +11,11 @@ const mealTimeItems = Object.values(MealTime).map((mealTime) => ({
     value: mealTime,
 }))
 
+const courseItems = Object.values(SourceType).map((course) => ({
+    label: course.replaceAll('_', ' '),
+    value: course,
+}))
+
 const sourceItems = Object.values(SourceType).map((sourceType) => ({
     label: sourceType.replaceAll('_', ' '),
     value: sourceType,
@@ -68,9 +73,11 @@ function StoryWrapper({
                         control={control}
                         errors={errors}
                         isMealTimeEditable={true}
+                        isCourseEditable={true}
                         isSourceEditable={true}
                         showUseForLeftoversQuestion={showUseForLeftoversQuestion}
                         mealTimeItems={mealTimeItems}
+                        courseItems={courseItems}
                         sourceItems={sourceItems}
                         onBack={onBack}
                     />
@@ -118,6 +125,7 @@ export const RequiresPrimaryFields: Story = {
 
         await waitFor(() => {
             expect(canvas.getByText(/meal time is required/i)).toBeInTheDocument()
+            expect(canvas.getByText(/course is required/i)).toBeInTheDocument()
             expect(canvas.getByText(/source is required/i)).toBeInTheDocument()
         })
     },

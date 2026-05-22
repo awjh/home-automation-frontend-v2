@@ -32,7 +32,9 @@ export interface MealPlansScreenProps {
         mealPlan: MealPlan,
         values: AddMealPlanFormValues,
     ) => Promise<PutMealPlanResponse>
-    onDeleteMealSubmit: (mealPlan: MealPlan) => Promise<Pick<MealPlan, 'date' | 'mealTime'>>
+    onDeleteMealSubmit: (
+        mealPlan: MealPlan,
+    ) => Promise<Pick<MealPlan, 'date' | 'mealTime' | 'course'>>
 }
 
 interface PendingAddMealState {
@@ -164,14 +166,17 @@ export default function MealPlansScreen({
                 ...createMealPlanFromFormValues(mealPlanPendingEdit.date, {
                     ...values,
                     mealTime: mealPlanPendingEdit.mealTime,
+                    course: mealPlanPendingEdit.course,
                 }),
                 mealTime: mealPlanPendingEdit.mealTime,
+                course: mealPlanPendingEdit.course,
             }
 
             setMeals((currentMeals) =>
                 currentMeals.map((mealPlan) =>
                     mealPlan.date === mealPlanPendingEdit.date &&
-                    mealPlan.mealTime === mealPlanPendingEdit.mealTime
+                    mealPlan.mealTime === mealPlanPendingEdit.mealTime &&
+                    mealPlan.course === mealPlanPendingEdit.course
                         ? updatedMealPlan
                         : mealPlan,
                 ),
@@ -198,7 +203,8 @@ export default function MealPlansScreen({
                 (mealPlan) =>
                     !(
                         mealPlan.date === deletedMealPlan.date &&
-                        mealPlan.mealTime === deletedMealPlan.mealTime
+                        mealPlan.mealTime === deletedMealPlan.mealTime &&
+                        mealPlan.course === deletedMealPlan.course
                     ),
             ),
         )

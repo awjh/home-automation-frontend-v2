@@ -11,12 +11,14 @@
         "prettier:check": "prettier '.' --check",
         "storybook": "storybook dev -p 6006",
         "test-storybook": "vitest run --project=storybook",
+        "cypress:open": "cypress open",
+        "cypress:run": "cypress run",
         "build-storybook": "storybook build",
         "lost-pixel": "lost-pixel",
         "lost-pixel:update": "lost-pixel update"
     },
     "dependencies": {
-        "@awjh/home-automation-v2-api-models": "^1.0.9",
+        "@awjh/home-automation-v2-api-models": "^1.0.11",
         "@chakra-ui/react": "^3.34.0",
         "@emotion/react": "^11.14.0",
         "@fontsource/inter": "^5.2.8",
@@ -44,6 +46,7 @@
         "@types/zxcvbn": "^4.4.5",
         "@vitest/browser-playwright": "^4.0.18",
         "@vitest/coverage-v8": "^4.0.18",
+        "cypress": "^15.14.2",
         "eslint": "^9",
         "eslint-config-next": "16.1.6",
         "eslint-plugin-storybook": "^10.2.15",

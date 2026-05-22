@@ -30,6 +30,7 @@ interface CalendarCellPropsNonSpacer {
               lg?: BackgroundStyle
           }
     day: number
+    fullDate: string
     variant: Exclude<CalendarCellVariant, 'spacer'>
     onClick: () => void | Promise<void>
 }
@@ -101,6 +102,8 @@ export default function CalendarCell(props: CalendarCellProps) {
             height={cellHeight}
             onClick={props.onClick}
             data-variant={props.variant}
+            data-testid={'calendar-day'}
+            data-date={props.fullDate}
         >
             <Text
                 h={cellHeight}

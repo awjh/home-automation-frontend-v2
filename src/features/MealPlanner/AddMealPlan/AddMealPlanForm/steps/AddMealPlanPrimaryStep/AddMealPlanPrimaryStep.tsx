@@ -9,8 +9,10 @@ import AddMealPlanBaseProps from '../defs/AddMealPlanBaseProps'
 export type AddMealPlanPrimaryStepProps = AddMealPlanBaseProps & {
     mealTimeItems: SelectItem[]
     sourceItems: SelectItem[]
+    courseItems: SelectItem[]
     isMealTimeEditable: boolean
     isSourceEditable: boolean
+    isCourseEditable: boolean
     showUseForLeftoversQuestion: boolean
 }
 
@@ -19,8 +21,10 @@ export default function AddMealPlanPrimaryStep({
     errors,
     isMealTimeEditable,
     isSourceEditable,
+    isCourseEditable,
     showUseForLeftoversQuestion,
     mealTimeItems,
+    courseItems,
     sourceItems,
     onBack,
     onContinue,
@@ -40,7 +44,9 @@ export default function AddMealPlanPrimaryStep({
         }
 
         const isValid = await trigger(
-            showLeftoversDate ? ['mealTime', 'source', 'leftoversDate'] : ['mealTime', 'source'],
+            showLeftoversDate
+                ? ['mealTime', 'course', 'source', 'leftoversDate']
+                : ['mealTime', 'course', 'source'],
         )
 
         if (isValid) {
@@ -64,6 +70,23 @@ export default function AddMealPlanPrimaryStep({
                         onChange={(value) => field.onChange(value as MealTime)}
                         onBlur={field.onBlur}
                         errorMessage={errors.mealTime?.message}
+                    />
+                )}
+            />
+            <Controller
+                name="course"
+                control={control}
+                rules={{ required: 'Course is required' }}
+                render={({ field }) => (
+                    <SelectInput
+                        label={'Course'}
+                        options={courseItems}
+                        required
+                        disabled={!isCourseEditable}
+                        value={field.value}
+                        onChange={(value) => field.onChange(value as MealTime)}
+                        onBlur={field.onBlur}
+                        errorMessage={errors.course?.message}
                     />
                 )}
             />

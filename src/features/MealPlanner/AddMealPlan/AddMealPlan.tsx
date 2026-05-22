@@ -57,6 +57,9 @@ export default function AddMealPlan(props: AddMealPlanProps) {
                 onSubmit={(event) => {
                     event.preventDefault()
                 }}
+                data-testid={'add-meal-plan-modal'}
+                data-mode={props.mode}
+                data-date={props.date}
             >
                 <Text
                     color={keyColors.primary}
@@ -81,6 +84,7 @@ export default function AddMealPlan(props: AddMealPlanProps) {
                         key={formKey}
                         initialValues={props.initialValues}
                         isMealTimeEditable={props.mode === 'add'}
+                        isCourseEditable={props.mode === 'add'}
                         isSourceEditable={props.isSourceEditable}
                         showUseForLeftoversQuestion={props.mode === 'add'}
                         searchInternalRecipes={props.searchInternalRecipes}
