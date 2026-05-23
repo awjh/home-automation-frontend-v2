@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import BookMealPlanMissingOptional from '@test/mockData/mealPlans/BookMealPlanMissingOptional'
 import BookMealPlanWithOptional from '@test/mockData/mealPlans/BookMealPlanWithOptional'
+import createMealPlanFixture from '@test/mockData/mealPlans/createMealPlanFixture'
 import FreezerMealPlan from '@test/mockData/mealPlans/FreezerMealPlan'
 import InternalMealPlan from '@test/mockData/mealPlans/InternalMealPlan'
 import LeftoversMealPlan from '@test/mockData/mealPlans/LeftoversMealPlan'
@@ -25,10 +26,9 @@ const defaultInitialMeals = [
 ].map((mealPlan, idx) => {
     const mealDate = new Date(startOfWeek)
     mealDate.setDate(startOfWeek.getDate() + idx)
-    return {
-        ...mealPlan,
+    return createMealPlanFixture(mealPlan, {
         date: formatDate(mealDate),
-    }
+    })
 })
 
 const nextWeeksMeals = [
@@ -39,10 +39,9 @@ const nextWeeksMeals = [
 ].map((mealPlan, idx) => {
     const mealDate = new Date(startOfWeek)
     mealDate.setDate(startOfWeek.getDate() + 7 + idx) // Next week
-    return {
-        ...mealPlan,
+    return createMealPlanFixture(mealPlan, {
         date: formatDate(mealDate),
-    }
+    })
 })
 
 type OnAddMeal = (day: Date) => void

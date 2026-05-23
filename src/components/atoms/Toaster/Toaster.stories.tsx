@@ -1,7 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import Toaster from './Toaster'
 import { Button, Flex } from '@chakra-ui/react'
 import useToaster from '@hooks/useToaster'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, screen } from 'storybook/test'
 
 function ToasterDemo() {

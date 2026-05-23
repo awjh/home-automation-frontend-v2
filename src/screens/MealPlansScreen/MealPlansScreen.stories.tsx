@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, waitFor, within } from 'storybook/test'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
 import BookMealPlanMissingOptional from '@test/mockData/mealPlans/BookMealPlanMissingOptional'
+import createMealPlanFixture from '@test/mockData/mealPlans/createMealPlanFixture'
 import FreezerMealPlan from '@test/mockData/mealPlans/FreezerMealPlan'
 import MagazineMealPlan from '@test/mockData/mealPlans/MagazineMealPlan'
 import OnlineMealPlan from '@test/mockData/mealPlans/OnlineMealPlan'
@@ -28,10 +29,9 @@ const defaultInitialMeals = [
 ].map((mealPlan, idx) => {
     const mealDate = new Date(startOfWeek)
     mealDate.setDate(startOfWeek.getDate() + idx)
-    return {
-        ...mealPlan,
+    return createMealPlanFixture(mealPlan, {
         date: formatDate(mealDate),
-    }
+    })
 })
 
 const meta: Meta<typeof MealPlansScreen> = {

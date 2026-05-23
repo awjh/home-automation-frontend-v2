@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import LoginScreen from '@screens/LoginScreen/LoginScreen'
 import { useStytch } from '@stytch/nextjs'
 
@@ -14,5 +15,9 @@ export default function Login() {
         })
     }
 
-    return <LoginScreen onSubmit={authenticate} />
+    return (
+        <Suspense fallback={null}>
+            <LoginScreen onSubmit={authenticate} />
+        </Suspense>
+    )
 }

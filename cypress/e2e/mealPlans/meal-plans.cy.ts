@@ -1,20 +1,20 @@
+import { PostMealPlanBody } from '@awjh/home-automation-v2-api-models'
 import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
-import getWeekDates from './utils/getWeekDates'
-import addDays from './utils/addDays'
-import getMealItemSelector from './selectors/getMealItemSelector'
-import getMealDaySelector from './selectors/getMealDaySelector'
+import createBookMealPlan from '@test/mockData/mealPlans/createBookMealPlan'
+import createFreezerMealPlan from '@test/mockData/mealPlans/createFreezerMealPlan'
+import createInternalRecipeMealPlan from '@test/mockData/mealPlans/createInternalRecipeMealPlan'
+import createLeftoversMealPlan from '@test/mockData/mealPlans/createLeftoversMealPlan'
+import createMagazineMealPlan from '@test/mockData/mealPlans/createMagazineMealPlan'
+import createReadyPreparedMealPlan from '@test/mockData/mealPlans/createReadyPreparedMealPlan'
+import { buildBookRecipe } from '../recipes/recipeBuilders/buildRecipe'
 import addMealPlanViaUi from './helpers/addMealPlanViaUi'
 import { assertMealVisible } from './helpers/assertMealVisible'
-import { buildBookRecipe } from '../recipes/recipeBuilders/buildRecipe'
-import buildMagazineMeal from './mealBuilders/buildMagazineMeal'
-import buildFreezerMeal from './mealBuilders/buildFreezerMeal'
-import buildInternalRecipeMeal from './mealBuilders/buildInternalRecipeMeal'
-import { PostMealPlanBody } from '@awjh/home-automation-v2-api-models'
-import buildBookMeal from './mealBuilders/buildBookMeal'
-import buildLeftoversMeal from './mealBuilders/buildLeftoversMeal'
-import buildReadyPreparedMeal from './mealBuilders/buildReadyPreparedMeal'
-import waitForRecipeSearchResult from './helpers/waitForRecipeSearchResult'
 import openEditMealModal from './helpers/openEditMealModal'
+import waitForRecipeSearchResult from './helpers/waitForRecipeSearchResult'
+import getMealDaySelector from './selectors/getMealDaySelector'
+import getMealItemSelector from './selectors/getMealItemSelector'
+import addDays from './utils/addDays'
+import getWeekDates from './utils/getWeekDates'
 
 describe('meal plans', () => {
     const createdRecipeIds: string[] = []
@@ -52,7 +52,7 @@ describe('meal plans', () => {
 
         cy.createRecipe(buildBookRecipe(internalRecipeTitle)).then((recipeId) => {
             createdRecipeIds.push(recipeId)
-            internalMealPlan = buildInternalRecipeMeal(
+            internalMealPlan = createInternalRecipeMealPlan(
                 weekDates[2],
                 MealTime.LUNCH,
                 internalRecipeTitle,
@@ -63,9 +63,11 @@ describe('meal plans', () => {
 
         cy.visitMealPlans()
 
-        addMealPlanViaUi(buildBookMeal(weekDates[0], MealTime.DINNER, 'Cypress Sunday Traybake'))
         addMealPlanViaUi(
-            buildLeftoversMeal(
+            createBookMealPlan(weekDates[0], MealTime.DINNER, 'Cypress Sunday Traybake'),
+        )
+        addMealPlanViaUi(
+            createLeftoversMealPlan(
                 weekDates[1],
                 MealTime.LUNCH,
                 'Cypress Sunday Traybake',
@@ -73,13 +75,17 @@ describe('meal plans', () => {
             ),
         )
         addMealPlanViaUi(
-            buildReadyPreparedMeal(weekDates[1], MealTime.DINNER, 'Cypress Chicken Flatties'),
+            createReadyPreparedMealPlan(weekDates[1], MealTime.DINNER, 'Cypress Chicken Flatties'),
         )
         cy.then(() => {
             addMealPlanViaUi(internalMealPlan)
         })
-        addMealPlanViaUi(buildMagazineMeal(weekDates[3], MealTime.DINNER, 'Cypress Wellington'))
-        addMealPlanViaUi(buildFreezerMeal(weekDates[4], MealTime.DINNER, 'Cypress Freezer Curry'))
+        addMealPlanViaUi(
+            createMagazineMealPlan(weekDates[3], MealTime.DINNER, 'Cypress Wellington'),
+        )
+        addMealPlanViaUi(
+            createFreezerMealPlan(weekDates[4], MealTime.DINNER, 'Cypress Freezer Curry'),
+        )
 
         cy.get('[data-testid="meal-plan-item"]').should('have.length', 6)
         cy.get(`${getMealDaySelector(weekDates[1])} [data-testid="meal-time-group"]`).should(
@@ -91,8 +97,10 @@ describe('meal plans', () => {
     it('edits a couple of existing meals in the plan', () => {
         const weekDates = getWeekDates()
 
-        cy.createMealPlan(buildBookMeal(weekDates[0], MealTime.DINNER, 'Editable Traybake'))
-        cy.createMealPlan(buildReadyPreparedMeal(weekDates[2], MealTime.LUNCH, 'Editable Ravioli'))
+        cy.createMealPlan(createBookMealPlan(weekDates[0], MealTime.DINNER, 'Editable Traybake'))
+        cy.createMealPlan(
+            createReadyPreparedMealPlan(weekDates[2], MealTime.LUNCH, 'Editable Ravioli'),
+        )
 
         cy.visitMealPlans()
 
@@ -146,11 +154,13 @@ describe('meal plans', () => {
         const weekDates = getWeekDates()
         const nextWeekDates = getWeekDates(addDays(new Date(), 7))
 
-        cy.createMealPlan(buildBookMeal(weekDates[0], MealTime.DINNER, 'Current Week Traybake'))
         cy.createMealPlan(
-            buildReadyPreparedMeal(nextWeekDates[0], MealTime.LUNCH, 'Next Week Gnocchi'),
+            createBookMealPlan(weekDates[0], MealTime.DINNER, 'Current Week Traybake'),
         )
-        cy.createMealPlan(buildBookMeal(nextWeekDates[1], MealTime.DINNER, 'Next Week Pie'))
+        cy.createMealPlan(
+            createReadyPreparedMealPlan(nextWeekDates[0], MealTime.LUNCH, 'Next Week Gnocchi'),
+        )
+        cy.createMealPlan(createBookMealPlan(nextWeekDates[1], MealTime.DINNER, 'Next Week Pie'))
 
         cy.visitMealPlans()
 
@@ -169,9 +179,11 @@ describe('meal plans', () => {
         const weekDates = getWeekDates()
 
         cy.createMealPlan(
-            buildBookMeal(weekDates[0], MealTime.DINNER, 'Cypress Bruschetta', Course.STARTER),
+            createBookMealPlan(weekDates[0], MealTime.DINNER, 'Cypress Bruschetta', Course.STARTER),
         )
-        cy.createMealPlan(buildBookMeal(weekDates[0], MealTime.DINNER, 'Cypress Pasta Carbonara'))
+        cy.createMealPlan(
+            createBookMealPlan(weekDates[0], MealTime.DINNER, 'Cypress Pasta Carbonara'),
+        )
 
         cy.visitMealPlans()
 

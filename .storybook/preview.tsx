@@ -1,10 +1,10 @@
-import Toaster from '../src/components/atoms/Toaster/Toaster'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import '@fontsource/inter'
 import { withThemeByClassName } from '@storybook/addon-themes'
 import type { Preview } from '@storybook/react-vite'
 import { ThemeProvider, useTheme } from 'next-themes'
 import { useEffect } from 'react'
-import '@fontsource/inter'
+import Toaster from '../src/components/atoms/Toaster/Toaster'
 
 /**
  * Syncs the Storybook toolbar theme selection into next-themes by calling
@@ -17,6 +17,7 @@ function StorybookThemeSync({ theme }: { theme: string }) {
     const { setTheme } = useTheme()
     useEffect(() => {
         setTheme(theme)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [theme])
     return null
 }

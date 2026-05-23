@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, fn, userEvent } from 'storybook/test'
 import Calendar from './Calendar'
-import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
 const meta: Meta<typeof Calendar> = {
     title: 'Molecules/Calendar',
