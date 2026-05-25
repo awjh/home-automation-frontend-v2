@@ -25,6 +25,7 @@ export default function NavBar({ showLinks = true }: NavBarProps) {
                 flex={'1'}
                 color={keyColors.primary}
                 fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
+                fontWeight={'normal'}
             >
                 Home Automation
             </Heading>

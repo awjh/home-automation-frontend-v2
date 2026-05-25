@@ -1,5 +1,6 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import '@fontsource/inter'
+import '@fontsource/lekton'
 import { withThemeByClassName } from '@storybook/addon-themes'
 import type { Preview } from '@storybook/react-vite'
 import { ThemeProvider, useTheme } from 'next-themes'
