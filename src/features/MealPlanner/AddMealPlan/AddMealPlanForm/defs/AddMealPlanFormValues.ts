@@ -1,6 +1,7 @@
 import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 
 interface AddMealPlanFormValues {
+    mealDate: string
     mealTime: MealTime | ''
     source: SourceType | ''
     course: Course | ''

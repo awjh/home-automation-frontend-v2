@@ -2,6 +2,9 @@ import AddMealPlanStep from '../flows/defs/AddMealPlanStep'
 import AddMealPlanBookStep, {
     AddMealPlanBookStepProps,
 } from './AddMealPlanBookStep/AddMealPlanBookStep'
+import AddMealPlanDateStep, {
+    AddMealPlanDateStepProps,
+} from './AddMealPlanDateStep/AddMealPlanDateStep'
 import AddMealPlanDurationsStep, {
     AddMealPlanDurationsStepProps,
 } from './AddMealPlanDurationsStep/AddMealPlanDurationsStep'
@@ -31,7 +34,8 @@ type StepComponentProps = AddMealPlanBookStepProps &
     AddMealPlanLeftoversStepProps &
     AddMealPlanMagazineStepProps &
     AddMealPlanOnlineStepProps &
-    AddMealPlanTitleAuthorStepProps & {
+    AddMealPlanTitleAuthorStepProps &
+    AddMealPlanDateStepProps & {
         step: AddMealPlanStep
     }
 
@@ -55,6 +59,8 @@ export default function AddMealPlanStepComponent(props: StepComponentProps) {
             return <AddMealPlanMagazineStep {...props} />
         case 'online':
             return <AddMealPlanOnlineStep {...props} />
+        case 'mealDate':
+            return <AddMealPlanDateStep {...props} />
     }
 
     throw new Error(`Unsupported step: ${step}`)

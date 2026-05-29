@@ -13,7 +13,7 @@ interface StoryWrapperProps {
     defaultValues?: Partial<AddMealPlanFormValues>
 }
 
-function StoryWrapper({ onBack = fn(), onContinue = fn(), defaultValues }: StoryWrapperProps) {
+function StoryWrapper({ onBack = fn(), onContinue, defaultValues }: StoryWrapperProps) {
     const {
         control,
         handleSubmit,
@@ -21,6 +21,7 @@ function StoryWrapper({ onBack = fn(), onContinue = fn(), defaultValues }: Story
         formState: { errors },
     } = useForm<AddMealPlanFormValues>({
         defaultValues: {
+            mealDate: '2026-04-05',
             mealTime: '',
             source: '',
             bookTitle: '',
@@ -69,7 +70,6 @@ const meta: Meta<typeof AddMealPlanMagazineStep> = {
     render: (args) => <StoryWrapper {...args} />,
     args: {
         onBack: fn(),
-        onContinue: fn(),
     },
 }
 
@@ -93,6 +93,7 @@ export const WithValues: Story = {
 
         await waitFor(() => {
             expect(submitMagazineStep).toHaveBeenCalledWith({
+                mealDate: '2026-04-05',
                 mealTime: '',
                 source: '',
                 bookTitle: '',

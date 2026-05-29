@@ -3,8 +3,9 @@ import FlowRules from './defs/FlowRules'
 import BaseFlowRules from './constants/BaseFlowRules'
 import EmptySourceStepMap from './constants/EmptySourceStepMap'
 import SourceFlowRuleOverrides from './constants/SourceFlowRuleOverrides'
+import FlowSource from '../defs/FlowSource'
 
-export default function getFlowRules(source: SourceType | ''): FlowRules {
+export default function getFlowRules(source: SourceType | '', flowSource: FlowSource): FlowRules {
     if (source === '') {
         return {
             ...BaseFlowRules,
@@ -12,7 +13,7 @@ export default function getFlowRules(source: SourceType | ''): FlowRules {
         }
     }
 
-    const overrides = SourceFlowRuleOverrides[source]
+    const overrides = SourceFlowRuleOverrides[`${source}_${flowSource}`]
 
     if (!overrides) {
         return BaseFlowRules

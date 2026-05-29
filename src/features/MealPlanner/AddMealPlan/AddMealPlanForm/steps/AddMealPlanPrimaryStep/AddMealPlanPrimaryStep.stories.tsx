@@ -1,10 +1,12 @@
-import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
+import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
+import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Flex, VStack } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, waitFor } from 'storybook/test'
+import { expect, fireEvent, fn, waitFor } from 'storybook/test'
 import { useForm } from 'react-hook-form'
 import AddMealPlanPrimaryStep from './AddMealPlanPrimaryStep'
-import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
+
+const submitPrimaryStep = fn()
 
 const mealTimeItems = Object.values(MealTime).map((mealTime) => ({
     label: mealTime.replaceAll('_', ' '),
@@ -25,12 +27,14 @@ interface StoryWrapperProps {
     onBack?: () => void
     defaultValues?: Partial<AddMealPlanFormValues>
     showUseForLeftoversQuestion?: boolean
+    onSubmit?: (values: AddMealPlanFormValues) => void
 }
 
 function StoryWrapper({
     onBack = fn(),
     defaultValues,
     showUseForLeftoversQuestion = true,
+    onSubmit = submitPrimaryStep,
 }: StoryWrapperProps) {
     const {
         control,
@@ -39,6 +43,7 @@ function StoryWrapper({
     } = useForm<AddMealPlanFormValues>({
         defaultValues: {
             mealTime: '',
+            course: '',
             source: '',
             useForLeftovers: false,
             leftoversDate: '',
@@ -65,7 +70,7 @@ function StoryWrapper({
                 style={{ width: '100%' }}
                 onSubmit={(event) => {
                     event.preventDefault()
-                    void handleSubmit(() => undefined)()
+                    void handleSubmit((values) => onSubmit(values))()
                 }}
             >
                 <VStack w={'full'} alignItems={'stretch'} gap={4}>
@@ -127,6 +132,53 @@ export const RequiresPrimaryFields: Story = {
             expect(canvas.getByText(/meal time is required/i)).toBeInTheDocument()
             expect(canvas.getByText(/course is required/i)).toBeInTheDocument()
             expect(canvas.getByText(/source is required/i)).toBeInTheDocument()
+        })
+    },
+}
+
+export const CanUseMealForLeftovers: Story = {
+    render: () => (
+        <StoryWrapper
+            defaultValues={{
+                mealTime: MealTime.DINNER,
+                course: Course.MAIN,
+                source: SourceType.ONLINE,
+                useForLeftovers: false,
+                leftoversDate: '',
+            }}
+        />
+    ),
+    play: async ({ canvas, userEvent }) => {
+        submitPrimaryStep.mockClear()
+
+        const leftoversSelect = canvas.getByLabelText(/use for leftovers\?/i, {
+            selector: 'select',
+        })
+
+        await userEvent.selectOptions(leftoversSelect, 'true')
+
+        const leftoversDateInput = canvas.getByLabelText(/when will the leftovers be used\?/i, {
+            selector: 'input',
+        })
+
+        fireEvent.change(leftoversDateInput, { target: { value: '2026-06-02' } })
+
+        await waitFor(() => {
+            expect(leftoversDateInput).toHaveValue('2026-06-02')
+        })
+
+        await userEvent.click(canvas.getByRole('button', { name: /next/i }))
+
+        await waitFor(() => {
+            expect(submitPrimaryStep).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    mealTime: MealTime.DINNER,
+                    course: Course.MAIN,
+                    source: SourceType.ONLINE,
+                    useForLeftovers: true,
+                    leftoversDate: '2026-06-02',
+                }),
+            )
         })
     },
 }

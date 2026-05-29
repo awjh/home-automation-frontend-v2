@@ -9,10 +9,12 @@ import { getEmptyAddMealPlanFormValues } from '../utils/createInitialFormValuesF
 import AddMealPlanFormValues from './defs/AddMealPlanFormValues'
 import getFlowRules from './flows/getFlowRules'
 import AddMealPlanStepComponent from './steps/AddMealPlanStepComponent'
+import FlowSource from './defs/FlowSource'
 
 export interface AddMealPlanFormProps {
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
-    initialValues?: Partial<AddMealPlanFormValues>
+    flowSource: FlowSource
+    initialValues: Partial<AddMealPlanFormValues> & { mealDate: string }
     isMealTimeEditable: boolean
     isCourseEditable: boolean
     isSourceEditable: boolean
@@ -24,6 +26,7 @@ export interface AddMealPlanFormProps {
 
 export default function AddMealPlanForm({
     extractTitleFromOnlineSource,
+    flowSource,
     initialValues,
     isMealTimeEditable,
     isCourseEditable,
@@ -63,7 +66,7 @@ export default function AddMealPlanForm({
         label: sourceType.replaceAll('_', ' '),
         value: sourceType,
     }))
-    const activeFlowRules = getFlowRules(selectedSource)
+    const activeFlowRules = getFlowRules(selectedSource, flowSource)
     const {
         stepMap: activeStepMap,
         titleAuthor: { showAuthor, authorLabel },

@@ -1,19 +1,18 @@
 import { Flex, VStack } from '@chakra-ui/react'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useForm } from 'react-hook-form'
 import { expect, fn, waitFor } from 'storybook/test'
-import AddMealPlanLeftoversStep from './AddMealPlanLeftoversStep'
+import { useForm } from 'react-hook-form'
+import AddMealPlanDateStep from './AddMealPlanDateStep'
 
-const submitLeftoversStep = fn()
+const submitDateStep = fn()
 
 interface StoryWrapperProps {
     onBack?: () => void
-    onContinue?: () => void
     defaultValues?: Partial<AddMealPlanFormValues>
 }
 
-function StoryWrapper({ onBack = fn(), onContinue, defaultValues }: StoryWrapperProps) {
+function StoryWrapper({ onBack = fn(), defaultValues }: StoryWrapperProps) {
     const {
         control,
         handleSubmit,
@@ -21,9 +20,12 @@ function StoryWrapper({ onBack = fn(), onContinue, defaultValues }: StoryWrapper
         formState: { errors },
     } = useForm<AddMealPlanFormValues>({
         defaultValues: {
+            mealDate: '',
             mealTime: '',
-            mealDate: '2026-04-02',
             source: '',
+            course: '',
+            useForLeftovers: false,
+            leftoversDate: '',
             title: '',
             author: '',
             fromDate: '',
@@ -50,14 +52,13 @@ function StoryWrapper({ onBack = fn(), onContinue, defaultValues }: StoryWrapper
                 style={{ width: '100%' }}
                 onSubmit={(event) => {
                     event.preventDefault()
-                    void handleSubmit((values) => submitLeftoversStep(values))()
+                    void handleSubmit((values) => submitDateStep(values))()
                 }}
             >
                 <VStack w={'full'} alignItems={'stretch'} gap={4}>
-                    <AddMealPlanLeftoversStep
+                    <AddMealPlanDateStep
                         control={control}
                         errors={errors}
-                        onContinue={onContinue}
                         onBack={onBack}
                         trigger={trigger}
                     />
@@ -67,9 +68,9 @@ function StoryWrapper({ onBack = fn(), onContinue, defaultValues }: StoryWrapper
     )
 }
 
-const meta: Meta<typeof AddMealPlanLeftoversStep> = {
-    title: 'Features/MealPlanner/AddMealPlan/AddMealPlanForm/Steps/AddMealPlanLeftoversStep',
-    component: AddMealPlanLeftoversStep,
+const meta: Meta<typeof AddMealPlanDateStep> = {
+    title: 'Features/MealPlanner/AddMealPlan/AddMealPlanForm/Steps/AddMealPlanDateStep',
+    component: AddMealPlanDateStep,
     render: (args) => <StoryWrapper {...args} />,
     args: {
         onBack: fn(),
@@ -77,7 +78,7 @@ const meta: Meta<typeof AddMealPlanLeftoversStep> = {
 }
 
 export default meta
-type Story = StoryObj<typeof AddMealPlanLeftoversStep>
+type Story = StoryObj<typeof AddMealPlanDateStep>
 
 export const Default: Story = {}
 
@@ -86,24 +87,26 @@ export const WithValue: Story = {
         <StoryWrapper
             {...args}
             defaultValues={{
-                fromDate: '2026-04-03',
                 mealDate: '2026-04-02',
             }}
         />
     ),
     play: async ({ canvas, userEvent }) => {
-        submitLeftoversStep.mockClear()
+        submitDateStep.mockClear()
 
-        await userEvent.click(canvas.getByRole('button', { name: /next/i }))
+        await userEvent.click(canvas.getByRole('button', { name: /submit/i }))
 
         await waitFor(() => {
-            expect(submitLeftoversStep).toHaveBeenCalledWith({
-                mealTime: '',
+            expect(submitDateStep).toHaveBeenCalledWith({
                 mealDate: '2026-04-02',
+                mealTime: '',
                 source: '',
+                course: '',
+                useForLeftovers: false,
+                leftoversDate: '',
                 title: '',
                 author: '',
-                fromDate: '2026-04-03',
+                fromDate: '',
                 bookTitle: '',
                 pageNumber: '',
                 series: '',
@@ -120,12 +123,12 @@ export const WithValue: Story = {
     },
 }
 
-export const RequiresOriginalMealDate: Story = {
+export const RequiresMealDate: Story = {
     play: async ({ canvas, userEvent }) => {
-        await userEvent.click(canvas.getByRole('button', { name: /next/i }))
+        await userEvent.click(canvas.getByRole('button', { name: /submit/i }))
 
         await waitFor(() => {
-            expect(canvas.getByText(/original meal date is required/i)).toBeInTheDocument()
+            expect(canvas.getByText(/meal date is required/i)).toBeInTheDocument()
         })
     },
 }

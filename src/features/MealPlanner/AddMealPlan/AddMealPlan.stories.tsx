@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { fn } from 'storybook/test'
-import { createAddMealPlanStoryArgs } from '@test/storybookHelpers/addMealPlan/storybookFlows'
+import {
+    createAddMealPlanStoryArgs,
+    playInternalRecipeFromRecipePageFlow,
+} from '@test/storybookHelpers/addMealPlan/storybookFlows'
 import {
     playBookFlow,
     playCancelOnlyOnFirstPage,
@@ -15,6 +18,7 @@ import {
     playReadyPreparedFlow,
 } from '@test/storybookHelpers/addMealPlan/storybookFlows'
 import AddMealPlan from './AddMealPlan'
+import FlowSource from './AddMealPlanForm/defs/FlowSource'
 
 const meta: Meta<typeof AddMealPlan> = {
     title: 'Features/MealPlanner/AddMealPlan',
@@ -30,9 +34,10 @@ const meta: Meta<typeof AddMealPlan> = {
         ),
     ],
     args: {
-        date: '2026-04-05',
+        initialValues: { mealDate: '2026-04-05' },
         isSourceEditable: true,
         mode: 'add',
+        flowSource: FlowSource.MEAL_PLANNER,
         onClose: fn(),
         ...createAddMealPlanStoryArgs(),
     },
@@ -71,6 +76,23 @@ export const MagazineFlow: Story = {
 
 export const InternalRecipeFlow: Story = {
     play: async ({ canvas, userEvent, args }) => playInternalRecipeFlow(canvas, userEvent, args),
+}
+
+export const InternalRecipeFromRecipePageFlow: Story = {
+    args: {
+        flowSource: FlowSource.RECIPE_PAGE,
+        initialValues: {
+            mealDate: '2026-04-05',
+            internalRecipeId: 'pre-entered-internal-recipe-id',
+            title: 'Pre-entered recipe title',
+            author: 'Pre-entered recipe author',
+            cookingDuration: '15',
+            prepDuration: '10',
+            standingTime: '5',
+        },
+    },
+    play: async ({ canvas, userEvent, args }) =>
+        playInternalRecipeFromRecipePageFlow(canvas, userEvent, args),
 }
 
 export const InternalRecipeTitleSearchFlow: Story = {

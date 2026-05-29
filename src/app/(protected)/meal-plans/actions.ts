@@ -48,12 +48,9 @@ export async function getMealPlans(startDate: Date, endDate: Date): Promise<GetM
     return res.json()
 }
 
-export async function addMealPlan(
-    date: string,
-    values: AddMealPlanFormValues,
-): Promise<PostMealPlanResponse> {
+export async function addMealPlan(values: AddMealPlanFormValues): Promise<PostMealPlanResponse> {
     const sessionJwt = await getSessionJwt()
-    const mealPlan: PostMealPlanBody = createMealPlanFromFormValues(date, values)
+    const mealPlan: PostMealPlanBody = createMealPlanFromFormValues(values)
 
     const res = await fetch(`${process.env.API_BASE_URL!}/meal-plans`, {
         method: 'POST',
@@ -77,9 +74,11 @@ export async function updateMealPlan(
     values: AddMealPlanFormValues,
 ): Promise<PutMealPlanResponse> {
     const sessionJwt = await getSessionJwt()
-    const mealPlan = createMealPlanFromFormValues(existingMealPlan.date, {
+    const mealPlan = createMealPlanFromFormValues({
         ...values,
         mealTime: existingMealPlan.mealTime,
+        course: existingMealPlan.course,
+        mealDate: existingMealPlan.date,
     })
     const mealPlanBody = {
         author: mealPlan.author,

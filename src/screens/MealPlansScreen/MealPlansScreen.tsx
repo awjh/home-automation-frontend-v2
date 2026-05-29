@@ -10,6 +10,7 @@ import { Flex, Spinner, VStack } from '@chakra-ui/react'
 import MealPlan from '@defs/MealPlan'
 import AddMealPlan from '@features/MealPlanner/AddMealPlan/AddMealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
+import FlowSource from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/FlowSource'
 import createInitialFormValuesFromMealPlan, {
     createInitialLeftoversFormValuesFromMealPlan,
 } from '@features/MealPlanner/AddMealPlan/utils/createInitialFormValuesFromMealPlan'
@@ -27,7 +28,7 @@ export interface MealPlansScreenProps {
     initialDate: Date
     extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
     searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
-    onAddMealSubmit: (date: string, values: AddMealPlanFormValues) => Promise<PostMealPlanResponse>
+    onAddMealSubmit: (values: AddMealPlanFormValues) => Promise<PostMealPlanResponse>
     onEditMealSubmit: (
         mealPlan: MealPlan,
         values: AddMealPlanFormValues,
@@ -38,15 +39,8 @@ export interface MealPlansScreenProps {
 }
 
 interface PendingAddMealState {
-    date: Date
-    initialValues?: Partial<AddMealPlanFormValues>
+    initialValues: Partial<AddMealPlanFormValues> & { mealDate: string }
     isSourceEditable: boolean
-}
-
-function createDateFromIsoDateString(dateString: string): Date {
-    const [year, month, day] = dateString.split('-').map(Number)
-
-    return new Date(year, month - 1, day)
 }
 
 function getDateRangeForWeek(date: Date) {
@@ -105,7 +99,7 @@ export default function MealPlansScreen({
 
     const onAddMeal = useCallback((day: Date) => {
         setPendingAddMeal({
-            date: day,
+            initialValues: { mealDate: formatDate(day) },
             isSourceEditable: true,
         })
     }, [])
@@ -124,18 +118,18 @@ export default function MealPlansScreen({
                 return
             }
 
-            const mealDate = formatDate(pendingAddMeal.date)
+            await onAddMealSubmit(values)
 
-            await onAddMealSubmit(mealDate, values)
-
-            const createdMealPlan = createMealPlanFromFormValues(mealDate, values)
+            const createdMealPlan = createMealPlanFromFormValues(values)
 
             setMeals((currentMeals) => [...currentMeals, createdMealPlan])
 
             if (values.source !== 'leftovers' && values.useForLeftovers) {
                 setPendingAddMeal({
-                    date: createDateFromIsoDateString(values.leftoversDate),
-                    initialValues: createInitialLeftoversFormValuesFromMealPlan(createdMealPlan),
+                    initialValues: createInitialLeftoversFormValuesFromMealPlan(
+                        createdMealPlan,
+                        values.leftoversDate,
+                    ),
                     isSourceEditable: false,
                 })
                 return
@@ -163,7 +157,7 @@ export default function MealPlansScreen({
             await onEditMealSubmit(mealPlanPendingEdit, values)
 
             const updatedMealPlan = {
-                ...createMealPlanFromFormValues(mealPlanPendingEdit.date, {
+                ...createMealPlanFromFormValues({
                     ...values,
                     mealTime: mealPlanPendingEdit.mealTime,
                     course: mealPlanPendingEdit.course,
@@ -216,7 +210,7 @@ export default function MealPlansScreen({
         <VStack width={'full'} minHeight={'100vh'}>
             {pendingAddMeal && (
                 <AddMealPlan
-                    date={formatDate(pendingAddMeal.date)}
+                    flowSource={FlowSource.MEAL_PLANNER}
                     initialValues={pendingAddMeal.initialValues}
                     extractTitleFromOnlineSource={extractTitleFromOnlineSource}
                     isSourceEditable={pendingAddMeal.isSourceEditable}
@@ -228,7 +222,7 @@ export default function MealPlansScreen({
             )}
             {mealPlanPendingEdit && (
                 <AddMealPlan
-                    date={mealPlanPendingEdit.date}
+                    flowSource={FlowSource.MEAL_PLANNER}
                     mode={'edit'}
                     initialValues={createInitialFormValuesFromMealPlan(mealPlanPendingEdit)}
                     isSourceEditable={true}

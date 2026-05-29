@@ -1,8 +1,9 @@
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import FlowRuleOverrides from '../defs/FlowRuleOverrides'
+import FlowSource from '../../defs/FlowSource'
 
-const SourceFlowRuleOverrides: Partial<Record<SourceType, FlowRuleOverrides>> = {
-    [SourceType.BOOK]: {
+const SourceFlowRuleOverrides: Partial<Record<`${SourceType}_${FlowSource}`, FlowRuleOverrides>> = {
+    [`${SourceType.BOOK}_${FlowSource.MEAL_PLANNER}`]: {
         stepMap: {
             1: 'primary',
             2: 'details',
@@ -10,13 +11,19 @@ const SourceFlowRuleOverrides: Partial<Record<SourceType, FlowRuleOverrides>> = 
             4: 'durations',
         },
     },
-    [SourceType.INTERNAL_RECIPE]: {
+    [`${SourceType.INTERNAL_RECIPE}_${FlowSource.MEAL_PLANNER}`]: {
         stepMap: {
             1: 'primary',
             2: 'internalRecipe',
         },
     },
-    [SourceType.MAGAZINE]: {
+    [`${SourceType.INTERNAL_RECIPE}_${FlowSource.RECIPE_PAGE}`]: {
+        stepMap: {
+            1: 'primary',
+            2: 'mealDate',
+        },
+    },
+    [`${SourceType.MAGAZINE}_${FlowSource.MEAL_PLANNER}`]: {
         stepMap: {
             1: 'primary',
             2: 'details',
@@ -24,7 +31,7 @@ const SourceFlowRuleOverrides: Partial<Record<SourceType, FlowRuleOverrides>> = 
             4: 'durations',
         },
     },
-    [SourceType.ONLINE]: {
+    [`${SourceType.ONLINE}_${FlowSource.MEAL_PLANNER}`]: {
         stepMap: {
             1: 'primary',
             2: 'online',
@@ -32,7 +39,7 @@ const SourceFlowRuleOverrides: Partial<Record<SourceType, FlowRuleOverrides>> = 
             4: 'durations',
         },
     },
-    [SourceType.LEFTOVERS]: {
+    [`${SourceType.LEFTOVERS}_${FlowSource.MEAL_PLANNER}`]: {
         stepMap: {
             1: 'primary',
             2: 'details',
@@ -40,12 +47,12 @@ const SourceFlowRuleOverrides: Partial<Record<SourceType, FlowRuleOverrides>> = 
             4: 'durations',
         },
     },
-    [SourceType.FREEZER]: {
+    [`${SourceType.FREEZER}_${FlowSource.MEAL_PLANNER}`]: {
         titleAuthor: {
             showAuthor: false,
         },
     },
-    [SourceType.READY_PREPARED]: {
+    [`${SourceType.READY_PREPARED}_${FlowSource.MEAL_PLANNER}`]: {
         titleAuthor: {
             authorLabel: 'Producer',
         },

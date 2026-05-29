@@ -4,6 +4,7 @@ type AddMealPlanStep =
     | 'leftovers'
     | 'book'
     | 'online'
+    | 'mealDate'
     | 'magazine'
     | 'internalRecipe'
     | 'durations'

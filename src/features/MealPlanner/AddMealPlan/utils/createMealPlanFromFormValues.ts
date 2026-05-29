@@ -12,10 +12,11 @@ function parseNumberField(value: string, fieldName: string) {
     return parsedValue
 }
 
-export default function createMealPlanFromFormValues(
-    date: string,
-    values: AddMealPlanFormValues,
-): MealPlan {
+export default function createMealPlanFromFormValues(values: AddMealPlanFormValues): MealPlan {
+    if (!values.mealDate) {
+        throw new Error('Meal date is required')
+    }
+
     if (!values.mealTime) {
         throw new Error('Meal time is required')
     }
@@ -32,7 +33,7 @@ export default function createMealPlanFromFormValues(
             return {
                 author: trimmedAuthor,
                 course: Course.MAIN,
-                date,
+                date: values.mealDate,
                 mealTime: values.mealTime,
                 source: {
                     type: SourceType.BOOK,
@@ -51,7 +52,7 @@ export default function createMealPlanFromFormValues(
             return {
                 author: trimmedAuthor,
                 course: Course.MAIN,
-                date,
+                date: values.mealDate,
                 mealTime: values.mealTime,
                 source: {
                     type: SourceType.ONLINE,
@@ -68,7 +69,7 @@ export default function createMealPlanFromFormValues(
             return {
                 author: trimmedAuthor,
                 course: Course.MAIN,
-                date,
+                date: values.mealDate,
                 mealTime: values.mealTime,
                 source: {
                     type: SourceType.MAGAZINE,
@@ -87,7 +88,7 @@ export default function createMealPlanFromFormValues(
             return {
                 author: trimmedAuthor,
                 course: Course.MAIN,
-                date,
+                date: values.mealDate,
                 mealTime: values.mealTime,
                 source: {
                     type: SourceType.INTERNAL_RECIPE,
@@ -104,7 +105,7 @@ export default function createMealPlanFromFormValues(
             return {
                 author: trimmedAuthor || 'Freezer',
                 course: Course.MAIN,
-                date,
+                date: values.mealDate,
                 mealTime: values.mealTime,
                 source: {
                     type: SourceType.FREEZER,
@@ -120,7 +121,7 @@ export default function createMealPlanFromFormValues(
             return {
                 author: trimmedAuthor,
                 course: Course.MAIN,
-                date,
+                date: values.mealDate,
                 mealTime: values.mealTime,
                 source: {
                     type: SourceType.READY_PREPARED,
@@ -140,7 +141,7 @@ export default function createMealPlanFromFormValues(
             return {
                 author: trimmedAuthor,
                 course: Course.MAIN,
-                date,
+                date: values.mealDate,
                 mealTime: values.mealTime,
                 source: {
                     type: SourceType.LEFTOVERS,

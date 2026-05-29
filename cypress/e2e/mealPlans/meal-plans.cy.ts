@@ -7,7 +7,9 @@ import createLeftoversMealPlan from '@test/mockData/mealPlans/createLeftoversMea
 import createMagazineMealPlan from '@test/mockData/mealPlans/createMagazineMealPlan'
 import createReadyPreparedMealPlan from '@test/mockData/mealPlans/createReadyPreparedMealPlan'
 import { buildBookRecipe } from '../recipes/recipeBuilders/buildRecipe'
-import addMealPlanViaUi from './helpers/addMealPlanViaUi'
+import addMealPlanViaUi, {
+    addBookMealPlanViaUiWithLeftoversFollowUp,
+} from './helpers/addMealPlanViaUi'
 import { assertMealVisible } from './helpers/assertMealVisible'
 import openEditMealModal from './helpers/openEditMealModal'
 import waitForRecipeSearchResult from './helpers/waitForRecipeSearchResult'
@@ -191,5 +193,16 @@ describe('meal plans', () => {
         cy.get(getMealItemSelector(weekDates[0], MealTime.DINNER)).should('have.length', 2)
         cy.contains('Cypress Bruschetta').should('be.visible')
         cy.contains('Cypress Pasta Carbonara').should('be.visible')
+    })
+
+    it('opens a prefilled leftovers follow-up after adding a meal marked for leftovers', () => {
+        const weekDates = getWeekDates()
+        const mealDate = weekDates[0]
+        const leftoversDate = weekDates[1]
+        const mealPlan = createBookMealPlan(mealDate, MealTime.DINNER, 'Cypress Leftover Traybake')
+
+        cy.visitMealPlans()
+
+        addBookMealPlanViaUiWithLeftoversFollowUp(mealPlan, leftoversDate, MealTime.LUNCH)
     })
 })

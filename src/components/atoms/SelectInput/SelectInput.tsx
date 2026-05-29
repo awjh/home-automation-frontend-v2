@@ -71,7 +71,6 @@ export default function SelectInput(props: SelectInputProps) {
                     </Select.Trigger>
                     <Select.IndicatorGroup>
                         <Select.Indicator color={keyColors.primary} />
-                        <Select.ClearTrigger color={keyColors.primary} />
                     </Select.IndicatorGroup>
                 </Select.Control>
 

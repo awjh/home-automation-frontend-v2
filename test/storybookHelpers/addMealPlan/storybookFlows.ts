@@ -1,8 +1,10 @@
-import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
+import {
+    GetExtractedExternalRecipeResponse,
+    GetRecipesResponse,
+} from '@awjh/home-automation-v2-api-models'
 import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
-import { expect, fn, type Mock, waitFor, within } from 'storybook/test'
 import type AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
-import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
+import { expect, fn, type Mock, waitFor, within } from 'storybook/test'
 
 export const internalRecipeResults = [
     {
@@ -52,6 +54,7 @@ export const bookFlowValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.BOOK,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: 'Traybake',
@@ -74,6 +77,7 @@ export const onlineFlowValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.ONLINE,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: 'Gnocchi with Roast Pepper Sauce',
@@ -96,6 +100,7 @@ export const onlineFlowUsingExtractedValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.ONLINE,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: extractedOnlineRecipe.title,
@@ -118,6 +123,7 @@ export const magazineFlowValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.MAGAZINE,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: 'Beef Wellington',
@@ -140,6 +146,7 @@ export const internalRecipeFlowValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.INTERNAL_RECIPE,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: 'Spaghetti Carbonara',
@@ -158,10 +165,34 @@ export const internalRecipeFlowValues = {
     standingTime: '0',
 } satisfies AddMealPlanFormValues
 
+export const internalRecipeFromRecipePageFlowValues = {
+    mealTime: MealTime.DINNER,
+    course: Course.MAIN,
+    source: SourceType.INTERNAL_RECIPE,
+    mealDate: '2026-04-02',
+    useForLeftovers: false,
+    leftoversDate: '',
+    title: 'Pre-entered recipe title',
+    author: 'Pre-entered recipe author',
+    fromDate: '',
+    bookTitle: '',
+    pageNumber: '',
+    series: '',
+    recipeUrl: '',
+    magazineName: '',
+    magazineIssue: '',
+    magazinePage: '',
+    internalRecipeId: 'pre-entered-internal-recipe-id',
+    prepDuration: '10',
+    cookingDuration: '15',
+    standingTime: '5',
+} satisfies AddMealPlanFormValues
+
 export const internalRecipeTitleSearchFlowValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.INTERNAL_RECIPE,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: 'Spaghetti Bolognese',
@@ -184,6 +215,7 @@ export const freezerFlowValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.FREEZER,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: 'Chicken Satay',
@@ -206,6 +238,7 @@ export const leftoversFlowValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.LEFTOVERS,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: 'Roast Chicken Pasta Bake',
@@ -228,6 +261,7 @@ export const readyPreparedFlowValues = {
     mealTime: MealTime.DINNER,
     course: Course.MAIN,
     source: SourceType.READY_PREPARED,
+    mealDate: '2026-04-10',
     useForLeftovers: false,
     leftoversDate: '',
     title: 'Chicken Flatties',
@@ -267,6 +301,7 @@ export interface AddMealPlanStoryArgs {
     onClose?: unknown
     onSubmit: unknown
     searchInternalRecipes?: unknown
+    initialValues?: Partial<AddMealPlanFormValues>
 }
 
 export function createAddMealPlanStoryArgs() {
@@ -365,14 +400,21 @@ async function fillDurations(
     await userEvent.click(canvas.getByRole('button', { name: /submit/i }))
 }
 
-async function expectSubmitted(args: AddMealPlanStoryArgs, values: AddMealPlanFormValues) {
+async function expectSubmitted(
+    args: AddMealPlanStoryArgs,
+    values: AddMealPlanFormValues,
+    mealDateWasEdited = false,
+) {
     if (args.assertSubmitted) {
         await args.assertSubmitted(values)
         return
     }
 
     await waitFor(() => {
-        expect(args.onSubmit).toHaveBeenCalledWith(values)
+        expect(args.onSubmit).toHaveBeenCalledWith({
+            ...values,
+            mealDate: mealDateWasEdited ? values.mealDate : args.initialValues!.mealDate,
+        })
     })
 }
 
@@ -529,6 +571,20 @@ export async function playInternalRecipeFlow(
     await userEvent.click(canvas.getByRole('button', { name: /submit/i }))
 
     await expectSubmitted(args, internalRecipeFlowValues)
+}
+
+export async function playInternalRecipeFromRecipePageFlow(
+    canvas: StoryCanvas,
+    userEvent: StoryUserEvent,
+    args: AddMealPlanStoryArgs,
+) {
+    resetAddMealPlanMocks(args)
+
+    await selectPrimaryDetails(canvas, userEvent, SourceType.INTERNAL_RECIPE)
+    await fillTextInput(canvas, userEvent, /meal date/i, '2026-04-02')
+    await userEvent.click(canvas.getByRole('button', { name: /submit/i }))
+
+    await expectSubmitted(args, internalRecipeFromRecipePageFlowValues, true)
 }
 
 export async function playInternalRecipeTitleSearchFlow(

@@ -11,5 +11,5 @@ export default function openEditMealModal(date: string, mealTime: MealTime) {
     cy.getByTestId('add-meal-plan-modal')
         .should('be.visible')
         .and('have.attr', 'data-mode', 'edit')
-        .and('have.attr', 'data-date', date)
+        .and('have.attr', 'data-mealdate', date)
 }

@@ -43,7 +43,7 @@ const meta: Meta<typeof MealPlansScreen> = {
         getMealPlansForDateRange: async () => [],
         extractTitleFromOnlineSource: addMealPlanStoryArgs.extractTitleFromOnlineSource,
         searchInternalRecipes: addMealPlanStoryArgs.searchInternalRecipes,
-        onAddMealSubmit: fn(async (date, values) => createMealPlanFromFormValues(date, values)),
+        onAddMealSubmit: fn(async (values) => createMealPlanFromFormValues(values)),
         onEditMealSubmit: fn(async (mealPlan) => ({
             date: mealPlan.date,
             mealTime: mealPlan.mealTime,
@@ -78,10 +78,10 @@ export const OpensAddMealPlanSubmitsAndAddsToMealList: Story = {
             extractTitleFromOnlineSource: args.extractTitleFromOnlineSource,
             assertSubmitted: async (values) => {
                 await waitFor(() => {
-                    expect(args.onAddMealSubmit).toHaveBeenCalledWith(
-                        formatDate(expectedDate),
-                        values,
-                    )
+                    expect(args.onAddMealSubmit).toHaveBeenCalledWith({
+                        ...values,
+                        mealDate: formatDate(expectedDate),
+                    })
                 })
             },
             onSubmit: fn().mockResolvedValue(undefined),
@@ -89,10 +89,10 @@ export const OpensAddMealPlanSubmitsAndAddsToMealList: Story = {
         })
 
         await waitFor(() => {
-            expect(args.onAddMealSubmit).toHaveBeenCalledWith(
-                formatDate(expectedDate),
-                bookFlowValues,
-            )
+            expect(args.onAddMealSubmit).toHaveBeenCalledWith({
+                ...bookFlowValues,
+                mealDate: formatDate(expectedDate),
+            })
             expect(canvas.getByText(/traybake/i)).toBeInTheDocument()
         })
     },
@@ -113,10 +113,10 @@ export const OpensAddMealPlanUsingExtractedOnlineTitle: Story = {
             extractTitleFromOnlineSource: args.extractTitleFromOnlineSource,
             assertSubmitted: async (values) => {
                 await waitFor(() => {
-                    expect(args.onAddMealSubmit).toHaveBeenCalledWith(
-                        formatDate(expectedDate),
-                        values,
-                    )
+                    expect(args.onAddMealSubmit).toHaveBeenCalledWith({
+                        ...values,
+                        mealDate: formatDate(expectedDate),
+                    })
                 })
             },
             onSubmit: fn().mockResolvedValue(undefined),
@@ -124,10 +124,10 @@ export const OpensAddMealPlanUsingExtractedOnlineTitle: Story = {
         })
 
         await waitFor(() => {
-            expect(args.onAddMealSubmit).toHaveBeenCalledWith(
-                formatDate(expectedDate),
-                onlineFlowUsingExtractedValues,
-            )
+            expect(args.onAddMealSubmit).toHaveBeenCalledWith({
+                ...onlineFlowUsingExtractedValues,
+                mealDate: formatDate(expectedDate),
+            })
             expect(canvas.getByText(/gnocchi in roasted red pepper sauce/i)).toBeInTheDocument()
         })
     },
@@ -150,7 +150,10 @@ export const OpensLeftoversFollowUpAfterSuccessfulAdd: Story = {
             extractTitleFromOnlineSource: args.extractTitleFromOnlineSource,
             assertSubmitted: async (values) => {
                 await waitFor(() => {
-                    expect(args.onAddMealSubmit).toHaveBeenCalledWith(expectedFormattedDate, values)
+                    expect(args.onAddMealSubmit).toHaveBeenCalledWith({
+                        ...values,
+                        mealDate: expectedFormattedDate,
+                    })
                 })
             },
             onSubmit: fn().mockResolvedValue(undefined),
@@ -161,8 +164,9 @@ export const OpensLeftoversFollowUpAfterSuccessfulAdd: Story = {
         const sourceSelect = leftoversPopup.getByLabelText(/source/i, { selector: 'select' })
 
         await waitFor(() => {
-            expect(args.onAddMealSubmit).toHaveBeenCalledWith(expectedFormattedDate, {
+            expect(args.onAddMealSubmit).toHaveBeenCalledWith({
                 ...bookFlowValues,
+                mealDate: expectedFormattedDate,
                 useForLeftovers: true,
                 leftoversDate,
             })
@@ -195,7 +199,9 @@ export const OpensLeftoversFollowUpAfterSuccessfulAdd: Story = {
         await userEvent.click(leftoversPopup.getByRole('button', { name: /submit/i }))
 
         await waitFor(() => {
-            expect(args.onAddMealSubmit).toHaveBeenNthCalledWith(2, leftoversDate, {
+            expect(args.onAddMealSubmit).toHaveBeenNthCalledWith(2, {
+                ...bookFlowValues,
+                mealDate: leftoversDate,
                 mealTime: MealTime.LUNCH,
                 course: bookFlowValues.course,
                 source: SourceType.LEFTOVERS,
@@ -299,6 +305,7 @@ export const OpensEditMealPlanWithInitialValuesAndSubmits: Story = {
                 }),
                 expect.objectContaining({
                     mealTime: defaultInitialMeals[0].mealTime,
+                    mealDate: formatDate(startOfWeek),
                     course: defaultInitialMeals[0].course,
                     source: defaultInitialMeals[0].source.type,
                     title: 'Updated Spaghetti Bolognese',
