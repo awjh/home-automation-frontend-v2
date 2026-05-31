@@ -15,7 +15,14 @@ export default function MethodIngredients({ ingredients }: MethodIngredientsProp
     }
 
     return (
-        <Box w={'full'} borderWidth={1} borderColor={keyColors.primary} p={4} bg={keyColors.subtle}>
+        <Box
+            w={'full'}
+            maxW={'600px'}
+            borderWidth={1}
+            borderColor={keyColors.primary}
+            p={{ base: 2, md: 4 }}
+            bg={keyColors.subtle}
+        >
             <IngredientsList ingredients={ingredients} />
         </Box>
     )

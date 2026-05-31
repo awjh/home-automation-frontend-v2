@@ -6,7 +6,7 @@ import MagazineRecipe from '@test/mockData/recipes/MagazineRecipe'
 import OnlineRecipe from '@test/mockData/recipes/OnlineRecipe'
 
 const meta: Meta<typeof OriginalSource> = {
-    title: 'Features/Recipes/ViewRecipes/OriginalSource',
+    title: 'Features/Recipes/ViewRecipe/OriginalSource',
     component: OriginalSource,
     decorators: [
         (Story) => (

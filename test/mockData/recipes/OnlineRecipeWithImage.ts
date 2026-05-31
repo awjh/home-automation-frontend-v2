@@ -10,7 +10,7 @@ const OnlineRecipeWithImage: Recipe = {
         url: 'https://www.seriouseats.com/weeknight-spaghetti-bolognese-recipe',
     } satisfies OnlineSource,
     ...MockBaseRecipe,
-    image: 'https://images.example.com/recipes/spaghetti-bolognese.jpg',
+    image: '/recipe.jpg',
 }
 
 export default OnlineRecipeWithImage

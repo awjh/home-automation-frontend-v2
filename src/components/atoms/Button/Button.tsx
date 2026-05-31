@@ -11,9 +11,15 @@ export interface NonSubmitButtonProps {
 }
 
 export interface NormalButtonProps {
-    colorStyle?: 'primary' | 'secondary'
+    colorStyle?: 'primary' | 'secondary' | 'tab'
     w?: string | number
     size?: 'sm' | 'md' | 'lg'
+}
+
+export interface TabButtonStyleProps {
+    colorStyle: 'tab'
+    active?: boolean
+    tabBorderSide?: 'left' | 'right'
 }
 
 export interface LinkButtonProps {
@@ -28,16 +34,21 @@ export interface BaseButtonProps {
 
 export type ButtonProps = BaseButtonProps &
     (SubmitButtonProps | NonSubmitButtonProps) &
-    (NormalButtonProps | LinkButtonProps)
+    (NormalButtonProps | LinkButtonProps | TabButtonStyleProps)
 
 export default function Button(props: ButtonProps) {
     const { keyColors } = useColorMode()
     const { type, children, colorStyle = 'primary' } = props
+    const isTabButton = colorStyle === 'tab'
+    const tabProps = props as TabButtonStyleProps
+    const isActiveTab = isTabButton && Boolean(tabProps.active)
+    const tabBorderSide =
+        isTabButton && !isActiveTab ? (tabProps.tabBorderSide ?? 'left') : undefined
 
     let w: string | number | undefined = undefined
     let size: 'sm' | 'md' | 'lg' | undefined = undefined
 
-    if (colorStyle === 'primary' || colorStyle === 'secondary') {
+    if (colorStyle === 'primary' || colorStyle === 'secondary' || colorStyle === 'tab') {
         w = (props as NormalButtonProps).w
         size = (props as NormalButtonProps).size
     }
@@ -51,15 +62,48 @@ export default function Button(props: ButtonProps) {
     return (
         <ChakraButton
             type={type}
-            borderColor={colorStyle === 'link' ? 'transparent' : keyColors.primary}
-            borderWidth={colorStyle === 'link' ? 0 : 2}
-            bg={colorStyle === 'primary' ? keyColors.primary : 'transparent'}
-            color={colorStyle === 'primary' ? keyColors.secondary : keyColors.primary}
+            borderColor={
+                isTabButton
+                    ? keyColors.primary
+                    : colorStyle === 'link'
+                      ? 'transparent'
+                      : keyColors.primary
+            }
+            borderWidth={isTabButton ? 0 : colorStyle === 'link' ? 0 : 2}
+            borderLeftWidth={tabBorderSide === 'left' ? 2 : 0}
+            borderRightWidth={tabBorderSide === 'right' ? 2 : 0}
+            borderBottomWidth={isTabButton && !isActiveTab ? 2 : 0}
+            bg={
+                isTabButton
+                    ? isActiveTab
+                        ? keyColors.secondary
+                        : keyColors.subtle
+                    : colorStyle === 'primary'
+                      ? keyColors.primary
+                      : 'transparent'
+            }
+            color={
+                isTabButton
+                    ? keyColors.primary
+                    : colorStyle === 'primary'
+                      ? keyColors.secondary
+                      : keyColors.primary
+            }
             textDecoration={colorStyle === 'link' ? 'underline' : 'none'}
             p={colorStyle === 'link' ? 0 : 2}
             _hover={{
-                bg: colorStyle === 'link' ? 'transparent' : keyColors.buttonHoverBg,
-                color: colorStyle === 'link' ? keyColors.primary : keyColors.secondary,
+                bg: isTabButton
+                    ? isActiveTab
+                        ? keyColors.secondary
+                        : keyColors.lessSubtle
+                    : colorStyle === 'link'
+                      ? 'transparent'
+                      : keyColors.buttonHoverBg,
+                color: isTabButton
+                    ? keyColors.primary
+                    : colorStyle === 'link'
+                      ? keyColors.primary
+                      : keyColors.secondary,
                 textDecoration: colorStyle === 'link' ? 'underline' : 'none',
             }}
             borderRadius={0}
@@ -70,6 +114,8 @@ export default function Button(props: ButtonProps) {
             fontSize={colorStyle === 'link' ? 'inherit' : undefined}
             loading={props.loading}
             loadingText={props.loadingText}
+            data-active={isTabButton && isActiveTab ? 'true' : undefined}
+            data-tab-border-side={tabBorderSide}
         >
             {children}
         </ChakraButton>

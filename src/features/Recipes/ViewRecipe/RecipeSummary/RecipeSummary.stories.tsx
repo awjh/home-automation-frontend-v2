@@ -6,7 +6,7 @@ import OnlineRecipe from '@test/mockData/recipes/OnlineRecipe'
 import MagazineRecipe from '@test/mockData/recipes/MagazineRecipe'
 
 const meta: Meta<typeof RecipeSummary> = {
-    title: 'Features/Recipes/ViewRecipes/RecipeSummary',
+    title: 'Features/Recipes/ViewRecipe/RecipeSummary',
     component: RecipeSummary,
     decorators: [
         (Story) => (
@@ -25,7 +25,7 @@ export const Book: Story = {
         title: BookRecipe.title,
         authors: BookRecipe.authors,
         tags: BookRecipe.tags,
-        source: BookRecipe.originalSource,
+        originalSource: BookRecipe.originalSource,
         calories: BookRecipe.calories,
         duration: BookRecipe.duration,
         produces: BookRecipe.produces,
@@ -37,7 +37,7 @@ export const Online: Story = {
         title: OnlineRecipe.title,
         authors: OnlineRecipe.authors,
         tags: OnlineRecipe.tags,
-        source: OnlineRecipe.originalSource,
+        originalSource: OnlineRecipe.originalSource,
         calories: OnlineRecipe.calories,
         duration: OnlineRecipe.duration,
         produces: OnlineRecipe.produces,
@@ -49,7 +49,7 @@ export const Magazine: Story = {
         title: MagazineRecipe.title,
         authors: MagazineRecipe.authors,
         tags: MagazineRecipe.tags,
-        source: MagazineRecipe.originalSource,
+        originalSource: MagazineRecipe.originalSource,
         calories: MagazineRecipe.calories,
         duration: MagazineRecipe.duration,
         produces: MagazineRecipe.produces,
@@ -61,7 +61,7 @@ export const StandingTime: Story = {
         title: BookRecipe.title,
         authors: BookRecipe.authors,
         tags: BookRecipe.tags,
-        source: BookRecipe.originalSource,
+        originalSource: BookRecipe.originalSource,
         calories: BookRecipe.calories,
         duration: {
             prepDuration: 20,
@@ -77,7 +77,7 @@ export const QuantityProduced: Story = {
         title: BookRecipe.title,
         authors: BookRecipe.authors,
         tags: BookRecipe.tags,
-        source: BookRecipe.originalSource,
+        originalSource: BookRecipe.originalSource,
         calories: BookRecipe.calories,
         duration: BookRecipe.duration,
         produces: {

@@ -7,13 +7,21 @@ export interface IngredientsListProps {
     ingredients: Ingredient[]
 }
 
+function uppercaseFirstCharacter(value: string | number) {
+    const text = `${value}`
+
+    return text.length ? `${text[0].toUpperCase()}${text.slice(1)}` : text
+}
+
 export default function IngredientsList({ ingredients }: IngredientsListProps) {
     return (
         <Flex w={'full'} flexDirection={'column'} gap={2}>
             {ingredients.map((ingredient, idx) => (
                 <DottedValuePair
                     key={`ingredient-${idx}`}
-                    left={joinValues(ingredient.item, ingredient.preparation, ',')}
+                    left={uppercaseFirstCharacter(
+                        joinValues(ingredient.item, ingredient.preparation, ','),
+                    )}
                     right={joinValues(ingredient.quantity, ingredient.measure)}
                 />
             ))}

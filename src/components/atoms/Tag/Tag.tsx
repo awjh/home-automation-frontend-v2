@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react'
 import { Flex } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 
 export interface TagProps {
-    value: string
+    value: ReactNode
     status?: 'subtle' | 'highlighted' | 'default'
     onClick?: () => void
 }
@@ -52,7 +53,7 @@ export default function Tag({ status = 'default', value, onClick }: TagProps) {
                     : undefined
             }
             textTransform={'capitalize'}
-            fontSize={'sm'}
+            fontSize={{ base: 'sm', lg: 'md' }}
         >
             {value}
         </Flex>

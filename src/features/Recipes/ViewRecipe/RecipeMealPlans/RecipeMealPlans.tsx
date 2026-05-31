@@ -1,8 +1,9 @@
 import Tag from '@atoms/Tag/Tag'
-import { HStack } from '@chakra-ui/react'
+import { Box, HStack } from '@chakra-ui/react'
 
 export interface RecipeMealPlansProps {
     dates: string[]
+    onDateClick: (date: string) => void
 }
 
 const daysOfWeek = [
@@ -14,6 +15,16 @@ const daysOfWeek = [
     'saturday',
     'sunday',
 ] as const
+
+const dayLabels: Record<(typeof daysOfWeek)[number], { base: string; md: string; lg: string }> = {
+    monday: { base: 'm', md: 'mon', lg: 'monday' },
+    tuesday: { base: 'tu', md: 'tue', lg: 'tuesday' },
+    wednesday: { base: 'w', md: 'wed', lg: 'wednesday' },
+    thursday: { base: 'th', md: 'thur', lg: 'thursday' },
+    friday: { base: 'f', md: 'fri', lg: 'friday' },
+    saturday: { base: 'sa', md: 'sat', lg: 'saturday' },
+    sunday: { base: 'su', md: 'sun', lg: 'sunday' },
+}
 
 function parseIsoDate(date: string): Date | undefined {
     const [year, month, day] = date.split('-').map(Number)
@@ -67,10 +78,30 @@ export default function RecipeMealPlans({ dates }: RecipeMealPlansProps) {
     })
 
     return (
-        <HStack gap={{ base: 2, md: 4 }}>
-            {daysOfWeek.map((day) => (
-                <Tag key={day} value={day} status={dayStatuses.get(day) ?? 'default'} />
-            ))}
+        <HStack gap={{ base: 2, md: 4 }} w={'full'}>
+            {daysOfWeek.map((day) => {
+                const label = dayLabels[day]
+
+                return (
+                    <Tag
+                        key={day}
+                        value={
+                            <>
+                                <Box as="span" display={{ base: 'inline', md: 'none' }}>
+                                    {label.base}
+                                </Box>
+                                <Box as="span" display={{ base: 'none', md: 'inline', lg: 'none' }}>
+                                    {label.md}
+                                </Box>
+                                <Box as="span" display={{ base: 'none', lg: 'inline' }}>
+                                    {label.lg}
+                                </Box>
+                            </>
+                        }
+                        status={dayStatuses.get(day) ?? 'default'}
+                    />
+                )
+            })}
         </HStack>
     )
 }

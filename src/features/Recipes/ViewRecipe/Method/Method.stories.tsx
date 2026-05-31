@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import Method from './Method'
 
 const meta: Meta<typeof Method> = {
-    title: 'Features/Recipes/ViewRecipes/Method',
+    title: 'Features/Recipes/ViewRecipe/Method',
     component: Method,
     decorators: [
         (Story) => (

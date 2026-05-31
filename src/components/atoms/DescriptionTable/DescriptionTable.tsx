@@ -14,7 +14,7 @@ export default function DescriptionTable({ data }: DescriptionTableProps) {
     return (
         <HStack
             pt={'0'}
-            gap={{ base: 2, md: 4 }}
+            gap={4}
             color={keyColors.primary}
             separator={
                 <StackSeparator
@@ -26,7 +26,7 @@ export default function DescriptionTable({ data }: DescriptionTableProps) {
         >
             {data.map(({ key, value }) => (
                 <VStack
-                    fontSize={{ base: 'xs', md: 'sm' }}
+                    fontSize={{ base: 'sm', md: 'sm', lg: 'md' }}
                     fontFamily={'lekton'}
                     key={`description-table-${key}-${value}`}
                     gap={1}

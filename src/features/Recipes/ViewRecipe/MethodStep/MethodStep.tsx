@@ -12,7 +12,7 @@ export default function MethodStep({ method, ingredients }: MethodStepProps) {
     const { keyColors } = useColorMode()
 
     return (
-        <VStack alignItems={'start'}>
+        <VStack alignItems={'start'} w={'full'} minW={0}>
             <Text color={keyColors.primary}>{method}</Text>
             <MethodIngredients ingredients={ingredients} />
         </VStack>

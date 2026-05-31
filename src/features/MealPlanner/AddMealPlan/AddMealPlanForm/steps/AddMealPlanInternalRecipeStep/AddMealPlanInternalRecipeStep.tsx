@@ -7,6 +7,7 @@ import useColorMode from '@hooks/useColorMode'
 import { useState } from 'react'
 import { Controller, UseFormSetValue } from 'react-hook-form'
 import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
+import formatAuthors from '@utils/formatAuthors'
 
 export type InternalRecipeSearchParams = {
     keywords: string
@@ -145,9 +146,13 @@ export default function AddMealPlanInternalRecipeStep({
                                                     setValue('title', recipe.title, {
                                                         shouldDirty: true,
                                                     })
-                                                    setValue('author', recipe.authors.join(', '), {
-                                                        shouldDirty: true,
-                                                    })
+                                                    setValue(
+                                                        'author',
+                                                        formatAuthors(recipe.authors),
+                                                        {
+                                                            shouldDirty: true,
+                                                        },
+                                                    )
                                                     setValue(
                                                         'prepDuration',
                                                         recipe.duration.prepDuration.toString(),

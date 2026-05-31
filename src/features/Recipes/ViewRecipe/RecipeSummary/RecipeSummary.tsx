@@ -1,31 +1,22 @@
 import DescriptionTable, { DescriptionTableProps } from '@atoms/DescriptionTable/DescriptionTable'
 import Tag from '@atoms/Tag/Tag'
-import {
-    Recipe,
-    OriginalSource as RecipeOriginalSource,
-    RecipeTags,
-} from '@awjh/home-automation-v2-api-models/recipes'
-import { RecipeDuration } from '@awjh/home-automation-v2-api-models/shared'
+import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
 import { Heading, HStack, VStack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 import formatDuration from '@utils/formatDuration'
 import joinValues from '@utils/joinValues'
 import OriginalSource from '../OriginalSource/OriginalSource'
+import formatAuthors from '@utils/formatAuthors'
 
-export interface RecipeSummaryProps {
-    title: string
-    authors: string[]
-    source: RecipeOriginalSource
-    tags: RecipeTags
-    calories: number
-    duration: RecipeDuration
-    produces: Recipe['produces']
-}
+export type RecipeSummaryProps = Pick<
+    Recipe,
+    'title' | 'authors' | 'originalSource' | 'tags' | 'calories' | 'duration' | 'produces'
+>
 
 export default function RecipeSummary({
     title,
     authors,
-    source,
+    originalSource,
     tags,
     calories,
     duration,
@@ -65,27 +56,25 @@ export default function RecipeSummary({
     }
 
     return (
-        <VStack alignItems={'start'} gap={4}>
-            <VStack alignItems={'start'} gap={1}>
+        <VStack alignItems={'start'} gap={{ base: 4, md: 2, lg: 4 }}>
+            <VStack alignItems={'start'} gap={{ base: 0, xl: 2 }}>
                 <Heading
                     as={'h1'}
-                    size={'2xl'}
                     color={keyColors.primary}
-                    fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
+                    fontSize={{ base: 'xl', lg: '2xl', xl: '3xl' }}
                     fontWeight={'normal'}
                 >
                     {title}
                 </Heading>
                 <Heading
                     as={'h2'}
-                    size={'md'}
                     color={keyColors.primary}
-                    fontSize={{ base: 'md', sm: 'lg', md: 'xl' }}
+                    fontSize={{ base: 'lg', lg: 'xl', xl: '2xl' }}
                     fontWeight={'normal'}
                 >
-                    {authors.join(', ')}
+                    {formatAuthors(authors)}
                 </Heading>
-                <OriginalSource source={source} />
+                <OriginalSource source={originalSource} />
             </VStack>
             <HStack gap={{ base: 2, md: 4 }}>
                 {Object.values(tags)

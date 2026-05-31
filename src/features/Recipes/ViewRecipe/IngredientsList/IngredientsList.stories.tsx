@@ -1,19 +1,18 @@
 import { Box } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import MethodStep from './MethodStep'
+import IngredientsList from './IngredientsList'
 
-const meta: Meta<typeof MethodStep> = {
-    title: 'Features/Recipes/ViewRecipes/MethodStep',
-    component: MethodStep,
+const meta: Meta<typeof IngredientsList> = {
+    title: 'Features/Recipes/ViewRecipe/IngredientsList',
+    component: IngredientsList,
     decorators: [
         (Story) => (
-            <Box p={4} w="full">
+            <Box maxW="360px" p={4} w="full">
                 <Story />
             </Box>
         ),
     ],
     args: {
-        method: 'Preheat the oven to 200C. Place the chicken breasts and leeks in a roasting tin and drizzle with olive oil. Roast for 20 minutes until the chicken is cooked through.',
         ingredients: [
             { item: 'Chicken breasts', quantity: 2 },
             { item: 'Leeks', preparation: 'finely sliced', quantity: 3 },
@@ -28,6 +27,6 @@ const meta: Meta<typeof MethodStep> = {
 }
 
 export default meta
-type Story = StoryObj<typeof MethodStep>
+type Story = StoryObj<typeof IngredientsList>
 
 export const Default: Story = {}

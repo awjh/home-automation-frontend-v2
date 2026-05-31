@@ -1,13 +1,13 @@
 import { Box } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import IngredientsList from './IngredientsList'
+import MethodIngredients from './MethodIngredients'
 
-const meta: Meta<typeof IngredientsList> = {
-    title: 'Features/Recipes/ViewRecipes/IngredientsList',
-    component: IngredientsList,
+const meta: Meta<typeof MethodIngredients> = {
+    title: 'Features/Recipes/ViewRecipe/MethodIngredients',
+    component: MethodIngredients,
     decorators: [
         (Story) => (
-            <Box maxW="360px" p={4} w="full">
+            <Box maxW="450px" p={4} w="full">
                 <Story />
             </Box>
         ),
@@ -27,6 +27,6 @@ const meta: Meta<typeof IngredientsList> = {
 }
 
 export default meta
-type Story = StoryObj<typeof IngredientsList>
+type Story = StoryObj<typeof MethodIngredients>
 
 export const Default: Story = {}

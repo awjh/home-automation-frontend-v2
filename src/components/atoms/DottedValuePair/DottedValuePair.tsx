@@ -69,7 +69,13 @@ export default function DottedValuePair({ left, right }: DottedValuePairProps) {
     const animationDuration = `${Math.max(10, overflowDistance / 24)}s`
 
     return (
-        <Flex justifyContent={'space-between'} alignItems={'start'} minW={0} w="full">
+        <Flex
+            justifyContent={'space-between'}
+            alignItems={'start'}
+            minW={0}
+            w="full"
+            fontSize={{ base: 'sm', md: 'lg' }}
+        >
             <Box ref={leftContainerRef} minW={0} overflow={'hidden'} mr={2} flexShrink={1}>
                 <Text
                     ref={leftTextRef}
