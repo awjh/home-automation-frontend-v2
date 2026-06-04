@@ -1,8 +1,8 @@
 import ImageWithFallback from '@atoms/ImageWithFallback/ImageWithFallback'
 import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
-import { Box, Flex, HStack, Stack, VStack } from '@chakra-ui/react'
+import { Box, Flex, HStack, Stack, Text, VStack } from '@chakra-ui/react'
 import TabbedContent from '@molecules/TabbedContent/TabbedContent'
-import RecipeMealPlans from './RecipeMealPlans/RecipeMealPlans'
+import RecipeMealPlans, { RecipeMealPlanDate } from './RecipeMealPlans/RecipeMealPlans'
 import RecipeIngredients from './RecipeIngredients/RecipeIngredients'
 import RecipeSummary from './RecipeSummary/RecipeSummary'
 import useColorMode from '@hooks/useColorMode'
@@ -24,7 +24,7 @@ const imageHeights = {
 
 interface ViewRecipeProps {
     recipe: Recipe
-    dates: string[]
+    dates: RecipeMealPlanDate[]
     onDateClick: (date: string) => void
 }
 
@@ -81,9 +81,20 @@ export default function ViewRecipe({ recipe, dates, onDateClick }: ViewRecipePro
                 justifyContent={'start'}
                 alignItems={'start'}
             >
-                <Box pr={{ base: 0, md: 6 }} boxSizing={'border-box'} minW={imageWidths}>
+                <VStack
+                    pr={{ base: 0, md: 6 }}
+                    py={0}
+                    boxSizing={'border-box'}
+                    minW={imageWidths}
+                    justifyContent={'start'}
+                    alignItems={'start'}
+                    gap={4}
+                >
+                    <Text fontSize={'2xl'} color={keyColors.primary}>
+                        Ingredients
+                    </Text>
                     <RecipeIngredients ingredients={recipe.ingredients} />
-                </Box>
+                </VStack>
                 <Flex
                     display={{ base: 'none', md: 'flex' }}
                     w={0.5}
@@ -91,9 +102,12 @@ export default function ViewRecipe({ recipe, dates, onDateClick }: ViewRecipePro
                     bg={keyColors.primary}
                     ml={{ base: 0, md: -6 }}
                 />
-                <Box flex={1}>
+                <VStack flex={1} gap={4}>
+                    <Text fontSize={'2xl'} color={keyColors.primary} alignSelf={'start'}>
+                        Method
+                    </Text>
                     <RecipeMethod method={recipe.method} />
-                </Box>
+                </VStack>
             </HStack>
         </VStack>
     )

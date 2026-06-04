@@ -74,7 +74,7 @@ export default function DottedValuePair({ left, right }: DottedValuePairProps) {
             alignItems={'start'}
             minW={0}
             w="full"
-            fontSize={{ base: 'sm', md: 'lg' }}
+            fontSize={{ base: 'sm', md: 'md' }}
         >
             <Box ref={leftContainerRef} minW={0} overflow={'hidden'} mr={2} flexShrink={1}>
                 <Text

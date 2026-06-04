@@ -9,7 +9,13 @@ export default function RecipeMethod({ method }: RecipeMethodProps) {
     const { keyColors } = useColorMode()
 
     return (
-        <VStack alignItems={'start'} gap={4} w={'full'} minW={0}>
+        <VStack
+            alignItems={'start'}
+            gap={4}
+            w={'full'}
+            minW={0}
+            fontSize={{ base: 'sm', md: 'md' }}
+        >
             {method.map((methodStep, index) => (
                 <HStack
                     key={`method-step-${index}`}

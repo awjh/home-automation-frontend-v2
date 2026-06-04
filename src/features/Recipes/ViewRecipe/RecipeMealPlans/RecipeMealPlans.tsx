@@ -1,8 +1,16 @@
 import Tag from '@atoms/Tag/Tag'
+import { MealTime, Course } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Box, HStack } from '@chakra-ui/react'
+import { formatDate } from '@utils/formatDate'
+
+export interface RecipeMealPlanDate {
+    date: string
+    mealTime: MealTime
+    course: Course
+}
 
 export interface RecipeMealPlansProps {
-    dates: string[]
+    dates: RecipeMealPlanDate[]
     onDateClick: (date: string) => void
 }
 
@@ -47,12 +55,50 @@ function getStartOfWeek(date: Date): Date {
     return startOfWeek
 }
 
-export default function RecipeMealPlans({ dates }: RecipeMealPlansProps) {
+function resolveClickedDateForDay(
+    day: (typeof daysOfWeek)[number],
+    dates: RecipeMealPlanDate[],
+    currentWeekStart: Date,
+) {
+    const targetDayIndex = daysOfWeek.indexOf(day)
+
+    const matchingDates = dates
+        .map((mealPlanDate) => parseIsoDate(mealPlanDate.date))
+        .filter((date): date is Date => Boolean(date))
+        .map((date) => {
+            const weekStart = getStartOfWeek(date)
+            const diffInDays = Math.round(
+                (weekStart.getTime() - currentWeekStart.getTime()) / (1000 * 60 * 60 * 24),
+            )
+
+            return {
+                date,
+                weekOffset: diffInDays / 7,
+                dayIndex: (date.getDay() + 6) % 7,
+            }
+        })
+        .filter(
+            ({ weekOffset, dayIndex }) =>
+                [0, 1, 2].includes(weekOffset) && dayIndex === targetDayIndex,
+        )
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+
+    if (matchingDates.length > 0) {
+        return formatDate(matchingDates[0].date)
+    }
+
+    const fallbackDate = new Date(currentWeekStart)
+    fallbackDate.setDate(currentWeekStart.getDate() + targetDayIndex)
+
+    return formatDate(fallbackDate)
+}
+
+export default function RecipeMealPlans({ dates, onDateClick }: RecipeMealPlansProps) {
     const currentWeekStart = getStartOfWeek(new Date())
     const dayStatuses = new Map<(typeof daysOfWeek)[number], 'highlighted' | 'subtle'>()
 
-    dates.forEach((date) => {
-        const parsedDate = parseIsoDate(date)
+    dates.forEach((mealPlanDate) => {
+        const parsedDate = parseIsoDate(mealPlanDate.date)
 
         if (!parsedDate) {
             return
@@ -85,6 +131,9 @@ export default function RecipeMealPlans({ dates }: RecipeMealPlansProps) {
                 return (
                     <Tag
                         key={day}
+                        onClick={() =>
+                            onDateClick(resolveClickedDateForDay(day, dates, currentWeekStart))
+                        }
                         value={
                             <>
                                 <Box as="span" display={{ base: 'inline', md: 'none' }}>

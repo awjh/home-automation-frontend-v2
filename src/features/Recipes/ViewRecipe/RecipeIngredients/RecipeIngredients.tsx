@@ -19,7 +19,7 @@ export default function RecipeIngredients({ ingredients }: RecipeIngredientsProp
                         <Heading
                             as={'h3'}
                             color={keyColors.primary}
-                            fontSize={{ base: 'lg', md: 'xl' }}
+                            fontSize={{ base: 'md', md: 'lg' }}
                             fontWeight={'normal'}
                             textTransform={'capitalize'}
                         >

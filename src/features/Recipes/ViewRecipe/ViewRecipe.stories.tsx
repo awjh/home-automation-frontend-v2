@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { expect, fn } from 'storybook/test'
 import MockDate from 'mockdate'
 import OnlineRecipe from '@test/mockData/recipes/OnlineRecipe'
@@ -25,7 +26,18 @@ const meta: Meta<typeof ViewRecipe> = {
             ...OnlineRecipe,
             image: '/recipe.jpg',
         },
-        dates: ['2026-06-02', '2026-06-09'],
+        dates: [
+            {
+                date: '2026-06-02',
+                mealTime: MealTime.DINNER,
+                course: Course.MAIN,
+            },
+            {
+                date: '2026-06-09',
+                mealTime: MealTime.LUNCH,
+                course: Course.SIDE,
+            },
+        ],
         onDateClick: fn(),
     },
 }
@@ -52,7 +64,7 @@ export const SwitchesVisibleRecipeSectionOnSmallScreens: Story = {
         expect(ingredientsPanel).toHaveTextContent(/for the bolognese/i)
         expect(ingredientsPanel).not.toHaveTextContent(/heat the olive oil in a large saucepan/i)
 
-        await userEvent.click(canvas.getByRole('button', { name: /method/i }))
+        await userEvent.click(canvas.getByText(/^method$/i))
 
         const methodPanel = canvasElement.querySelector('[data-active-tab="Method"]')
 

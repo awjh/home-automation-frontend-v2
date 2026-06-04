@@ -23,6 +23,7 @@ export default function TabbedContent({
         }
 
         if (!activeTab || !tabs.includes(activeTab)) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setActiveTab(
                 initialActiveTab && tabs.includes(initialActiveTab)
                     ? initialActiveTab

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect } from 'storybook/test'
+import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
+import { expect, fn } from 'storybook/test'
 import MockDate from 'mockdate'
 import { useEffect } from 'react'
 import RecipeMealPlans from './RecipeMealPlans'
@@ -19,6 +20,9 @@ const meta: Meta<typeof RecipeMealPlans> = {
     component: RecipeMealPlans,
     decorators: [(Story) => <Story />],
     render: (args) => <StoryWrapper {...args} />,
+    args: {
+        onDateClick: fn(),
+    },
 }
 
 export default meta
@@ -32,7 +36,28 @@ export const NoneSelected: Story = {
 
 export const ShowsCurrentAndUpcomingWeeks: Story = {
     args: {
-        dates: ['2026-04-07', '2026-04-09', '2026-04-14', '2026-04-20'],
+        dates: [
+            {
+                date: '2026-05-26',
+                mealTime: MealTime.DINNER,
+                course: Course.MAIN,
+            },
+            {
+                date: '2026-05-28',
+                mealTime: MealTime.LUNCH,
+                course: Course.SIDE,
+            },
+            {
+                date: '2026-06-01',
+                mealTime: MealTime.DINNER,
+                course: Course.MAIN,
+            },
+            {
+                date: '2026-06-09',
+                mealTime: MealTime.LUNCH,
+                course: Course.STARTER,
+            },
+        ],
     },
     play: async ({ canvas }) => {
         expect(canvas.getByText(/monday/i).closest('[data-status]')).toHaveAttribute(

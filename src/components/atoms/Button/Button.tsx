@@ -70,9 +70,9 @@ export default function Button(props: ButtonProps) {
                       : keyColors.primary
             }
             borderWidth={isTabButton ? 0 : colorStyle === 'link' ? 0 : 2}
-            borderLeftWidth={tabBorderSide === 'left' ? 2 : 0}
-            borderRightWidth={tabBorderSide === 'right' ? 2 : 0}
-            borderBottomWidth={isTabButton && !isActiveTab ? 2 : 0}
+            borderLeftWidth={isTabButton ? (tabBorderSide === 'left' ? 2 : 0) : undefined}
+            borderRightWidth={isTabButton ? (tabBorderSide === 'right' ? 2 : 0) : undefined}
+            borderBottomWidth={isTabButton ? (!isActiveTab ? 2 : 0) : undefined}
             bg={
                 isTabButton
                     ? isActiveTab
@@ -111,7 +111,13 @@ export default function Button(props: ButtonProps) {
             w={w}
             onClick={onClick}
             size={size}
-            fontSize={colorStyle === 'link' ? 'inherit' : undefined}
+            fontSize={
+                colorStyle === 'link'
+                    ? 'inherit'
+                    : colorStyle === 'tab'
+                      ? { base: 'md', md: 'lg' }
+                      : undefined
+            }
             loading={props.loading}
             loadingText={props.loadingText}
             data-active={isTabButton && isActiveTab ? 'true' : undefined}

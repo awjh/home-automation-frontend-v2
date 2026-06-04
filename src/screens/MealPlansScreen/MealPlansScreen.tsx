@@ -43,6 +43,19 @@ interface PendingAddMealState {
     isSourceEditable: boolean
 }
 
+type PendingMealPlanState =
+    | {
+          mode: 'add'
+          initialValues: PendingAddMealState['initialValues']
+          isSourceEditable: boolean
+      }
+    | {
+          mode: 'edit'
+          mealPlan: MealPlan
+          initialValues: AddMealPlanFormValues
+          isSourceEditable: boolean
+      }
+
 function getDateRangeForWeek(date: Date) {
     const startDate = new Date(date)
     startDate.setDate(date.getDate() - date.getDay())
@@ -70,8 +83,7 @@ export default function MealPlansScreen({
     const [selectedDateRange, setSelectedDateRange] = useState(() =>
         getDateRangeForWeek(initialDate),
     )
-    const [pendingAddMeal, setPendingAddMeal] = useState<PendingAddMealState | null>(null)
-    const [mealPlanPendingEdit, setMealPlanPendingEdit] = useState<MealPlan | null>(null)
+    const [pendingMealPlan, setPendingMealPlan] = useState<PendingMealPlanState | null>(null)
     const [mealPlanPendingDelete, setMealPlanPendingDelete] = useState<MealPlan | null>(null)
     const latestRequestId = useRef(0)
 
@@ -98,46 +110,71 @@ export default function MealPlansScreen({
     )
 
     const onAddMeal = useCallback((day: Date) => {
-        setPendingAddMeal({
+        setPendingMealPlan({
+            mode: 'add',
             initialValues: { mealDate: formatDate(day) },
             isSourceEditable: true,
         })
     }, [])
 
-    const onCloseAddMeal = useCallback(() => {
-        setPendingAddMeal(null)
+    const onCloseMealPlan = useCallback(() => {
+        setPendingMealPlan(null)
     }, [])
 
-    const onCloseEditMeal = useCallback(() => {
-        setMealPlanPendingEdit(null)
-    }, [])
-
-    const handleAddMealSubmit = useCallback(
+    const handleMealPlanSubmit = useCallback(
         async (values: AddMealPlanFormValues) => {
-            if (!pendingAddMeal) {
+            if (!pendingMealPlan) {
                 return
             }
 
-            await onAddMealSubmit(values)
+            if (pendingMealPlan.mode === 'add') {
+                await onAddMealSubmit(values)
 
-            const createdMealPlan = createMealPlanFromFormValues(values)
+                const createdMealPlan = createMealPlanFromFormValues(values)
 
-            setMeals((currentMeals) => [...currentMeals, createdMealPlan])
+                setMeals((currentMeals) => [...currentMeals, createdMealPlan])
 
-            if (values.source !== 'leftovers' && values.useForLeftovers) {
-                setPendingAddMeal({
-                    initialValues: createInitialLeftoversFormValuesFromMealPlan(
-                        createdMealPlan,
-                        values.leftoversDate,
-                    ),
-                    isSourceEditable: false,
-                })
+                if (values.source !== 'leftovers' && values.useForLeftovers) {
+                    setPendingMealPlan({
+                        mode: 'add',
+                        initialValues: createInitialLeftoversFormValuesFromMealPlan(
+                            createdMealPlan,
+                            values.leftoversDate,
+                        ),
+                        isSourceEditable: false,
+                    })
+                    return
+                }
+
+                setPendingMealPlan(null)
                 return
             }
 
-            setPendingAddMeal(null)
+            await onEditMealSubmit(pendingMealPlan.mealPlan, values)
+
+            const updatedMealPlan = {
+                ...createMealPlanFromFormValues({
+                    ...values,
+                    mealTime: pendingMealPlan.mealPlan.mealTime,
+                    course: pendingMealPlan.mealPlan.course,
+                }),
+                mealTime: pendingMealPlan.mealPlan.mealTime,
+                course: pendingMealPlan.mealPlan.course,
+            }
+
+            setMeals((currentMeals) =>
+                currentMeals.map((mealPlan) =>
+                    mealPlan.date === pendingMealPlan.mealPlan.date &&
+                    mealPlan.mealTime === pendingMealPlan.mealPlan.mealTime &&
+                    mealPlan.course === pendingMealPlan.mealPlan.course
+                        ? updatedMealPlan
+                        : mealPlan,
+                ),
+            )
+
+            setPendingMealPlan(null)
         },
-        [onAddMealSubmit, pendingAddMeal],
+        [onAddMealSubmit, onEditMealSubmit, pendingMealPlan],
     )
 
     const onDeleteMeal = useCallback((mealPlan: MealPlan) => {
@@ -145,41 +182,13 @@ export default function MealPlansScreen({
     }, [])
 
     const onEditMeal = useCallback((mealPlan: MealPlan) => {
-        setMealPlanPendingEdit(mealPlan)
+        setPendingMealPlan({
+            mode: 'edit',
+            mealPlan,
+            initialValues: createInitialFormValuesFromMealPlan(mealPlan),
+            isSourceEditable: true,
+        })
     }, [])
-
-    const handleEditMealSubmit = useCallback(
-        async (values: AddMealPlanFormValues) => {
-            if (!mealPlanPendingEdit) {
-                return
-            }
-
-            await onEditMealSubmit(mealPlanPendingEdit, values)
-
-            const updatedMealPlan = {
-                ...createMealPlanFromFormValues({
-                    ...values,
-                    mealTime: mealPlanPendingEdit.mealTime,
-                    course: mealPlanPendingEdit.course,
-                }),
-                mealTime: mealPlanPendingEdit.mealTime,
-                course: mealPlanPendingEdit.course,
-            }
-
-            setMeals((currentMeals) =>
-                currentMeals.map((mealPlan) =>
-                    mealPlan.date === mealPlanPendingEdit.date &&
-                    mealPlan.mealTime === mealPlanPendingEdit.mealTime &&
-                    mealPlan.course === mealPlanPendingEdit.course
-                        ? updatedMealPlan
-                        : mealPlan,
-                ),
-            )
-
-            setMealPlanPendingEdit(null)
-        },
-        [mealPlanPendingEdit, onEditMealSubmit],
-    )
 
     const onCancelDeleteMeal = useCallback(() => {
         setMealPlanPendingDelete(null)
@@ -208,28 +217,16 @@ export default function MealPlansScreen({
 
     return (
         <VStack width={'full'} minHeight={'100vh'}>
-            {pendingAddMeal && (
+            {pendingMealPlan && (
                 <AddMealPlan
                     flowSource={FlowSource.MEAL_PLANNER}
-                    initialValues={pendingAddMeal.initialValues}
+                    mode={pendingMealPlan.mode}
+                    initialValues={pendingMealPlan.initialValues}
                     extractTitleFromOnlineSource={extractTitleFromOnlineSource}
-                    isSourceEditable={pendingAddMeal.isSourceEditable}
+                    isSourceEditable={pendingMealPlan.isSourceEditable}
                     searchInternalRecipes={searchInternalRecipes}
-                    onSubmit={handleAddMealSubmit}
-                    onClose={onCloseAddMeal}
-                    mode={'add'}
-                />
-            )}
-            {mealPlanPendingEdit && (
-                <AddMealPlan
-                    flowSource={FlowSource.MEAL_PLANNER}
-                    mode={'edit'}
-                    initialValues={createInitialFormValuesFromMealPlan(mealPlanPendingEdit)}
-                    isSourceEditable={true}
-                    extractTitleFromOnlineSource={extractTitleFromOnlineSource}
-                    searchInternalRecipes={searchInternalRecipes}
-                    onSubmit={handleEditMealSubmit}
-                    onClose={onCloseEditMeal}
+                    onSubmit={handleMealPlanSubmit}
+                    onClose={onCloseMealPlan}
                 />
             )}
             {mealPlanPendingDelete && (
