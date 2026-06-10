@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import AddMealPlanInternalRecipeStep from './AddMealPlanInternalRecipeStep'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
+import formatAuthors from '@utils/formatAuthors'
 
 const searchRecipes: (keywords: string) => Promise<GetRecipesResponse> = async (keywords) => {
     const recipes: GetRecipesResponse = [
@@ -153,7 +154,27 @@ function StoryWrapper({ onBack = fn(), onSubmit = fn(), defaultValues }: StoryWr
                         errors={errors}
                         onBack={onBack}
                         searchRecipes={searchRecipes}
-                        setValue={setValue}
+                        onRecipeSelected={(recipe) => {
+                            setValue('title', recipe.title, {
+                                shouldDirty: true,
+                            })
+                            setValue('author', formatAuthors(recipe.authors), {
+                                shouldDirty: true,
+                            })
+                            setValue('prepDuration', recipe.duration.prepDuration.toString(), {
+                                shouldDirty: true,
+                            })
+                            setValue(
+                                'cookingDuration',
+                                recipe.duration.cookingDuration.toString(),
+                                {
+                                    shouldDirty: true,
+                                },
+                            )
+                            setValue('standingTime', recipe.duration.standingTime.toString(), {
+                                shouldDirty: true,
+                            })
+                        }}
                     />
                 </VStack>
             </form>

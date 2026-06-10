@@ -1,6 +1,7 @@
 import type { GetMealPlansResponse } from '@awjh/home-automation-v2-api-models'
 import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { buildBookRecipe } from './recipeBuilders/buildRecipe'
+import getStartOfWeek from '../mealPlans/utils/getStartOfWeek'
 
 describe('recipe page', () => {
     const createdRecipeIds: string[] = []
@@ -65,6 +66,8 @@ describe('recipe page', () => {
 
     it('adds the recipe to meal planner from the recipe page', () => {
         const recipeTitle = `Cypress Recipe Add ${Date.now()}`
+        const startOfWeek = new Date()
+        startOfWeek.setDate(startOfWeek.getDate() - ((startOfWeek.getDay() + 6) % 7)) // Set to previous Monday
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
             createdRecipeIds.push(recipeId)
@@ -116,6 +119,125 @@ describe('recipe page', () => {
                     expect(recipeMealPlans[0].title).to.equal(recipeTitle)
                     expect(recipeMealPlans[0].mealTime).to.equal(MealTime.DINNER)
                     expect(recipeMealPlans[0].course).to.equal(Course.MAIN)
+                    expect(recipeMealPlans[0].date).to.equal(
+                        startOfWeek.toISOString().split('T')[0],
+                    )
+                })
+            })
+        })
+    })
+
+    it('adds the recipe to meal planner from the recipe page and sets it as leftovers', () => {
+        const recipeTitle = `Cypress Recipe Add with leftovers ${Date.now()}`
+        const startOfWeek = getStartOfWeek()
+        const tuesdayDate = new Date(startOfWeek)
+        tuesdayDate.setDate(tuesdayDate.getDate() + 1)
+        const tuesdayDateString = tuesdayDate.toISOString().split('T')[0]
+        const wednesdayDate = new Date(startOfWeek)
+        wednesdayDate.setDate(wednesdayDate.getDate() + 2)
+        const wednesdayDateString = wednesdayDate.toISOString().split('T')[0]
+
+        cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
+            createdRecipeIds.push(recipeId)
+
+            cy.visit(`/recipes/${recipeId}`)
+
+            cy.contains(/tuesday/i).click()
+
+            cy.getByTestId('add-meal-plan-modal')
+                .should('be.visible')
+                .and('have.attr', 'data-mode', 'add')
+                .within(() => {
+                    cy.contains(/setup meal plan for recipe/i).should('be.visible')
+                    cy.getInputByLabel(/meal time/i, 'select').select(MealTime.DINNER, {
+                        force: true,
+                    })
+                    cy.getInputByLabel(/course/i, 'select').select(Course.MAIN, {
+                        force: true,
+                    })
+                    cy.getInputByLabel(/source/i, 'select')
+                        .should('be.disabled')
+                        .and('have.value', SourceType.INTERNAL_RECIPE)
+                    cy.getInputByLabel(/use for leftovers\?/i, 'select').select('true', {
+                        force: true,
+                    })
+                    cy.getInputByLabel(/when will the leftovers be used\?/i, 'input').type(
+                        wednesdayDateString.split('-').reverse().join('/'),
+                    )
+                    cy.clickButtonByText('Next')
+                    cy.clickButtonByText('Submit')
+                })
+
+            cy.getByTestId('add-meal-plan-modal')
+                .should('be.visible')
+                .and('have.attr', 'data-mode', 'add')
+                .within(() => {
+                    cy.contains(/setup meal plan for recipe/i).should('be.visible')
+                    cy.getInputByLabel(/meal time/i, 'select').select(MealTime.LUNCH, {
+                        force: true,
+                    })
+                    cy.getInputByLabel(/course/i, 'select').select(Course.MAIN, {
+                        force: true,
+                    })
+                    cy.getInputByLabel(/source/i, 'select')
+                        .should('be.disabled')
+                        .and('have.value', SourceType.LEFTOVERS)
+                    cy.clickButtonByText('Next')
+                    cy.clickButtonByText('Next')
+
+                    cy.getInputByLabel(/preparation time/i, 'input')
+                        .clear()
+                        .type('0')
+                    cy.getInputByLabel(/cooking time/i, 'input')
+                        .clear()
+                        .type('20')
+                    cy.getInputByLabel(/standing time/i, 'input')
+                        .clear()
+                        .type('0')
+
+                    cy.clickButtonByText('Submit')
+                })
+
+            cy.getByTestId('add-meal-plan-modal').should('not.exist')
+
+            cy.getCookie('stytch_session_jwt', { log: false }).then((sessionCookie) => {
+                cy.request<GetMealPlansResponse>({
+                    method: 'GET',
+                    url: `${Cypress.env('API_BASE_URL')}/meal-plans`,
+                    headers: {
+                        Authorization: `Bearer ${sessionCookie!.value}`,
+                        'x-api-key': Cypress.env('API_KEY'),
+                    },
+                    qs: {
+                        startDate: '2000-01-01',
+                        endDate: '2100-12-31',
+                    },
+                }).then(({ body }) => {
+                    const recipeMealPlans = body.filter(
+                        (mealPlan) =>
+                            mealPlan.source.type === SourceType.INTERNAL_RECIPE &&
+                            mealPlan.source.recipeId === recipeId,
+                    )
+
+                    expect(recipeMealPlans).to.have.length(1)
+                    expect(recipeMealPlans[0].title).to.equal(recipeTitle)
+                    expect(recipeMealPlans[0].mealTime).to.equal(MealTime.DINNER)
+                    expect(recipeMealPlans[0].course).to.equal(Course.MAIN)
+                    expect(recipeMealPlans[0].date).to.equal(tuesdayDateString)
+
+                    const leftoveMealPlans = body.filter(
+                        (mealPlan) =>
+                            mealPlan.source.type === SourceType.LEFTOVERS &&
+                            mealPlan.source.fromDate === tuesdayDateString,
+                    )
+
+                    expect(leftoveMealPlans).to.have.length(1)
+                    expect(leftoveMealPlans[0].mealTime).to.equal(MealTime.LUNCH)
+                    expect(leftoveMealPlans[0].course).to.equal(Course.MAIN)
+                    expect(leftoveMealPlans[0].date).to.equal(wednesdayDateString)
+                    expect(recipeMealPlans[0].title).to.equal(recipeTitle)
+
+                    // TODO - test if works
                 })
             })
         })

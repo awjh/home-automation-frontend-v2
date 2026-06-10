@@ -64,7 +64,7 @@ export const SwitchesVisibleRecipeSectionOnSmallScreens: Story = {
         expect(ingredientsPanel).toHaveTextContent(/for the bolognese/i)
         expect(ingredientsPanel).not.toHaveTextContent(/heat the olive oil in a large saucepan/i)
 
-        await userEvent.click(canvas.getByText(/^method$/i))
+        await userEvent.click(canvas.getByRole('button', { name: /^method$/i }))
 
         const methodPanel = canvasElement.querySelector('[data-active-tab="Method"]')
 

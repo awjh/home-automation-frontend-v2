@@ -13,7 +13,7 @@ export default function AreYouSure(props: AreYouSureProps) {
     const { keyColors } = useColorMode()
 
     return (
-        <Flex position={'fixed'} zIndex={100} justifyContent={'center'}>
+        <Flex position={'fixed'} zIndex={100} justifyContent={'center'} w={'100vw'}>
             <Flex
                 position={'fixed'}
                 left={0}

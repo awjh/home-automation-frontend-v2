@@ -5,6 +5,7 @@ import {
 import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import formatAuthors from '@utils/formatAuthors'
 import { getEmptyAddMealPlanFormValues } from '../utils/createInitialFormValuesFromMealPlan'
 import AddMealPlanFormValues from './defs/AddMealPlanFormValues'
 import getFlowRules from './flows/getFlowRules'
@@ -112,6 +113,23 @@ export default function AddMealPlanForm({
             trigger={trigger}
             extractTitleFromOnlineSource={extractTitleFromOnlineSource}
             searchRecipes={searchInternalRecipes}
+            onRecipeSelected={(recipe) => {
+                setValue('title', recipe.title, {
+                    shouldDirty: true,
+                })
+                setValue('author', formatAuthors(recipe.authors), {
+                    shouldDirty: true,
+                })
+                setValue('prepDuration', recipe.duration.prepDuration.toString(), {
+                    shouldDirty: true,
+                })
+                setValue('cookingDuration', recipe.duration.cookingDuration.toString(), {
+                    shouldDirty: true,
+                })
+                setValue('standingTime', recipe.duration.standingTime.toString(), {
+                    shouldDirty: true,
+                })
+            }}
             setValue={setValue}
             authorLabel={authorLabel}
             showAuthor={showAuthor}

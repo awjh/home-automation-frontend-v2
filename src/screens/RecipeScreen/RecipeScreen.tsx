@@ -5,15 +5,13 @@ import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
 import { VStack } from '@chakra-ui/react'
 import MealPlan from '@defs/MealPlan'
-import AddMealPlan from '@features/MealPlanner/AddMealPlan/AddMealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import FlowSource from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/FlowSource'
-import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
+import MealPlanPopups from '@features/MealPlanner/MealPlanPopups/MealPlanPopups'
 import NavBar from '@features/NavBar/NavBar'
 import { RecipeMealPlanDate } from '@features/Recipes/ViewRecipe/RecipeMealPlans/RecipeMealPlans'
 import ViewRecipe from '@features/Recipes/ViewRecipe/ViewRecipe'
 import useColorMode from '@hooks/useColorMode'
-import AreYouSure from '@molecules/AreYouSure/AreYouSure'
 import formatAuthors from '@utils/formatAuthors'
 import { formatDate } from '@utils/formatDate'
 import { useCallback, useMemo, useState } from 'react'
@@ -35,11 +33,6 @@ export default function RecipeScreen({
 }: RecipeScreenProps) {
     const { keyColors } = useColorMode()
     const [mealPlanDates, setMealPlanDates] = useState(dates)
-    const [pendingMealDate, setPendingMealDate] = useState<string | null>(null)
-    const [mealPlanPendingDelete, setMealPlanPendingDelete] = useState<Pick<
-        MealPlan,
-        'date' | 'mealTime' | 'course'
-    > | null>(null)
 
     const internalRecipeInitialValues = useMemo(
         () => ({
@@ -54,41 +47,11 @@ export default function RecipeScreen({
         [recipe],
     )
 
-    const onDateClick = useCallback(
-        (date: string) => {
-            const existingMealPlanDate = mealPlanDates.find(
-                (mealPlanDate) => mealPlanDate.date === date,
-            )
-
-            if (existingMealPlanDate) {
-                setMealPlanPendingDelete(existingMealPlanDate)
-                return
-            }
-
-            // recipe meal dates sends the default date as from the start of the week
-            // usually when adding meal plans its as we're shopping for next week
-            // so we add 7 days for handiness
-
-            const [year, month, day] = date.split('-').map(Number)
-            const nextWeek = new Date(year, month - 1, day)
-            nextWeek.setDate(nextWeek.getDate() + 7)
-            const dateToAdd = formatDate(nextWeek)
-            setPendingMealDate(dateToAdd)
-        },
-        [mealPlanDates],
-    )
-
-    const onCloseMealPlan = useCallback(() => {
-        setPendingMealDate(null)
-    }, [])
-
     const handleMealPlanSubmit = useCallback(
         async (values: AddMealPlanFormValues) => {
-            if (!pendingMealDate) {
-                return
+            if (values.source === SourceType.LEFTOVERS) {
+                return onAddMealSubmit(values)
             }
-
-            // TODO need to handle when they want leftovers so it does that flow once done ideally I think - test it out if can?
 
             const submittedValues: AddMealPlanFormValues = {
                 ...values,
@@ -112,89 +75,121 @@ export default function RecipeScreen({
                 standingTime: recipe.duration.standingTime.toString(),
             }
 
-            await onAddMealSubmit(submittedValues)
+            return onAddMealSubmit(submittedValues)
+        },
+        [onAddMealSubmit, recipe],
+    )
 
-            const createdMealPlan = createMealPlanFromFormValues(submittedValues)
+    const onAddMealSuccess = useCallback(
+        (response: PostMealPlanResponse, values: AddMealPlanFormValues) => {
+            // Only update the recipe date highlights for the primary internal recipe add.
+            // Leftovers follow-up submissions should be persisted but not reflected here.
+            if (values.source !== SourceType.INTERNAL_RECIPE) {
+                return
+            }
+
+            const course = values.course
+
+            if (!course) {
+                throw new Error('Course is required for recipe meal plans')
+            }
 
             setMealPlanDates((currentDates) => [
                 ...currentDates,
                 {
-                    date: createdMealPlan.date,
-                    mealTime: createdMealPlan.mealTime,
-                    course: createdMealPlan.course,
+                    date: response.date,
+                    mealTime: response.mealTime,
+                    course,
                 },
             ])
-            setPendingMealDate(null)
-
-            if (submittedValues.useForLeftovers) {
-                // TODO
-            }
         },
-        [onAddMealSubmit, pendingMealDate, recipe],
+        [],
     )
 
-    const onCancelDeleteMeal = useCallback(() => {
-        setMealPlanPendingDelete(null)
+    const createAddInitialValues = useCallback(
+        (day: Date) => ({
+            mealDate: formatDate(day),
+            ...internalRecipeInitialValues,
+        }),
+        [internalRecipeInitialValues],
+    )
+
+    const onRecipeDateClick = useCallback(
+        (
+            date: string,
+            controls: {
+                onAddMeal: (day: Date) => void
+                onDeleteMeal: (mealPlan: RecipeMealPlanDate) => void
+            },
+        ) => {
+            const existingMealPlanDate = mealPlanDates.find(
+                (mealPlanDate) => mealPlanDate.date === date,
+            )
+
+            if (existingMealPlanDate) {
+                controls.onDeleteMeal(existingMealPlanDate)
+                return
+            }
+
+            // recipe meal dates sends the default date as from the start of the week
+            // usually when adding meal plans its as we're shopping for next week
+            // so we add 7 days for handiness
+            const [year, month, day] = date.split('-').map(Number)
+            const nextWeek = new Date(year, month - 1, day)
+            nextWeek.setDate(nextWeek.getDate() + 7)
+            controls.onAddMeal(nextWeek)
+        },
+        [mealPlanDates],
+    )
+
+    const unsupportedRecipePopupAction = useCallback(async () => {
+        throw new Error('Unsupported in recipe meal plan popup flow')
     }, [])
 
-    const onConfirmDeleteMeal = useCallback(async () => {
-        if (!mealPlanPendingDelete) {
-            return
-        }
-
-        const deletedMealPlan = await onDeleteMealSubmit(mealPlanPendingDelete)
-
-        setMealPlanDates((currentDates) =>
-            currentDates.filter(
-                (mealPlanDate) =>
-                    !(
-                        mealPlanDate.date === deletedMealPlan.date &&
-                        mealPlanDate.mealTime === deletedMealPlan.mealTime &&
-                        mealPlanDate.course === deletedMealPlan.course
-                    ),
-            ),
-        )
-
-        setMealPlanPendingDelete(null)
-    }, [mealPlanPendingDelete, onDeleteMealSubmit])
+    const onDeleteMealSuccess = useCallback(
+        (deletedMealPlan: Pick<MealPlan, 'date' | 'mealTime' | 'course'>) => {
+            setMealPlanDates((currentDates) =>
+                currentDates.filter(
+                    (mealPlanDate) =>
+                        !(
+                            mealPlanDate.date === deletedMealPlan.date &&
+                            mealPlanDate.mealTime === deletedMealPlan.mealTime &&
+                            mealPlanDate.course === deletedMealPlan.course
+                        ),
+                ),
+            )
+        },
+        [],
+    )
 
     return (
         <VStack width={'full'}>
-            {pendingMealDate && (
-                <AddMealPlan
-                    flowSource={FlowSource.RECIPE_PAGE}
-                    mode={'add'}
-                    initialValues={{
-                        mealDate: pendingMealDate,
-                        ...internalRecipeInitialValues,
-                    }}
-                    isSourceEditable={false}
-                    extractTitleFromOnlineSource={async () => {
-                        alert("I'm not sure how you got here but you did, now go away!")
-                        throw new Error('Not implemented')
-                    }}
-                    searchInternalRecipes={() => {
-                        alert("I'm not sure how you got here but you did, now go away!")
-                        throw new Error('Not implemented')
-                    }}
-                    onSubmit={handleMealPlanSubmit}
-                    onClose={onCloseMealPlan}
-                />
-            )}
-            {mealPlanPendingDelete && (
-                <AreYouSure
-                    title={'Delete Meal Plan?'}
-                    message={
-                        'Are you sure you want to delete this meal plan? This action cannot be undone.'
-                    }
-                    onCancel={onCancelDeleteMeal}
-                    onConfirm={onConfirmDeleteMeal}
-                />
-            )}
             <NavBar />
-            <VStack width={'full'} minHeight={'100vh'} borderColor={keyColors.primary}>
-                <ViewRecipe recipe={recipe} dates={mealPlanDates} onDateClick={onDateClick} />
-            </VStack>
+            <MealPlanPopups<RecipeMealPlanDate>
+                flowSource={FlowSource.RECIPE_PAGE}
+                createAddInitialValues={createAddInitialValues}
+                extractTitleFromOnlineSource={unsupportedRecipePopupAction}
+                searchInternalRecipes={unsupportedRecipePopupAction}
+                onAddMealSubmit={handleMealPlanSubmit}
+                onAddMealSuccess={onAddMealSuccess}
+                onDeleteMealSubmit={onDeleteMealSubmit}
+                onDeleteMealSuccess={onDeleteMealSuccess}
+            >
+                {({ onAddMeal, onDeleteMeal }) => (
+                    <VStack width={'full'} minHeight={'100vh'} borderColor={keyColors.primary}>
+                        <ViewRecipe
+                            recipe={recipe}
+                            dates={mealPlanDates}
+                            onDateClick={(date) =>
+                                onRecipeDateClick(date, {
+                                    onAddMeal,
+                                    onDeleteMeal: (mealPlan) => onDeleteMeal(mealPlan),
+                                })
+                            }
+                        />
+                    </VStack>
+                )}
+            </MealPlanPopups>
         </VStack>
     )
 }

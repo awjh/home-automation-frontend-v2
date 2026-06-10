@@ -1,46 +1,38 @@
 import { Field, Input } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
-import { HTMLInputTypeAttribute } from 'react'
+import { forwardRef, type ComponentPropsWithoutRef, type HTMLInputTypeAttribute } from 'react'
 
-interface TextInputProps {
+type TextInputProps = {
     required: boolean
     type: Omit<HTMLInputTypeAttribute, 'password'>
-    label: string
-    value?: string
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
-    onBlur?: () => void
+    label?: string
     errorMessage?: string
     reserveErrorSpace?: boolean
-}
+} & Omit<ComponentPropsWithoutRef<typeof Input>, 'children' | 'required' | 'type'>
 
-export default function TextInput({
-    type,
-    label,
-    required,
-    value,
-    onChange,
-    onBlur,
-    errorMessage,
-    reserveErrorSpace = false,
-}: TextInputProps) {
+export default forwardRef<HTMLInputElement, TextInputProps>(function TextInput(
+    { type, label, required, errorMessage, reserveErrorSpace = false, ...inputProps },
+    ref,
+) {
     const { keyColors } = useColorMode()
 
     return (
         <Field.Root required={required} invalid={!!errorMessage}>
-            <Field.Label color={keyColors.primary}>
-                {label}
-                {required ? <Field.RequiredIndicator /> : null}
-            </Field.Label>
+            {label && (
+                <Field.Label color={keyColors.primary} textTransform={'capitalize'}>
+                    {label}
+                    {required ? <Field.RequiredIndicator /> : null}
+                </Field.Label>
+            )}
             <Input
+                ref={ref}
                 type={type as string}
                 borderColor={keyColors.primary}
                 borderWidth={2}
                 borderRadius={0}
                 color={keyColors.primary}
                 pl={4}
-                value={value ?? ''}
-                onChange={onChange}
-                onBlur={onBlur}
+                {...inputProps}
             />
             {(reserveErrorSpace || errorMessage) && (
                 <Field.ErrorText visibility={errorMessage ? 'visible' : 'hidden'} minH={'5'}>
@@ -49,4 +41,4 @@ export default function TextInput({
             )}
         </Field.Root>
     )
-}
+})
