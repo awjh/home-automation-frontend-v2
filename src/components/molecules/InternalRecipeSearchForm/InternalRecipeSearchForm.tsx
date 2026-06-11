@@ -8,21 +8,23 @@ import { useState } from 'react'
 
 export type InternalRecipeSummary = GetRecipesResponse[number]
 
-export interface InternalRecipeSearchPopupProps {
+export interface InternalRecipeSearchProps {
     searchRecipes: (keywords: string) => Promise<GetRecipesResponse>
     selectedRecipeId?: string
     onSelectRecipe: (recipe: InternalRecipeSummary) => void
     selectionErrorMessage?: string
+    initialKeywords?: string
 }
 
-export default function InternalRecipeSearchPopup({
+export default function InternalRecipeSearchForm({
     searchRecipes,
     selectedRecipeId,
     onSelectRecipe,
     selectionErrorMessage,
-}: InternalRecipeSearchPopupProps) {
+    initialKeywords = '',
+}: InternalRecipeSearchProps) {
     const { keyColors } = useColorMode()
-    const [keywordsQuery, setKeywordsQuery] = useState('')
+    const [keywordsQuery, setKeywordsQuery] = useState(initialKeywords)
     const [results, setResults] = useState<GetRecipesResponse>([])
     const [searchError, setSearchError] = useState<string | undefined>()
     const [searchPerformed, setSearchPerformed] = useState(false)

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
-import { expect, fn } from 'storybook/test'
+import { expect, fn, waitFor } from 'storybook/test'
 import MockDate from 'mockdate'
 import OnlineRecipe from '@test/mockData/recipes/OnlineRecipe'
 import { useEffect } from 'react'
@@ -48,9 +48,14 @@ type Story = StoryObj<typeof ViewRecipe>
 export const Default: Story = {}
 
 export const SwitchesVisibleRecipeSectionOnSmallScreens: Story = {
+    parameters: {
+        viewport: {
+            defaultViewport: 'mobile1',
+        },
+    },
     globals: {
         viewport: {
-            value: 'mobile',
+            value: 'mobile1',
             isRotated: false,
         },
     },
@@ -63,6 +68,10 @@ export const SwitchesVisibleRecipeSectionOnSmallScreens: Story = {
 
         expect(ingredientsPanel).toHaveTextContent(/for the bolognese/i)
         expect(ingredientsPanel).not.toHaveTextContent(/heat the olive oil in a large saucepan/i)
+
+        await waitFor(() => {
+            expect(canvas.queryByRole('button', { name: /^method$/i })).not.toBeNull()
+        })
 
         await userEvent.click(canvas.getByRole('button', { name: /^method$/i }))
 

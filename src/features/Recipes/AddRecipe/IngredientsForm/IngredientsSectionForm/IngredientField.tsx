@@ -35,8 +35,8 @@ export default function IngredientField({
                 rules={
                     required
                         ? {
-                              validate: (value: string) =>
-                                  value.trim().length > 0 || `${fieldName} is required`,
+                              validate: (value: string | undefined) =>
+                                  (value && value?.trim().length > 0) || `${fieldName} is required`,
                           }
                         : undefined
                 }

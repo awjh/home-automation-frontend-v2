@@ -1,8 +1,8 @@
 import Button from '@atoms/Button/Button'
 import { HStack } from '@chakra-ui/react'
-import InternalRecipeSearchPopup, {
+import InternalRecipeSearchForm, {
     InternalRecipeSummary,
-} from '@molecules/InternalRecipeSearchPopup/InternalRecipeSearchPopup'
+} from '@molecules/InternalRecipeSearchForm/InternalRecipeSearchForm'
 import AddMealPlanBaseProps from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/steps/defs/AddMealPlanBaseProps'
 import { Controller } from 'react-hook-form'
 import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
@@ -45,7 +45,7 @@ export default function AddMealPlanInternalRecipeStep({
             render={({ field }) => {
                 return (
                     <>
-                        <InternalRecipeSearchPopup
+                        <InternalRecipeSearchForm
                             searchRecipes={searchRecipes}
                             selectedRecipeId={field.value}
                             selectionErrorMessage={errors.internalRecipeId?.message?.toString()}

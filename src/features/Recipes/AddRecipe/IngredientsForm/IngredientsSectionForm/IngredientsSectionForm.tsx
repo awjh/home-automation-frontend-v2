@@ -1,25 +1,29 @@
+import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
 import { Box, Grid, GridItem, IconButton, Text, VStack } from '@chakra-ui/react'
-import AreYouSure from '@molecules/AreYouSure/AreYouSure'
 import useColorMode from '@hooks/useColorMode'
+import AreYouSure from '@molecules/AreYouSure/AreYouSure'
 import { Fragment, useState, type KeyboardEvent } from 'react'
 import {
     useFieldArray,
     useWatch,
     type Control,
     type FieldArrayPath,
+    type UseFormClearErrors,
+    type UseFormSetError,
     type UseFormSetFocus,
     type UseFormSetValue,
-    type UseFormTrigger,
 } from 'react-hook-form'
-import { LuLink, LuTrash } from 'react-icons/lu'
+import { LuTrash } from 'react-icons/lu'
 import IngredientField from './IngredientField'
 import IngredientsSectionTitle from './IngredientsSectionTitle'
+import LinkIngredient from './LinkIngredient'
 
 export type IngredientsFormIngredientsRow = {
     quantity: string
     measure: string
     item: string
     preparation: string
+    linkedRecipeId?: string
 }
 
 export type IngredientsFormSection = {
@@ -79,25 +83,30 @@ export function hasPendingDraftIngredient(ingredients: IngredientsFormIngredient
 
 interface IngredientsSectionFormProps {
     control: Control<IngredientsFormValues>
+    clearErrors: UseFormClearErrors<IngredientsFormValues>
     sectionIndex: number
     sectionCount: number
     onDeleteSection: () => void
+    setError: UseFormSetError<IngredientsFormValues>
     setValue: UseFormSetValue<IngredientsFormValues>
-    trigger: UseFormTrigger<IngredientsFormValues>
     setFocus: UseFormSetFocus<IngredientsFormValues>
+    searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
 }
 
-// TODO need to add ability to link an ingredient via popup - can I use existing?
+// TODO
 // Need to allow moving ingredients between sections - would drag and drop be helpful on desktop?
+// then make a cypress test including linking an ingredient
 
 export default function IngredientsSectionForm({
     control,
+    clearErrors,
     sectionIndex,
     sectionCount,
     onDeleteSection,
+    setError,
     setValue,
-    trigger,
     setFocus,
+    searchInternalRecipes,
 }: IngredientsSectionFormProps) {
     const { keyColors } = useColorMode()
     const [isDeleteSectionConfirmationOpen, setIsDeleteSectionConfirmationOpen] = useState(false)
@@ -132,16 +141,36 @@ export default function IngredientsSectionForm({
             return
         }
 
+        const quantityFieldPath = `${ingredientsPath}.${rowIndex}.quantity` as IngredientFieldPath
+        const itemFieldPath = `${ingredientsPath}.${rowIndex}.item` as IngredientFieldPath
         const rowFieldNames = [
-            `${ingredientsPath}.${rowIndex}.quantity`,
+            quantityFieldPath,
             `${ingredientsPath}.${rowIndex}.measure`,
-            `${ingredientsPath}.${rowIndex}.item`,
+            itemFieldPath,
             `${ingredientsPath}.${rowIndex}.preparation`,
         ] as IngredientFieldPath[]
 
-        const isValid = await trigger(rowFieldNames)
+        clearErrors(rowFieldNames)
 
-        if (!isValid) {
+        let hasValidationError = false
+
+        if (!rowValues?.quantity.trim()) {
+            setError(quantityFieldPath, {
+                type: 'required',
+                message: 'quantity is required',
+            })
+            hasValidationError = true
+        }
+
+        if (!rowValues?.item.trim()) {
+            setError(itemFieldPath, {
+                type: 'required',
+                message: 'item is required',
+            })
+            hasValidationError = true
+        }
+
+        if (hasValidationError) {
             return
         }
 
@@ -174,10 +203,7 @@ export default function IngredientsSectionForm({
                 </GridItem>
                 {fields.map((field, rowIndex) => {
                     const isDraftRow = rowIndex === fields.length - 1
-                    const rowValues = watchedIngredients?.[rowIndex]
-                    const isDraftRowEmpty = isIngredientRowEmpty(rowValues)
-                    const shouldRequireDraftRow = !isDraftRowEmpty
-                    const isRequired = !isDraftRow ? true : shouldRequireDraftRow
+                    const isRequired = !isDraftRow
 
                     return (
                         <Fragment key={field.id}>
@@ -233,23 +259,17 @@ export default function IngredientsSectionForm({
                             {isDraftRow ? null : (
                                 <>
                                     <GridItem>
-                                        <IconButton
-                                            type={'button'}
-                                            aria-label={`link ingredient`}
-                                            color={keyColors.primary}
-                                            _hover={{
-                                                bg: keyColors.buttonHoverBg,
-                                                color: keyColors.secondary,
-                                            }}
-                                            background={keyColors.secondary}
-                                            borderWidth={2}
-                                            borderColor={keyColors.primary}
-                                            borderRadius={0}
-                                            onClick={() => {}}
-                                            data-testid={`link-button-${sectionIndex}-${rowIndex}`}
-                                        >
-                                            <LuLink />
-                                        </IconButton>
+                                        <LinkIngredient
+                                            control={control}
+                                            ingredientsPath={ingredientsPath}
+                                            rowIndex={rowIndex}
+                                            sectionIndex={sectionIndex}
+                                            hasLinkedRecipe={
+                                                !!watchedIngredients?.[rowIndex]?.linkedRecipeId
+                                            }
+                                            searchInternalRecipes={searchInternalRecipes}
+                                            setValue={setValue}
+                                        />
                                     </GridItem>
                                     <GridItem>
                                         <IconButton
@@ -266,6 +286,7 @@ export default function IngredientsSectionForm({
                                             borderRadius={0}
                                             onClick={() => {
                                                 remove(rowIndex)
+                                                clearErrors(ingredientsPath)
                                             }}
                                             data-testid={`delete-button-${sectionIndex}-${rowIndex}`}
                                         >

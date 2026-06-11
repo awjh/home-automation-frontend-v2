@@ -9,25 +9,28 @@ import IngredientsSectionForm, {
     trimTrailingEmptyIngredients,
     type IngredientsFormValues,
 } from './IngredientsSectionForm/IngredientsSectionForm'
+import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
 
 interface IngredientsFormProps {
+    searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
     onNext: (values: IngredientsFormValues) => void
     onBack: () => void
 }
 
 export default function IngredientsForm(props: IngredientsFormProps) {
     const { keyColors } = useColorMode()
-    const { control, handleSubmit, setFocus, setValue, trigger } = useForm<IngredientsFormValues>({
-        defaultValues: {
-            sections: [
-                {
-                    name: 'Main Recipe',
-                    ingredients: [createEmptyIngredient()],
-                },
-            ],
-        },
-        mode: 'onTouched',
-    })
+    const { control, clearErrors, handleSubmit, setError, setFocus, setValue } =
+        useForm<IngredientsFormValues>({
+            defaultValues: {
+                sections: [
+                    {
+                        name: 'Main Recipe',
+                        ingredients: [createEmptyIngredient()],
+                    },
+                ],
+            },
+            mode: 'onTouched',
+        })
 
     const {
         fields: sections,
@@ -78,14 +81,16 @@ export default function IngredientsForm(props: IngredientsFormProps) {
                                 <IngredientsSectionForm
                                     key={section.id}
                                     control={control}
+                                    clearErrors={clearErrors}
                                     sectionIndex={sectionIndex}
                                     sectionCount={sections.length}
                                     onDeleteSection={() => {
                                         removeSection(sectionIndex)
                                     }}
+                                    setError={setError}
                                     setValue={setValue}
-                                    trigger={trigger}
                                     setFocus={setFocus}
+                                    searchInternalRecipes={props.searchInternalRecipes}
                                 />
                             ))}
                             <Button

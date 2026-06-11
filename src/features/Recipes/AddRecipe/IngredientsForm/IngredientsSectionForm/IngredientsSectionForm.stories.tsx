@@ -6,9 +6,10 @@ import IngredientsSectionForm, {
     createEmptyIngredient,
     type IngredientsFormValues,
 } from './IngredientsSectionForm'
+import searchRecipes from '@test/storybookHelpers/searchRecipes'
 
 function IngredientsSectionFormStory() {
-    const { control, setFocus, setValue, trigger } = useForm<IngredientsFormValues>({
+    const { clearErrors, control, setError, setFocus, setValue } = useForm<IngredientsFormValues>({
         defaultValues: {
             sections: [
                 {
@@ -23,12 +24,14 @@ function IngredientsSectionFormStory() {
     return (
         <IngredientsSectionForm
             control={control}
+            clearErrors={clearErrors}
             sectionIndex={0}
             sectionCount={1}
             onDeleteSection={() => {}}
+            setError={setError}
             setValue={setValue}
-            trigger={trigger}
             setFocus={setFocus}
+            searchInternalRecipes={searchRecipes}
         />
     )
 }
