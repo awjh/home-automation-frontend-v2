@@ -77,6 +77,8 @@ function resolveClickedDateForDay(
                 dayIndex: (date.getDay() + 6) % 7,
             }
         })
+        // Keep only dates from this week, next week, and the week after that so the
+        // click resolves to the nearest forward occurrence of the selected weekday.
         .filter(
             ({ weekOffset, dayIndex }) =>
                 [0, 1, 2].includes(weekOffset) && dayIndex === targetDayIndex,
@@ -87,6 +89,7 @@ function resolveClickedDateForDay(
         return formatDate(matchingDates[0].date)
     }
 
+    // If there is no scheduled match, default to the selected weekday in the current week.
     const fallbackDate = new Date(currentWeekStart)
     fallbackDate.setDate(currentWeekStart.getDate() + targetDayIndex)
 
@@ -110,6 +113,7 @@ export default function RecipeMealPlans({ dates, onDateClick }: RecipeMealPlansP
         )
         const weekOffset = diffInDays / 7
 
+        // Only care about this week, next week, and the week after that for highlighting purposes.
         if (![0, 1, 2].includes(weekOffset)) {
             return
         }

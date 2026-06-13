@@ -4,7 +4,10 @@ import { expect, waitFor } from 'storybook/test'
 import { useForm, useWatch } from 'react-hook-form'
 import searchRecipes from '@test/storybookHelpers/searchRecipes'
 import LinkIngredient from './LinkIngredient'
-import { createEmptyIngredient, type IngredientsFormValues } from './IngredientsSectionForm'
+import {
+    createEmptyIngredient,
+    type IngredientsFormValues,
+} from '../IngredientsSectionForm/IngredientsSectionForm'
 
 interface LinkIngredientStoryProps {
     initialLinkedRecipeId?: string
@@ -56,7 +59,7 @@ function LinkIngredientStory({
 }
 
 const meta: Meta<typeof LinkIngredientStory> = {
-    title: 'Features/AddRecipe/IngredientsForm/LinkIngredient',
+    title: 'Features/Recipes/AddRecipe/IngredientsForm/LinkIngredient',
     component: LinkIngredientStory,
     decorators: [
         (Story) => (

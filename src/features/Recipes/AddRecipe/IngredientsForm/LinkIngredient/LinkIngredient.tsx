@@ -1,5 +1,8 @@
 import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
-import { IngredientsFormIngredientsRow, IngredientsFormValues } from './IngredientsSectionForm'
+import {
+    IngredientsFormIngredientsRow,
+    IngredientsFormValues,
+} from '../IngredientsSectionForm/IngredientsSectionForm'
 import { Control, FieldArrayPath, UseFormSetValue, useWatch } from 'react-hook-form'
 import { Box, IconButton } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
@@ -14,6 +17,7 @@ export interface LinkIngredientProps {
     rowIndex: number
     sectionIndex: number
     hasLinkedRecipe: boolean
+    disabled?: boolean
     searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
     setValue: UseFormSetValue<IngredientsFormValues>
 }
@@ -24,6 +28,7 @@ export default function LinkIngredient({
     rowIndex,
     sectionIndex,
     hasLinkedRecipe,
+    disabled = false,
     searchInternalRecipes,
     setValue,
 }: LinkIngredientProps) {
@@ -48,6 +53,7 @@ export default function LinkIngredient({
                 borderWidth={2}
                 borderColor={keyColors.primary}
                 borderRadius={0}
+                disabled={disabled ? true : undefined}
                 onClick={() => {
                     if (hasLinkedRecipe) {
                         setValue(`${ingredientsPath}.${rowIndex}.linkedRecipeId`, undefined)

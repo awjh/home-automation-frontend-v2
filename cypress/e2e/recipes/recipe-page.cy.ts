@@ -66,8 +66,11 @@ describe('recipe page', () => {
 
     it('adds the recipe to meal planner from the recipe page', () => {
         const recipeTitle = `Cypress Recipe Add ${Date.now()}`
+
         const startOfWeek = new Date()
-        startOfWeek.setDate(startOfWeek.getDate() - ((startOfWeek.getDay() + 6) % 7)) // Set to previous Monday
+        startOfWeek.setDate(startOfWeek.getDate() - ((startOfWeek.getDay() + 6) % 7)) // Monday of the current week
+        const nextWeekStart = new Date(startOfWeek)
+        nextWeekStart.setDate(nextWeekStart.getDate() + 7)
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
             createdRecipeIds.push(recipeId)
@@ -119,8 +122,10 @@ describe('recipe page', () => {
                     expect(recipeMealPlans[0].title).to.equal(recipeTitle)
                     expect(recipeMealPlans[0].mealTime).to.equal(MealTime.DINNER)
                     expect(recipeMealPlans[0].course).to.equal(Course.MAIN)
+                    // The recipe page treats the clicked weekday as a template and opens
+                    // the modal for the matching weekday in the following week.
                     expect(recipeMealPlans[0].date).to.equal(
-                        startOfWeek.toISOString().split('T')[0],
+                        nextWeekStart.toISOString().split('T')[0],
                     )
                 })
             })
@@ -131,10 +136,10 @@ describe('recipe page', () => {
         const recipeTitle = `Cypress Recipe Add with leftovers ${Date.now()}`
         const startOfWeek = getStartOfWeek()
         const tuesdayDate = new Date(startOfWeek)
-        tuesdayDate.setDate(tuesdayDate.getDate() + 1)
+        tuesdayDate.setDate(tuesdayDate.getDate() + 10) // meal planner buttons use next week for meal dates
         const tuesdayDateString = tuesdayDate.toISOString().split('T')[0]
         const wednesdayDate = new Date(startOfWeek)
-        wednesdayDate.setDate(wednesdayDate.getDate() + 2)
+        wednesdayDate.setDate(wednesdayDate.getDate() + 11)
         const wednesdayDateString = wednesdayDate.toISOString().split('T')[0]
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
@@ -162,7 +167,7 @@ describe('recipe page', () => {
                         force: true,
                     })
                     cy.getInputByLabel(/when will the leftovers be used\?/i, 'input').type(
-                        wednesdayDateString.split('-').reverse().join('/'),
+                        wednesdayDateString,
                     )
                     cy.clickButtonByText('Next')
                     cy.clickButtonByText('Submit')
@@ -236,8 +241,6 @@ describe('recipe page', () => {
                     expect(leftoveMealPlans[0].course).to.equal(Course.MAIN)
                     expect(leftoveMealPlans[0].date).to.equal(wednesdayDateString)
                     expect(recipeMealPlans[0].title).to.equal(recipeTitle)
-
-                    // TODO - test if works
                 })
             })
         })

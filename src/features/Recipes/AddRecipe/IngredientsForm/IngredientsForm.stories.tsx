@@ -1,4 +1,4 @@
-import { expect, fn, waitFor } from 'storybook/test'
+import { expect, fireEvent, fn, waitFor } from 'storybook/test'
 import IngredientsForm from './IngredientsForm'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Box } from '@chakra-ui/react'
@@ -8,7 +8,7 @@ const onNext = fn()
 const onBack = fn()
 
 const meta: Meta<typeof IngredientsForm> = {
-    title: 'Features/AddRecipe/IngredientsForm',
+    title: 'Features/Recipes/AddRecipe/IngredientsForm',
     component: IngredientsForm,
     decorators: [
         (Story) => (
@@ -160,6 +160,117 @@ export const CanSubmitWithIngredientsAcrossSections: Story = {
                 ],
             })
         })
+    },
+}
+
+// This is failing since it seems to try and validate on the draft row - can we just turn off validation for the draft row? Let it validate theres a value or when its moved instead?
+export const CanDragIngredientBetweenSectionsAndSubmit: Story = {
+    play: async ({ canvas, canvasElement, userEvent }: PlayContext) => {
+        onNext.mockClear()
+        const alertSpy = fn()
+        const originalAlert = window.alert
+        window.alert = alertSpy
+
+        try {
+            expect(canvas.queryByRole('button', { name: /enter drag and drop mode/i })).toBeNull()
+
+            const textboxes = canvas.getAllByRole('textbox')
+            await userEvent.type(textboxes[0], '1')
+            await userEvent.type(textboxes[2], 'Onion')
+            await userEvent.click(textboxes[2])
+            await userEvent.keyboard('{Enter}')
+
+            await waitFor(() => {
+                expect(canvas.getAllByRole('textbox')).toHaveLength(8)
+            })
+
+            const textboxes2 = canvas.getAllByRole('textbox')
+            await userEvent.type(textboxes2[4], '2')
+            await userEvent.type(textboxes2[6], 'Garlic')
+            await userEvent.click(textboxes2[6])
+            await userEvent.keyboard('{Enter}')
+
+            await waitFor(() => {
+                expect(canvas.getAllByRole('textbox')).toHaveLength(12)
+            })
+
+            await userEvent.click(canvas.getByRole('button', { name: /add section/i }))
+
+            await waitFor(() => {
+                expect(canvas.getByText('section 2')).toBeInTheDocument()
+                expect(
+                    canvas.getByRole('button', { name: /enter drag and drop mode/i }),
+                ).toBeInTheDocument()
+            })
+
+            await userEvent.click(canvas.getByRole('button', { name: /enter drag and drop mode/i }))
+
+            const dragButton = canvas.getByTestId('drag-ingredient-button-0-0')
+            const targetSectionHeading = canvas.getByText('section 2')
+            const dataTransfer = new DataTransfer()
+
+            fireEvent.dragStart(dragButton, { dataTransfer })
+            fireEvent.drop(targetSectionHeading, { dataTransfer })
+            fireEvent.dragEnd(dragButton, { dataTransfer })
+
+            await waitFor(() => {
+                const sourceItemField = canvasElement.querySelector(
+                    'input[name="sections.0.ingredients.0.item"]',
+                ) as HTMLInputElement | null
+                const targetItemField = canvasElement.querySelector(
+                    'input[name="sections.1.ingredients.0.item"]',
+                ) as HTMLInputElement | null
+
+                expect(sourceItemField).not.toBeNull()
+                expect(targetItemField).not.toBeNull()
+                expect(sourceItemField).toHaveValue('Garlic')
+                expect(targetItemField).toHaveValue('Onion')
+            })
+
+            await userEvent.click(canvas.getByRole('button', { name: /exit drag and drop mode/i }))
+
+            await waitFor(() => {
+                expect(
+                    canvas.queryByRole('button', { name: /exit drag and drop mode/i }),
+                ).not.toBeInTheDocument()
+                expect(canvas.getByRole('button', { name: /next/i })).toBeEnabled()
+            })
+
+            await userEvent.click(canvas.getByRole('button', { name: /next/i }))
+
+            await waitFor(() => {
+                expect(alertSpy).not.toHaveBeenCalled()
+                expect(onNext).toHaveBeenCalledOnce()
+                expect(onNext).toHaveBeenCalledWith({
+                    sections: [
+                        {
+                            name: 'Main Recipe',
+                            ingredients: [
+                                {
+                                    quantity: '2',
+                                    measure: '',
+                                    item: 'Garlic',
+                                    preparation: '',
+                                },
+                            ],
+                        },
+                        {
+                            name: 'section 2',
+                            ingredients: [
+                                {
+                                    quantity: '1',
+                                    measure: '',
+                                    item: 'Onion',
+                                    preparation: '',
+                                },
+                            ],
+                        },
+                    ],
+                })
+            })
+        } finally {
+            window.alert = originalAlert
+        }
     },
 }
 

@@ -6,7 +6,7 @@ const onNext = fn()
 const onBack = fn()
 
 const meta: Meta<typeof BasicDetailsForm> = {
-    title: 'Features/AddRecipe/BasicDetailsForm',
+    title: 'Features/Recipes/AddRecipe/BasicDetailsForm',
     component: BasicDetailsForm,
     decorators: [(Story) => <Story />],
     args: {

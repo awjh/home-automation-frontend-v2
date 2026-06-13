@@ -11,6 +11,7 @@ interface IngredientsSectionTitleProps {
     sectionIndex: number
     setValue: UseFormSetValue<IngredientsFormValues>
     canDeleteSection: boolean
+    disabled?: boolean
     onDeleteSection: () => void
 }
 
@@ -19,6 +20,7 @@ export default function IngredientsSectionTitle({
     sectionIndex,
     setValue,
     canDeleteSection = false,
+    disabled = false,
     onDeleteSection,
 }: IngredientsSectionTitleProps) {
     const { keyColors } = useColorMode()
@@ -31,6 +33,10 @@ export default function IngredientsSectionTitle({
     const originalSectionNameRef = useRef(sectionName)
 
     const startEditing = () => {
+        if (disabled) {
+            return
+        }
+
         originalSectionNameRef.current = sectionName
         setIsEditing(true)
     }
@@ -56,6 +62,7 @@ export default function IngredientsSectionTitle({
                                 {...field}
                                 type={'text'}
                                 required={false}
+                                disabled={disabled ? true : undefined}
                                 label={undefined}
                                 errorMessage={fieldState.error?.message}
                                 reserveErrorSpace={true}
@@ -92,6 +99,7 @@ export default function IngredientsSectionTitle({
                     borderWidth={2}
                     borderColor={keyColors.primary}
                     borderRadius={0}
+                    disabled={disabled ? true : undefined}
                     onClick={confirmEdit}
                 >
                     <LuCheck />
@@ -108,6 +116,7 @@ export default function IngredientsSectionTitle({
                     borderWidth={2}
                     borderColor={keyColors.primary}
                     borderRadius={0}
+                    disabled={disabled ? true : undefined}
                     onClick={revertEdit}
                 >
                     <LuX />
@@ -134,6 +143,7 @@ export default function IngredientsSectionTitle({
                     borderWidth={2}
                     borderColor={keyColors.primary}
                     borderRadius={0}
+                    disabled={disabled ? true : undefined}
                     onClick={onDeleteSection}
                 >
                     <LuTrash2 />

@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, waitFor } from 'storybook/test'
 import { useForm } from 'react-hook-form'
 import IngredientField from './IngredientField'
-import { createEmptyIngredient, type IngredientsFormValues } from './IngredientsSectionForm'
+import {
+    createEmptyIngredient,
+    type IngredientsFormValues,
+} from '../IngredientsSectionForm/IngredientsSectionForm'
 
 function IngredientFieldStory({
     isDraftRow = false,
@@ -39,7 +42,7 @@ function IngredientFieldStory({
 }
 
 const meta: Meta<typeof IngredientFieldStory> = {
-    title: 'Features/AddRecipe/IngredientsForm/IngredientField',
+    title: 'Features/Recipes/AddRecipe/IngredientsForm/IngredientField',
     component: IngredientFieldStory,
     args: {
         onDraftRowEnter: fn(),

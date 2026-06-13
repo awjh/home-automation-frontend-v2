@@ -30,6 +30,7 @@ export interface BaseButtonProps {
     children: React.ReactNode
     loading?: boolean
     loadingText?: string
+    disabled?: boolean
 }
 
 export type ButtonProps = BaseButtonProps &
@@ -120,6 +121,7 @@ export default function Button(props: ButtonProps) {
             }
             loading={props.loading}
             loadingText={props.loadingText}
+            disabled={props.disabled ? true : undefined}
             data-active={isTabButton && isActiveTab ? 'true' : undefined}
             data-tab-border-side={tabBorderSide}
         >

@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, waitFor } from 'storybook/test'
 import { useForm } from 'react-hook-form'
 import IngredientsSectionTitle from './IngredientsSectionTitle'
-import { createEmptyIngredient, type IngredientsFormValues } from './IngredientsSectionForm'
+import {
+    createEmptyIngredient,
+    type IngredientsFormValues,
+} from '../IngredientsSectionForm/IngredientsSectionForm'
 
 function IngredientsSectionTitleStory({
     canDeleteSection = false,
@@ -36,7 +39,7 @@ function IngredientsSectionTitleStory({
 }
 
 const meta: Meta<typeof IngredientsSectionTitleStory> = {
-    title: 'Features/AddRecipe/IngredientsForm/IngredientsSectionTitle',
+    title: 'Features/Recipes/AddRecipe/IngredientsForm/IngredientsSectionTitle',
     component: IngredientsSectionTitleStory,
     decorators: [
         (Story) => (

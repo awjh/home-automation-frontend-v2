@@ -2,21 +2,13 @@ import { Box } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, waitFor } from 'storybook/test'
 import { useForm } from 'react-hook-form'
-import IngredientsSectionForm, {
-    createEmptyIngredient,
-    type IngredientsFormValues,
-} from './IngredientsSectionForm'
+import IngredientsSectionForm, { type IngredientsFormValues } from './IngredientsSectionForm'
 import searchRecipes from '@test/storybookHelpers/searchRecipes'
 
 function IngredientsSectionFormStory() {
-    const { clearErrors, control, setError, setFocus, setValue } = useForm<IngredientsFormValues>({
+    const { clearErrors, control, setValue } = useForm<IngredientsFormValues>({
         defaultValues: {
-            sections: [
-                {
-                    name: 'section 1',
-                    ingredients: [createEmptyIngredient()],
-                },
-            ],
+            sections: [{ name: 'section 1', ingredients: [] }],
         },
         mode: 'onTouched',
     })
@@ -27,17 +19,21 @@ function IngredientsSectionFormStory() {
             clearErrors={clearErrors}
             sectionIndex={0}
             sectionCount={1}
+            isDragMode={false}
+            draggingIngredient={null}
             onDeleteSection={() => {}}
-            setError={setError}
+            onDragStartIngredient={() => {}}
+            onDragEndIngredient={() => {}}
+            onDropIngredient={() => {}}
+            onDraftIngredientChange={() => {}}
             setValue={setValue}
-            setFocus={setFocus}
             searchInternalRecipes={searchRecipes}
         />
     )
 }
 
 const meta: Meta<typeof IngredientsSectionFormStory> = {
-    title: 'Features/AddRecipe/IngredientsForm/IngredientsSectionForm',
+    title: 'Features/Recipes/AddRecipe/IngredientsForm/IngredientsSectionForm',
     component: IngredientsSectionFormStory,
     decorators: [
         (Story) => (

@@ -9,14 +9,12 @@ import {
     type Control,
     type FieldArrayPath,
     type UseFormClearErrors,
-    type UseFormSetError,
-    type UseFormSetFocus,
     type UseFormSetValue,
 } from 'react-hook-form'
-import { LuTrash } from 'react-icons/lu'
-import IngredientField from './IngredientField'
-import IngredientsSectionTitle from './IngredientsSectionTitle'
-import LinkIngredient from './LinkIngredient'
+import { LuGripVertical, LuTrash } from 'react-icons/lu'
+import IngredientField from '../IngredientsField/IngredientField'
+import IngredientsSectionTitle from '../IngredientsSectionTitle/IngredientsSectionTitle'
+import LinkIngredient from '../LinkIngredient/LinkIngredient'
 
 export type IngredientsFormIngredientsRow = {
     quantity: string
@@ -51,8 +49,8 @@ export function createEmptyIngredient(): IngredientsFormIngredientsRow {
 
 export function createEmptySection(sectionIndex: number): IngredientsFormSection {
     return {
-        name: `section ${sectionIndex}`,
-        ingredients: [createEmptyIngredient()],
+        name: sectionIndex === 1 ? 'Main Recipe' : `section ${sectionIndex}`,
+        ingredients: [],
     }
 }
 
@@ -77,25 +75,24 @@ export function trimTrailingEmptyIngredients(ingredients: IngredientsFormIngredi
     return trimmedIngredients
 }
 
-export function hasPendingDraftIngredient(ingredients: IngredientsFormIngredientsRow[]) {
-    return !isIngredientRowEmpty(ingredients[ingredients.length - 1])
-}
-
 interface IngredientsSectionFormProps {
     control: Control<IngredientsFormValues>
     clearErrors: UseFormClearErrors<IngredientsFormValues>
     sectionIndex: number
     sectionCount: number
     onDeleteSection: () => void
-    setError: UseFormSetError<IngredientsFormValues>
     setValue: UseFormSetValue<IngredientsFormValues>
-    setFocus: UseFormSetFocus<IngredientsFormValues>
     searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
+    isDragMode: boolean
+    draggingIngredient: {
+        sectionIndex: number
+        rowIndex: number
+    } | null
+    onDragStartIngredient: (rowIndex: number) => void
+    onDragEndIngredient: () => void
+    onDropIngredient: () => void
+    onDraftIngredientChange: (draftIngredient: IngredientsFormIngredientsRow) => void
 }
-
-// TODO
-// Need to allow moving ingredients between sections - would drag and drop be helpful on desktop?
-// then make a cypress test including linking an ingredient
 
 export default function IngredientsSectionForm({
     control,
@@ -103,13 +100,21 @@ export default function IngredientsSectionForm({
     sectionIndex,
     sectionCount,
     onDeleteSection,
-    setError,
     setValue,
-    setFocus,
     searchInternalRecipes,
+    isDragMode,
+    draggingIngredient,
+    onDragStartIngredient,
+    onDragEndIngredient,
+    onDropIngredient,
+    onDraftIngredientChange,
 }: IngredientsSectionFormProps) {
     const { keyColors } = useColorMode()
     const [isDeleteSectionConfirmationOpen, setIsDeleteSectionConfirmationOpen] = useState(false)
+    const [draftIngredient, setDraftIngredient] = useState(createEmptyIngredient())
+    const [draftErrors, setDraftErrors] = useState<
+        Partial<Record<keyof IngredientsFormIngredientsRow, string>>
+    >({})
     const ingredientsPath = `sections.${sectionIndex}.ingredients` as const
     const { append, fields, remove } = useFieldArray({
         control,
@@ -120,75 +125,75 @@ export default function IngredientsSectionForm({
         name: ingredientsPath as FieldArrayPath<IngredientsFormValues>,
     }) as IngredientsFormIngredientsRow[] | undefined
 
-    const appendIngredientRow = () => {
-        const nextIngredientIndex = fields.length
-
-        append(createEmptyIngredient())
-
-        window.setTimeout(() => {
-            setFocus(`${ingredientsPath}.${nextIngredientIndex}.quantity` as IngredientFieldPath)
-        }, 0)
-    }
-
-    const handleDraftRowEnter = async (
-        event: KeyboardEvent<HTMLInputElement>,
-        rowIndex: number,
-    ) => {
+    const handleDraftRowEnter = async (event: KeyboardEvent<HTMLInputElement>) => {
         event.preventDefault()
 
-        const rowValues = watchedIngredients?.[rowIndex]
-        if (isIngredientRowEmpty(rowValues)) {
+        if (isIngredientRowEmpty(draftIngredient)) {
+            setDraftErrors({})
             return
         }
 
-        const quantityFieldPath = `${ingredientsPath}.${rowIndex}.quantity` as IngredientFieldPath
-        const itemFieldPath = `${ingredientsPath}.${rowIndex}.item` as IngredientFieldPath
-        const rowFieldNames = [
-            quantityFieldPath,
-            `${ingredientsPath}.${rowIndex}.measure`,
-            itemFieldPath,
-            `${ingredientsPath}.${rowIndex}.preparation`,
-        ] as IngredientFieldPath[]
+        const nextErrors: Partial<Record<keyof IngredientsFormIngredientsRow, string>> = {}
 
-        clearErrors(rowFieldNames)
-
-        let hasValidationError = false
-
-        if (!rowValues?.quantity.trim()) {
-            setError(quantityFieldPath, {
-                type: 'required',
-                message: 'quantity is required',
-            })
-            hasValidationError = true
+        if (!draftIngredient.quantity.trim()) {
+            nextErrors.quantity = 'quantity is required'
         }
 
-        if (!rowValues?.item.trim()) {
-            setError(itemFieldPath, {
-                type: 'required',
-                message: 'item is required',
-            })
-            hasValidationError = true
+        if (!draftIngredient.item.trim()) {
+            nextErrors.item = 'item is required'
         }
 
-        if (hasValidationError) {
+        setDraftErrors(nextErrors)
+
+        if (Object.keys(nextErrors).length > 0) {
             return
         }
 
-        appendIngredientRow()
+        append(draftIngredient)
+        setDraftIngredient(createEmptyIngredient())
+        onDraftIngredientChange(createEmptyIngredient())
+        setDraftErrors({})
     }
 
     return (
-        <VStack gap={4} alignItems={'stretch'}>
+        <VStack
+            gap={4}
+            alignItems={'stretch'}
+            p={2}
+            borderWidth={isDragMode ? 2 : 0}
+            borderColor={isDragMode ? keyColors.primary : 'transparent'}
+            onDragOver={(event) => {
+                if (!isDragMode) {
+                    return
+                }
+
+                event.preventDefault()
+            }}
+            onDrop={(event) => {
+                if (!isDragMode) {
+                    return
+                }
+
+                event.preventDefault()
+                onDropIngredient()
+            }}
+        >
             <IngredientsSectionTitle
                 control={control}
                 sectionIndex={sectionIndex}
                 setValue={setValue}
                 canDeleteSection={sectionCount > 1}
+                disabled={isDragMode}
                 onDeleteSection={() => {
                     setIsDeleteSectionConfirmationOpen(true)
                 }}
             />
-            <Grid gap={4} templateColumns={'2fr 3fr 6fr 4fr auto auto'}>
+            <Grid
+                gap={4}
+                templateColumns={
+                    isDragMode ? '2fr 3fr 6fr 4fr auto auto auto' : '2fr 3fr 6fr 4fr auto auto'
+                }
+            >
                 <GridItem>
                     <Text color={keyColors.primary}>Quantity</Text>
                 </GridItem>
@@ -201,9 +206,16 @@ export default function IngredientsSectionForm({
                 <GridItem colSpan={3}>
                     <Text color={keyColors.primary}>Preparation</Text>
                 </GridItem>
+                {isDragMode ? (
+                    <GridItem>
+                        <Text color={keyColors.primary}>Move</Text>
+                    </GridItem>
+                ) : null}
                 {fields.map((field, rowIndex) => {
-                    const isDraftRow = rowIndex === fields.length - 1
-                    const isRequired = !isDraftRow
+                    const isBeingDragged =
+                        isDragMode &&
+                        draggingIngredient?.sectionIndex === sectionIndex &&
+                        draggingIngredient.rowIndex === rowIndex
 
                     return (
                         <Fragment key={field.id}>
@@ -213,11 +225,10 @@ export default function IngredientsSectionForm({
                                     `${ingredientsPath}.${rowIndex}.quantity` as IngredientFieldPath
                                 }
                                 fieldName={'quantity'}
-                                required={isRequired}
-                                isDraftRow={isDraftRow}
-                                onDraftRowEnter={(event) => {
-                                    void handleDraftRowEnter(event, rowIndex)
-                                }}
+                                required={true}
+                                isDraftRow={false}
+                                disabled={isDragMode}
+                                onDraftRowEnter={() => {}}
                             />
                             <IngredientField
                                 control={control}
@@ -226,10 +237,9 @@ export default function IngredientsSectionForm({
                                 }
                                 fieldName={'measure'}
                                 required={false}
-                                isDraftRow={isDraftRow}
-                                onDraftRowEnter={(event) => {
-                                    void handleDraftRowEnter(event, rowIndex)
-                                }}
+                                isDraftRow={false}
+                                disabled={isDragMode}
+                                onDraftRowEnter={() => {}}
                             />
                             <IngredientField
                                 control={control}
@@ -237,11 +247,10 @@ export default function IngredientsSectionForm({
                                     `${ingredientsPath}.${rowIndex}.item` as IngredientFieldPath
                                 }
                                 fieldName={'item'}
-                                required={isRequired}
-                                isDraftRow={isDraftRow}
-                                onDraftRowEnter={(event) => {
-                                    void handleDraftRowEnter(event, rowIndex)
-                                }}
+                                required={true}
+                                isDraftRow={false}
+                                disabled={isDragMode}
+                                onDraftRowEnter={() => {}}
                             />
                             <IngredientField
                                 control={control}
@@ -250,54 +259,178 @@ export default function IngredientsSectionForm({
                                 }
                                 fieldName={'preparation'}
                                 required={false}
-                                isDraftRow={isDraftRow}
-                                colSpan={isDraftRow ? 3 : 1}
-                                onDraftRowEnter={(event) => {
-                                    void handleDraftRowEnter(event, rowIndex)
-                                }}
+                                isDraftRow={false}
+                                disabled={isDragMode}
+                                colSpan={1}
+                                onDraftRowEnter={() => {}}
                             />
-                            {isDraftRow ? null : (
-                                <>
-                                    <GridItem>
-                                        <LinkIngredient
-                                            control={control}
-                                            ingredientsPath={ingredientsPath}
-                                            rowIndex={rowIndex}
-                                            sectionIndex={sectionIndex}
-                                            hasLinkedRecipe={
-                                                !!watchedIngredients?.[rowIndex]?.linkedRecipeId
-                                            }
-                                            searchInternalRecipes={searchInternalRecipes}
-                                            setValue={setValue}
-                                        />
-                                    </GridItem>
-                                    <GridItem>
-                                        <IconButton
-                                            type={'button'}
-                                            aria-label={`delete ingredient`}
-                                            color={keyColors.primary}
-                                            _hover={{
-                                                bg: keyColors.buttonHoverBg,
-                                                color: keyColors.secondary,
-                                            }}
-                                            background={keyColors.secondary}
-                                            borderWidth={2}
-                                            borderColor={keyColors.primary}
-                                            borderRadius={0}
-                                            onClick={() => {
-                                                remove(rowIndex)
-                                                clearErrors(ingredientsPath)
-                                            }}
-                                            data-testid={`delete-button-${sectionIndex}-${rowIndex}`}
-                                        >
-                                            <LuTrash />
-                                        </IconButton>
-                                    </GridItem>
-                                </>
-                            )}
+                            <GridItem>
+                                <LinkIngredient
+                                    control={control}
+                                    ingredientsPath={ingredientsPath}
+                                    rowIndex={rowIndex}
+                                    sectionIndex={sectionIndex}
+                                    hasLinkedRecipe={
+                                        !!watchedIngredients?.[rowIndex]?.linkedRecipeId
+                                    }
+                                    disabled={isDragMode}
+                                    searchInternalRecipes={searchInternalRecipes}
+                                    setValue={setValue}
+                                />
+                            </GridItem>
+                            <GridItem>
+                                <IconButton
+                                    type={'button'}
+                                    aria-label={`delete ingredient`}
+                                    color={keyColors.primary}
+                                    _hover={{
+                                        bg: keyColors.buttonHoverBg,
+                                        color: keyColors.secondary,
+                                    }}
+                                    background={keyColors.secondary}
+                                    borderWidth={2}
+                                    borderColor={keyColors.primary}
+                                    borderRadius={0}
+                                    disabled={isDragMode ? true : undefined}
+                                    onClick={() => {
+                                        remove(rowIndex)
+                                        clearErrors(ingredientsPath)
+                                    }}
+                                    data-testid={`delete-button-${sectionIndex}-${rowIndex}`}
+                                >
+                                    <LuTrash />
+                                </IconButton>
+                            </GridItem>
+                            {isDragMode ? (
+                                <GridItem>
+                                    <IconButton
+                                        type={'button'}
+                                        aria-label={'move ingredient'}
+                                        color={keyColors.primary}
+                                        _hover={{
+                                            bg: keyColors.buttonHoverBg,
+                                            color: keyColors.secondary,
+                                        }}
+                                        background={
+                                            isBeingDragged ? keyColors.subtle : keyColors.secondary
+                                        }
+                                        borderWidth={2}
+                                        borderColor={keyColors.primary}
+                                        borderRadius={0}
+                                        draggable={true}
+                                        onDragStart={(event) => {
+                                            event.dataTransfer.effectAllowed = 'move'
+                                            onDragStartIngredient(rowIndex)
+                                        }}
+                                        onDragEnd={onDragEndIngredient}
+                                        data-testid={`drag-ingredient-button-${sectionIndex}-${rowIndex}`}
+                                    >
+                                        <LuGripVertical />
+                                    </IconButton>
+                                </GridItem>
+                            ) : null}
                         </Fragment>
                     )
                 })}
+                <IngredientField
+                    fieldName={'quantity'}
+                    required={false}
+                    isDraftRow={true}
+                    disabled={isDragMode}
+                    onDraftRowEnter={(event) => {
+                        void handleDraftRowEnter(event)
+                    }}
+                    value={draftIngredient.quantity}
+                    errorMessage={draftErrors.quantity}
+                    onValueChange={(value) => {
+                        setDraftIngredient((currentDraft) => {
+                            const nextDraft = {
+                                ...currentDraft,
+                                quantity: value,
+                            }
+
+                            onDraftIngredientChange(nextDraft)
+
+                            return nextDraft
+                        })
+                        setDraftErrors((currentErrors) => ({
+                            ...currentErrors,
+                            quantity: undefined,
+                        }))
+                    }}
+                />
+                <IngredientField
+                    fieldName={'measure'}
+                    required={false}
+                    isDraftRow={true}
+                    disabled={isDragMode}
+                    onDraftRowEnter={(event) => {
+                        void handleDraftRowEnter(event)
+                    }}
+                    value={draftIngredient.measure}
+                    onValueChange={(value) => {
+                        setDraftIngredient((currentDraft) => {
+                            const nextDraft = {
+                                ...currentDraft,
+                                measure: value,
+                            }
+
+                            onDraftIngredientChange(nextDraft)
+
+                            return nextDraft
+                        })
+                    }}
+                />
+                <IngredientField
+                    fieldName={'item'}
+                    required={false}
+                    isDraftRow={true}
+                    disabled={isDragMode}
+                    onDraftRowEnter={(event) => {
+                        void handleDraftRowEnter(event)
+                    }}
+                    value={draftIngredient.item}
+                    errorMessage={draftErrors.item}
+                    onValueChange={(value) => {
+                        setDraftIngredient((currentDraft) => {
+                            const nextDraft = {
+                                ...currentDraft,
+                                item: value,
+                            }
+
+                            onDraftIngredientChange(nextDraft)
+
+                            return nextDraft
+                        })
+                        setDraftErrors((currentErrors) => ({
+                            ...currentErrors,
+                            item: undefined,
+                        }))
+                    }}
+                />
+                <IngredientField
+                    fieldName={'preparation'}
+                    required={false}
+                    isDraftRow={true}
+                    disabled={isDragMode}
+                    colSpan={3}
+                    onDraftRowEnter={(event) => {
+                        void handleDraftRowEnter(event)
+                    }}
+                    value={draftIngredient.preparation}
+                    onValueChange={(value) => {
+                        setDraftIngredient((currentDraft) => {
+                            const nextDraft = {
+                                ...currentDraft,
+                                preparation: value,
+                            }
+
+                            onDraftIngredientChange(nextDraft)
+
+                            return nextDraft
+                        })
+                    }}
+                />
             </Grid>
             {isDeleteSectionConfirmationOpen ? (
                 <Box
