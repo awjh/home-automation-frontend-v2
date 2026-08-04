@@ -5,6 +5,7 @@ interface PopupFormProps {
     dataProps: Record<Lowercase<string>, string>
     heading: string
     onClose: () => void
+    maxW?: string | number
 }
 
 export default function PopupForm(props: PopupFormProps & { children: React.ReactNode }) {
@@ -27,7 +28,7 @@ export default function PopupForm(props: PopupFormProps & { children: React.Reac
             <chakra.form
                 mt={20}
                 zIndex={1}
-                maxW={'450px'}
+                maxW={props.maxW ?? '450px'}
                 w={'90%'}
                 bg={keyColors.subtle}
                 borderRadius={0}

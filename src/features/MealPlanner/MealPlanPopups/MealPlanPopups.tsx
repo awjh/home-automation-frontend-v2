@@ -68,8 +68,9 @@ interface MealPlanPopupsMealPlannerProps extends MealPlanPopupsBaseProps<MealPla
     ) => void
 }
 
-interface MealPlanPopupsRecipePageProps<TMeal extends MealPlanKey>
-    extends MealPlanPopupsBaseProps<TMeal> {
+interface MealPlanPopupsRecipePageProps<
+    TMeal extends MealPlanKey,
+> extends MealPlanPopupsBaseProps<TMeal> {
     flowSource: FlowSource.RECIPE_PAGE
     createAddInitialValues: (day: Date) => Partial<AddMealPlanFormValues> & { mealDate: string }
     onEditMealSubmit?: never
@@ -92,9 +93,7 @@ export default function MealPlanPopups<TMeal extends MealPlanKey = MealPlan>(
         onAddMealSuccess,
     } = props
     const mealPlannerProps =
-        flowSource === FlowSource.MEAL_PLANNER
-            ? (props as MealPlanPopupsMealPlannerProps)
-            : null
+        flowSource === FlowSource.MEAL_PLANNER ? (props as MealPlanPopupsMealPlannerProps) : null
 
     const [pendingMealPlan, setPendingMealPlan] = useState<PendingMealPlanState | null>(null)
     const [mealPlanPendingDelete, setMealPlanPendingDelete] = useState<TMeal | null>(null)
@@ -242,7 +241,7 @@ export default function MealPlanPopups<TMeal extends MealPlanKey = MealPlan>(
                 <AreYouSure
                     title={'Delete Meal Plan?'}
                     message={
-                        'Are you sure you want to delete this meal plan? This action cannot be undone.'
+                        'Are you sure you want to delete this meal plan? This will also delete any leftovers based off this meal. This action cannot be undone.'
                     }
                     onCancel={onCancelDeleteMeal}
                     onConfirm={onConfirmDeleteMeal}

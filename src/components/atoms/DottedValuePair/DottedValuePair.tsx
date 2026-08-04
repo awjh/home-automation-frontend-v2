@@ -20,9 +20,10 @@ const bounceScroll = keyframes`
 export interface DottedValuePairProps {
     left: ReactNode
     right: ReactNode
+    small?: boolean
 }
 
-export default function DottedValuePair({ left, right }: DottedValuePairProps) {
+export default function DottedValuePair({ left, right, small }: DottedValuePairProps) {
     const { keyColors } = useColorMode()
     const leftContainerRef = useRef<HTMLDivElement>(null)
     const leftTextRef = useRef<HTMLParagraphElement>(null)
@@ -74,7 +75,7 @@ export default function DottedValuePair({ left, right }: DottedValuePairProps) {
             alignItems={'start'}
             minW={0}
             w="full"
-            fontSize={{ base: 'sm', md: 'md' }}
+            fontSize={{ base: 'sm', md: small ? 'sm' : 'md' }}
         >
             <Box ref={leftContainerRef} minW={0} overflow={'hidden'} mr={2} flexShrink={1}>
                 <Text

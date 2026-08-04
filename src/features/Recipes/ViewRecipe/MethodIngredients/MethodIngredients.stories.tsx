@@ -30,3 +30,10 @@ export default meta
 type Story = StoryObj<typeof MethodIngredients>
 
 export const Default: Story = {}
+
+export const Empty: Story = {
+    args: {
+        ingredients: [],
+        showWhenEmpty: true,
+    },
+}

@@ -5,6 +5,7 @@ import joinValues from '@utils/joinValues'
 
 export interface IngredientsListProps {
     ingredients: Ingredient[]
+    small?: boolean
 }
 
 function uppercaseFirstCharacter(value: string | number) {
@@ -13,11 +14,12 @@ function uppercaseFirstCharacter(value: string | number) {
     return text.length ? `${text[0].toUpperCase()}${text.slice(1)}` : text
 }
 
-export default function IngredientsList({ ingredients }: IngredientsListProps) {
+export default function IngredientsList({ ingredients, small }: IngredientsListProps) {
     return (
         <Flex w={'full'} flexDirection={'column'} gap={2}>
             {ingredients.map((ingredient, idx) => (
                 <DottedValuePair
+                    small={small}
                     key={`ingredient-${idx}`}
                     left={uppercaseFirstCharacter(
                         joinValues(ingredient.item, ingredient.preparation, ','),

@@ -61,6 +61,64 @@ export const CanDeleteSectionAndIngredients: Story = {
     },
 }
 
+export const CanDeleteOnlyIngredientRow: Story = {
+    play: async ({ canvas, userEvent }: PlayContext) => {
+        onNext.mockClear()
+
+        const firstDraftRow = canvas.getAllByRole('textbox')
+        await userEvent.type(firstDraftRow[0], '1')
+        await userEvent.type(firstDraftRow[2], 'Onion')
+        await userEvent.click(firstDraftRow[2])
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => {
+            expect(canvas.getAllByRole('textbox')).toHaveLength(8)
+        })
+
+        const secondDraftRow = canvas.getAllByRole('textbox')
+        await userEvent.type(secondDraftRow[4], '2')
+        await userEvent.type(secondDraftRow[6], 'Garlic')
+        await userEvent.click(secondDraftRow[6])
+        await userEvent.keyboard('{Enter}')
+
+        await waitFor(() => {
+            expect(canvas.getAllByRole('textbox')).toHaveLength(12)
+            expect(canvas.getByDisplayValue('Onion')).toBeInTheDocument()
+            expect(canvas.getByDisplayValue('Garlic')).toBeInTheDocument()
+        })
+
+        const deleteButtons = canvas.getAllByRole('button', { name: /delete ingredient/i })
+        await userEvent.click(deleteButtons[0])
+
+        await waitFor(() => {
+            expect(canvas.queryByDisplayValue('Onion')).not.toBeInTheDocument()
+            expect(canvas.getByDisplayValue('Garlic')).toBeInTheDocument()
+            expect(canvas.getAllByRole('textbox')).toHaveLength(8)
+        })
+
+        await userEvent.click(canvas.getByRole('button', { name: /next/i }))
+
+        await waitFor(() => {
+            expect(onNext).toHaveBeenCalledOnce()
+            expect(onNext).toHaveBeenCalledWith({
+                sections: [
+                    {
+                        name: 'Main Recipe',
+                        ingredients: [
+                            {
+                                quantity: '2',
+                                measure: '',
+                                item: 'Garlic',
+                                preparation: '',
+                            },
+                        ],
+                    },
+                ],
+            })
+        })
+    },
+}
+
 export const CanSubmitWithIngredients: Story = {
     play: async ({ canvas, userEvent }: PlayContext) => {
         onNext.mockClear()
