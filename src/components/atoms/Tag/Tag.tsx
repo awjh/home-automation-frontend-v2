@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Flex } from '@chakra-ui/react'
+import { Flex, chakra } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 
 export interface TagProps {
@@ -29,9 +29,36 @@ export default function Tag({ status = 'default', value, onClick }: TagProps) {
 
     const hoverTextColor = status === 'subtle' ? 'white' : keyColors.primary
 
+    if (onClick) {
+        return (
+            <chakra.button
+                type={'button'}
+                display={'inline-flex'}
+                data-status={status}
+                w={'fit-content'}
+                alignSelf={'flex-start'}
+                borderWidth={'1px'}
+                bg={backgroundColor}
+                color={textColor}
+                borderColor={keyColors.primary}
+                cursor={'pointer'}
+                py={1}
+                px={2}
+                onClick={onClick}
+                _hover={{
+                    bg: hoverBackgroundColor,
+                    color: hoverTextColor,
+                }}
+                textTransform={'capitalize'}
+                fontSize={{ base: 'sm', lg: 'md' }}
+            >
+                {value}
+            </chakra.button>
+        )
+    }
+
     return (
         <Flex
-            as={onClick ? 'button' : 'div'}
             display={'inline-flex'}
             data-status={status}
             w={'fit-content'}
@@ -40,18 +67,9 @@ export default function Tag({ status = 'default', value, onClick }: TagProps) {
             bg={backgroundColor}
             color={textColor}
             borderColor={keyColors.primary}
-            cursor={onClick ? 'pointer' : 'default'}
+            cursor={'default'}
             py={1}
             px={2}
-            onClick={onClick}
-            _hover={
-                onClick
-                    ? {
-                          bg: hoverBackgroundColor,
-                          color: hoverTextColor,
-                      }
-                    : undefined
-            }
             textTransform={'capitalize'}
             fontSize={{ base: 'sm', lg: 'md' }}
         >

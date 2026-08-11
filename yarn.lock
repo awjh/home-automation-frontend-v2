@@ -78,10 +78,10 @@
     "@zag-js/types" "1.35.3"
     "@zag-js/utils" "1.35.3"
 
-"@awjh/home-automation-v2-api-models@^1.0.11":
-  version "1.0.11"
-  resolved "https://npm.pkg.github.com/download/@awjh/home-automation-v2-api-models/1.0.11/6b1800405369a1d499e70659051a84f8feea877c#6b1800405369a1d499e70659051a84f8feea877c"
-  integrity sha512-YuznzCDpw0NVOcTdKXEFsblc0WMRGM8KBF9Dzd5ush6gZ3wmb4h4eYhLbMHcZKQN0QJGvVS7jCpWCpeOeAgydg==
+"@awjh/home-automation-v2-api-models@^1.0.12":
+  version "1.0.12"
+  resolved "https://npm.pkg.github.com/download/@awjh/home-automation-v2-api-models/1.0.12/68369586f5cd0027d65503d60017af9d99bbd71f#68369586f5cd0027d65503d60017af9d99bbd71f"
+  integrity sha512-Jspo1i6kVFAAY/n9iGy/xQ/TIlAfhV+hi5diGAF9NiG6jnomT21DwC97pvERi4BIao3HH26N8MUOzofrlQFaKw==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.28.6", "@babel/code-frame@^7.29.0":
   version "7.29.0"

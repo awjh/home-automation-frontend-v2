@@ -52,14 +52,14 @@ export function trimTrailingEmptyMethodSteps(steps: MethodFormStep[]) {
 }
 
 interface MethodFormProps {
-    ingredientSections?: IngredientsFormSection[]
+    ingredientSections: IngredientsFormSection[]
     onNext: (values: MethodFormValues) => void
     onBack: () => void
 }
 
 export default function MethodForm(props: MethodFormProps) {
     const { keyColors } = useColorMode()
-    const { ingredientSections = [] } = props
+    const { ingredientSections } = props
     const [draftStep, setDraftStep] = useState(createEmptyMethodStep())
     const [draftError, setDraftError] = useState<string | undefined>()
     const [editingIngredientsStepIndex, setEditingIngredientsStepIndex] = useState<number | null>(

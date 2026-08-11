@@ -7,12 +7,12 @@ import MultipleEntryTextInput from '../../../../components/molecules/MultipleEnt
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { LuUserMinus, LuUserPlus } from 'react-icons/lu'
 
-enum ProducesType {
+export enum ProducesType {
     QUANTITY = 'quantity',
     PORTIONS = 'portions',
 }
 
-type BasicDetailsFormValues = {
+export type BasicDetailsFormValues = {
     recipeTitle: string
     authors: string[]
     image: string

@@ -152,10 +152,13 @@ export async function deleteMealPlan(mealPlan: MealPlan): Promise<DeleteMealPlan
         throw new Error('Failed to delete meal plan')
     }
 
+    const resultJson = (await res.json()) as DeleteMealPlanResponse
+
     return {
         date: mealPlan.date,
         mealTime: mealPlan.mealTime,
         course: mealPlan.course,
+        relatedMealPlans: resultJson.relatedMealPlans,
     }
 }
 
