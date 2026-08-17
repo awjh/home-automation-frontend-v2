@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useForm } from 'react-hook-form'
 import { expect, fn, waitFor } from 'storybook/test'
 import AddMealPlanLeftoversStep from './AddMealPlanLeftoversStep'
+import { Course, MealTime } from '@awjh/home-automation-v2-api-models/mealPlans'
 
 const submitLeftoversStep = fn()
 
@@ -27,6 +28,8 @@ function StoryWrapper({ onBack = fn(), onContinue, defaultValues }: StoryWrapper
             title: '',
             author: '',
             fromDate: '',
+            fromMealTime: '',
+            fromCourse: '',
             bookTitle: '',
             pageNumber: '',
             series: '',
@@ -87,6 +90,8 @@ export const WithValue: Story = {
             {...args}
             defaultValues={{
                 fromDate: '2026-04-03',
+                fromMealTime: MealTime.DINNER,
+                fromCourse: Course.MAIN,
                 mealDate: '2026-04-02',
             }}
         />
@@ -104,6 +109,8 @@ export const WithValue: Story = {
                 title: '',
                 author: '',
                 fromDate: '2026-04-03',
+                fromMealTime: MealTime.DINNER,
+                fromCourse: Course.MAIN,
                 bookTitle: '',
                 pageNumber: '',
                 series: '',

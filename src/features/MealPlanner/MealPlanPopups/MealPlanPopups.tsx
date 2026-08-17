@@ -1,7 +1,8 @@
 'use client'
 
 import {
-    GetExtractedExternalRecipeResponse,
+    DeleteMealPlanResponse,
+    GetExtractedExternalRecipeBasicsResponse,
     GetRecipesResponse,
     PostMealPlanResponse,
     PutMealPlanResponse,
@@ -44,17 +45,23 @@ export interface MealPlanPopupControls<TMeal extends MealPlanKey = MealPlanKey> 
     onEditMeal: (mealPlan: MealPlan) => void
 }
 
-interface MealPlanPopupsBaseProps<TMeal extends MealPlanKey> {
+interface MealPlanPopupsBaseProps<
+    TMeal extends MealPlanKey,
+    TDeleteMealResponse extends MealPlanKey,
+> {
     onAddMealSubmit: (values: AddMealPlanFormValues) => Promise<PostMealPlanResponse>
     onAddMealSuccess: (response: PostMealPlanResponse, values: AddMealPlanFormValues) => void
-    onDeleteMealSubmit: (mealPlan: TMeal) => Promise<Pick<MealPlan, 'date' | 'mealTime' | 'course'>>
-    onDeleteMealSuccess: (mealPlan: Pick<MealPlan, 'date' | 'mealTime' | 'course'>) => void
-    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    onDeleteMealSubmit: (mealPlan: TMeal) => Promise<TDeleteMealResponse>
+    onDeleteMealSuccess: (mealPlan: TDeleteMealResponse) => void
+    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeBasicsResponse>
     searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
     children: (controls: MealPlanPopupControls<TMeal>) => ReactNode
 }
 
-interface MealPlanPopupsMealPlannerProps extends MealPlanPopupsBaseProps<MealPlan> {
+interface MealPlanPopupsMealPlannerProps extends MealPlanPopupsBaseProps<
+    MealPlan,
+    DeleteMealPlanResponse
+> {
     flowSource: FlowSource.MEAL_PLANNER
     createAddInitialValues?: (day: Date) => Partial<AddMealPlanFormValues> & { mealDate: string }
     onEditMealSubmit: (
@@ -70,20 +77,23 @@ interface MealPlanPopupsMealPlannerProps extends MealPlanPopupsBaseProps<MealPla
 
 interface MealPlanPopupsRecipePageProps<
     TMeal extends MealPlanKey,
-> extends MealPlanPopupsBaseProps<TMeal> {
+    TDeleteMealResponse extends MealPlanKey = TMeal,
+> extends MealPlanPopupsBaseProps<TMeal, TDeleteMealResponse> {
     flowSource: FlowSource.RECIPE_PAGE
     createAddInitialValues: (day: Date) => Partial<AddMealPlanFormValues> & { mealDate: string }
     onEditMealSubmit?: never
     onEditMealSuccess?: never
 }
 
-type MealPlanPopupsProps<TMeal extends MealPlanKey = MealPlan> =
-    | MealPlanPopupsMealPlannerProps
-    | MealPlanPopupsRecipePageProps<TMeal>
+type MealPlanPopupsProps<
+    TMeal extends MealPlanKey = MealPlan,
+    TDeleteMealResponse extends MealPlanKey = TMeal,
+> = MealPlanPopupsMealPlannerProps | MealPlanPopupsRecipePageProps<TMeal, TDeleteMealResponse>
 
-export default function MealPlanPopups<TMeal extends MealPlanKey = MealPlan>(
-    props: MealPlanPopupsProps<TMeal>,
-) {
+export default function MealPlanPopups<
+    TMeal extends MealPlanKey = MealPlan,
+    TDeleteMealResponse extends MealPlanKey = TMeal,
+>(props: MealPlanPopupsProps<TMeal, TDeleteMealResponse>) {
     const {
         flowSource,
         createAddInitialValues,
@@ -199,7 +209,10 @@ export default function MealPlanPopups<TMeal extends MealPlanKey = MealPlan>(
 
             mealPlannerProps.onDeleteMealSuccess(deletedMealPlan)
         } else {
-            const recipePageProps = props as MealPlanPopupsRecipePageProps<TMeal>
+            const recipePageProps = props as MealPlanPopupsRecipePageProps<
+                TMeal,
+                TDeleteMealResponse
+            >
             const deletedMealPlan = await recipePageProps.onDeleteMealSubmit(
                 mealPlanPendingDelete as TMeal,
             )
@@ -217,7 +230,7 @@ export default function MealPlanPopups<TMeal extends MealPlanKey = MealPlan>(
                   onDeleteMeal: onDeleteMeal as unknown as (mealPlan: MealPlan) => void,
                   onEditMeal,
               })
-            : (props as MealPlanPopupsRecipePageProps<TMeal>).children({
+            : (props as MealPlanPopupsRecipePageProps<TMeal, TDeleteMealResponse>).children({
                   onAddMeal,
                   onDeleteMeal,
                   onEditMeal,

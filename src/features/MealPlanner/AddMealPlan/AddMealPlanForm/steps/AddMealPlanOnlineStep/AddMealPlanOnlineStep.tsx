@@ -1,6 +1,6 @@
 import Button from '@atoms/Button/Button'
 import TextInput from '@atoms/TextInput/TextInput'
-import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
+import { GetExtractedExternalRecipeBasicsResponse } from '@awjh/home-automation-v2-api-models'
 import { Box, HStack, Text } from '@chakra-ui/react'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import AddMealPlanBaseProps from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/steps/defs/AddMealPlanBaseProps'
@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { Controller, UseFormSetValue } from 'react-hook-form'
 
 export type AddMealPlanOnlineStepProps = AddMealPlanBaseProps & {
-    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeBasicsResponse>
     setValue: UseFormSetValue<AddMealPlanFormValues>
 }
 

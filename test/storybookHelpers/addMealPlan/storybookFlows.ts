@@ -1,5 +1,5 @@
 import {
-    GetExtractedExternalRecipeResponse,
+    GetExtractedExternalRecipeBasicsResponse,
     GetRecipesResponse,
 } from '@awjh/home-automation-v2-api-models'
 import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
@@ -48,7 +48,7 @@ export const extractedOnlineRecipe = {
         cookingDuration: 18,
         standingTime: 2,
     },
-} satisfies GetExtractedExternalRecipeResponse
+} satisfies GetExtractedExternalRecipeBasicsResponse
 
 export const bookFlowValues = {
     mealTime: MealTime.DINNER,
@@ -60,6 +60,8 @@ export const bookFlowValues = {
     title: 'Traybake',
     author: 'Rukmini Iyer',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: 'The Roasting Tin',
     pageNumber: '86',
     series: 'Simple Suppers',
@@ -83,6 +85,8 @@ export const onlineFlowValues = {
     title: 'Gnocchi with Roast Pepper Sauce',
     author: 'BBC Good Food',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -106,6 +110,8 @@ export const onlineFlowUsingExtractedValues = {
     title: extractedOnlineRecipe.title,
     author: 'BBC Good Food',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -129,6 +135,8 @@ export const magazineFlowValues = {
     title: 'Beef Wellington',
     author: 'Gordon Ramsay',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -152,6 +160,8 @@ export const internalRecipeFlowValues = {
     title: 'Spaghetti Carbonara',
     author: 'Andrew Hurt',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -175,6 +185,8 @@ export const internalRecipeFromRecipePageFlowValues = {
     title: 'Pre-entered recipe title',
     author: 'Pre-entered recipe author',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -198,6 +210,8 @@ export const internalRecipeTitleSearchFlowValues = {
     title: 'Spaghetti Bolognese',
     author: 'Andrew Hurt',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -221,6 +235,8 @@ export const freezerFlowValues = {
     title: 'Chicken Satay',
     author: '',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -244,6 +260,8 @@ export const leftoversFlowValues = {
     title: 'Roast Chicken Pasta Bake',
     author: 'Andrew Hurt',
     fromDate: '2026-04-03',
+    fromMealTime: MealTime.DINNER,
+    fromCourse: Course.MAIN,
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -267,6 +285,8 @@ export const readyPreparedFlowValues = {
     title: 'Chicken Flatties',
     author: 'M&S',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -333,7 +353,10 @@ async function selectPrimaryDetails(
     canvas: StoryCanvas,
     userEvent: StoryUserEvent,
     source: SourceType,
-    options?: { leftoversDate?: string; useForLeftovers?: boolean },
+    options?: {
+        leftoversDate: string
+        useForLeftovers: boolean
+    },
 ) {
     await userEvent.selectOptions(
         canvas.getByLabelText(/meal time/i, { selector: 'select' }),
@@ -351,14 +374,12 @@ async function selectPrimaryDetails(
             'true',
         )
 
-        if (options.leftoversDate) {
-            await fillTextInput(
-                canvas,
-                userEvent,
-                /when will the leftovers be used\?/i,
-                options.leftoversDate,
-            )
-        }
+        await fillTextInput(
+            canvas,
+            userEvent,
+            /when will the leftovers be used\?/i,
+            options.leftoversDate,
+        )
     }
 
     await userEvent.click(canvas.getByRole('button', { name: /next/i }))
@@ -634,6 +655,14 @@ export async function playLeftoversFlow(
     await selectPrimaryDetails(canvas, userEvent, SourceType.LEFTOVERS)
     await fillTitleAuthorDetails(canvas, userEvent, leftoversFlowValues)
     await fillTextInput(canvas, userEvent, /original meal date/i, leftoversFlowValues.fromDate)
+    await userEvent.selectOptions(
+        canvas.getByLabelText(/original meal time/i, { selector: 'select' }),
+        leftoversFlowValues.fromMealTime,
+    )
+    await userEvent.selectOptions(
+        canvas.getByLabelText(/original meal course/i, { selector: 'select' }),
+        leftoversFlowValues.fromCourse,
+    )
     await userEvent.click(canvas.getByRole('button', { name: /next/i }))
     await fillDurations(canvas, userEvent, leftoversFlowValues)
 

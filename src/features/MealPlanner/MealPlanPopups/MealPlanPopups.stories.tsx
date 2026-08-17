@@ -1,5 +1,5 @@
 import {
-    GetExtractedExternalRecipeResponse,
+    GetExtractedExternalRecipeBasicsResponse,
     GetRecipesResponse,
     PostMealPlanResponse,
     PutMealPlanResponse,
@@ -41,7 +41,7 @@ interface MealPlanPopupsStoryArgs {
     addMealDay: Date
     editMeal: MealPlan
     deleteMeal: MealPlan
-    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeBasicsResponse>
     searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
     onAddMealSubmit: OnAddMealSubmit
     onEditMealSubmit: OnEditMealSubmit

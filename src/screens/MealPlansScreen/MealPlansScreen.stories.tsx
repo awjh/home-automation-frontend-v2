@@ -1,6 +1,6 @@
-import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
+import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, waitFor, within } from 'storybook/test'
+import { expect, fn, screen, waitFor, within } from 'storybook/test'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
 import BookMealPlanMissingOptional from '@test/mockData/mealPlans/BookMealPlanMissingOptional'
 import createMealPlanFixture from '@test/mockData/mealPlans/createMealPlanFixture'
@@ -53,6 +53,7 @@ const meta: Meta<typeof MealPlansScreen> = {
             date: mealPlan.date,
             mealTime: mealPlan.mealTime,
             course: mealPlan.course,
+            relatedMealPlans: [],
         })),
     },
 }
@@ -210,6 +211,8 @@ export const OpensLeftoversFollowUpAfterSuccessfulAdd: Story = {
                 title: bookFlowValues.title,
                 author: bookFlowValues.author,
                 fromDate: expectedFormattedDate,
+                fromMealTime: bookFlowValues.mealTime,
+                fromCourse: bookFlowValues.course,
                 bookTitle: '',
                 pageNumber: '',
                 series: '',
@@ -251,6 +254,53 @@ export const DeletesMealPlan: Story = {
             expect(canvas.queryByText(/spaghetti bolognese/i)).not.toBeInTheDocument()
             expect(canvas.getAllByRole('button', { name: /delete meal/i })).toHaveLength(3)
         })
+
+        expect(await screen.findByText(/deleted meal plan/i)).toBeInTheDocument()
+        expect(await screen.findByText(/successfully deleted/i)).toBeInTheDocument()
+    },
+}
+
+export const DeletesMealPlanAndRelatedMealPlans: Story = {
+    args: {
+        onDeleteMealSubmit: fn(async (mealPlan) => ({
+            date: mealPlan.date,
+            mealTime: mealPlan.mealTime,
+            course: mealPlan.course,
+            relatedMealPlans: [
+                {
+                    date: defaultInitialMeals[1].date,
+                    mealTime: defaultInitialMeals[1].mealTime,
+                    course: defaultInitialMeals[1].course,
+                },
+            ],
+        })),
+    },
+    play: async ({ canvas, userEvent, args }) => {
+        expect(canvas.getAllByRole('button', { name: /delete meal/i })).toHaveLength(4)
+
+        await userEvent.click(canvas.getAllByRole('button', { name: /delete meal/i })[0])
+        await userEvent.click(canvas.getByRole('button', { name: /confirm/i }))
+
+        await waitFor(() => {
+            expect(args.onDeleteMealSubmit).toHaveBeenCalledOnce()
+            expect(args.onDeleteMealSubmit).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    date: formatDate(startOfWeek),
+                }),
+            )
+            expect(canvas.queryByText(/delete meal plan\?/i)).not.toBeInTheDocument()
+            expect(canvas.getAllByRole('button', { name: /delete meal/i })).toHaveLength(2)
+        })
+
+        await waitFor(
+            () => {
+                expect(screen.getByText(/deleted meal plan/i)).toBeInTheDocument()
+                expect(screen.getByText(/successfully deleted/i)).toBeInTheDocument()
+                expect(screen.getByText(/06\/04\/2026/i)).toBeInTheDocument()
+                expect(screen.getByText(/have also been deleted/i)).toBeInTheDocument()
+            },
+            { timeout: 5000 },
+        )
     },
 }
 

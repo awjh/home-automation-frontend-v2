@@ -10,6 +10,8 @@ interface AddMealPlanFormValues {
     title: string
     author: string
     fromDate: string
+    fromMealTime: MealTime | ''
+    fromCourse: Course | ''
     bookTitle: string
     pageNumber: string
     series: string

@@ -15,6 +15,8 @@ const LeftoversMealPlan: MealPlan = {
     source: {
         type: SourceType.LEFTOVERS,
         fromDate: '2026-02-24',
+        fromMealTime: MealTime.DINNER,
+        fromCourse: Course.MAIN,
     } satisfies Leftovers,
     title: 'Chicken Satay',
     duration: {

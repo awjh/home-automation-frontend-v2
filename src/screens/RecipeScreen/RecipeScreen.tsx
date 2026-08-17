@@ -1,6 +1,6 @@
 'use client'
 
-import { PostMealPlanResponse } from '@awjh/home-automation-v2-api-models'
+import { DeleteMealPlanResponse, PostMealPlanResponse } from '@awjh/home-automation-v2-api-models'
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
 import { VStack } from '@chakra-ui/react'
@@ -12,6 +12,7 @@ import NavBar from '@features/NavBar/NavBar'
 import { RecipeMealPlanDate } from '@features/Recipes/ViewRecipe/RecipeMealPlans/RecipeMealPlans'
 import ViewRecipe from '@features/Recipes/ViewRecipe/ViewRecipe'
 import useColorMode from '@hooks/useColorMode'
+import useToaster from '@hooks/useToaster'
 import formatAuthors from '@utils/formatAuthors'
 import { formatDate } from '@utils/formatDate'
 import { useCallback, useMemo, useState } from 'react'
@@ -22,7 +23,7 @@ export interface RecipeScreenProps {
     onAddMealSubmit: (values: AddMealPlanFormValues) => Promise<PostMealPlanResponse>
     onDeleteMealSubmit: (
         mealPlan: Pick<MealPlan, 'date' | 'mealTime' | 'course'>,
-    ) => Promise<Pick<MealPlan, 'date' | 'mealTime' | 'course'>>
+    ) => Promise<DeleteMealPlanResponse>
 }
 
 export default function RecipeScreen({
@@ -32,6 +33,7 @@ export default function RecipeScreen({
     onDeleteMealSubmit,
 }: RecipeScreenProps) {
     const { keyColors } = useColorMode()
+    const toaster = useToaster()
     const [mealPlanDates, setMealPlanDates] = useState(dates)
 
     const internalRecipeInitialValues = useMemo(
@@ -62,6 +64,8 @@ export default function RecipeScreen({
                 title: recipe.title,
                 author: formatAuthors(recipe.authors),
                 fromDate: '',
+                fromMealTime: '',
+                fromCourse: '',
                 bookTitle: '',
                 pageNumber: '',
                 series: '',
@@ -147,7 +151,7 @@ export default function RecipeScreen({
     }, [])
 
     const onDeleteMealSuccess = useCallback(
-        (deletedMealPlan: Pick<MealPlan, 'date' | 'mealTime' | 'course'>) => {
+        (deletedMealPlan: DeleteMealPlanResponse) => {
             setMealPlanDates((currentDates) =>
                 currentDates.filter(
                     (mealPlanDate) =>
@@ -158,14 +162,34 @@ export default function RecipeScreen({
                         ),
                 ),
             )
+
+            const datesOfRelatedMealPlans = new Set(
+                (deletedMealPlan.relatedMealPlans ?? []).map(({ date }) => date),
+            )
+
+            let description = `The meal plan for ${deletedMealPlan.date.split('-').reverse().join('/')} has been successfully deleted.`
+
+            if (datesOfRelatedMealPlans.size === 1) {
+                description += ` Related meal plan${datesOfRelatedMealPlans.size === 1 ? '' : 's'} for ${Array.from(
+                    datesOfRelatedMealPlans,
+                )
+                    .map((date) => date.split('-').reverse().join('/'))
+                    .join(', ')} have also been deleted.`
+            }
+
+            toaster.create({
+                title: 'Deleted meal plan',
+                description,
+                type: 'success',
+            })
         },
-        [],
+        [toaster],
     )
 
     return (
         <VStack width={'full'}>
             <NavBar />
-            <MealPlanPopups<RecipeMealPlanDate>
+            <MealPlanPopups<RecipeMealPlanDate, DeleteMealPlanResponse>
                 flowSource={FlowSource.RECIPE_PAGE}
                 createAddInitialValues={createAddInitialValues}
                 extractTitleFromOnlineSource={unsupportedRecipePopupAction}

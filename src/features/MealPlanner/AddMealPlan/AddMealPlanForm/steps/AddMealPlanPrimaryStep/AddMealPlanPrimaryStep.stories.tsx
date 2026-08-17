@@ -13,7 +13,7 @@ const mealTimeItems = Object.values(MealTime).map((mealTime) => ({
     value: mealTime,
 }))
 
-const courseItems = Object.values(SourceType).map((course) => ({
+const courseItems = Object.values(Course).map((course) => ({
     label: course.replaceAll('_', ' '),
     value: course,
 }))

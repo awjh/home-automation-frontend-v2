@@ -21,7 +21,7 @@ export default async function MealPlans() {
         today.getDate() + (6 - today.getDay()),
     )
 
-    const initialMeals = await getMealPlans(startDate, endDate)
+    const initialMeals = await getMealPlans({ startDate, endDate })
 
     return (
         <MealPlansScreen

@@ -1,4 +1,4 @@
-import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
+import { GetExtractedExternalRecipeBasicsResponse } from '@awjh/home-automation-v2-api-models'
 import { Flex, VStack } from '@chakra-ui/react'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import type { Meta, StoryObj } from '@storybook/react-vite'
@@ -7,7 +7,9 @@ import { expect, fn, waitFor } from 'storybook/test'
 import AddMealPlanOnlineStep from './AddMealPlanOnlineStep'
 
 interface StoryWrapperProps {
-    extractTitleFromOnlineSource?: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    extractTitleFromOnlineSource?: (
+        url: string,
+    ) => Promise<GetExtractedExternalRecipeBasicsResponse>
     onBack?: () => void
     onSubmit?: (values: AddMealPlanFormValues) => void
     defaultValues?: Partial<AddMealPlanFormValues>
@@ -20,7 +22,7 @@ const extractedRecipe = {
         cookingDuration: 35,
         standingTime: 5,
     },
-} satisfies GetExtractedExternalRecipeResponse
+} satisfies GetExtractedExternalRecipeBasicsResponse
 
 function StoryWrapper({
     extractTitleFromOnlineSource = fn(async () => extractedRecipe),

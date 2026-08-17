@@ -1,7 +1,7 @@
 import Button from '@atoms/Button/Button'
 import SelectInput, { SelectItem } from '@atoms/SelectInput/SelectInput'
 import TextInput from '@atoms/TextInput/TextInput'
-import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
+import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { HStack } from '@chakra-ui/react'
 import { Controller, useWatch } from 'react-hook-form'
 import AddMealPlanBaseProps from '../defs/AddMealPlanBaseProps'
@@ -36,7 +36,7 @@ export default function AddMealPlanPrimaryStep({
         showUseForLeftoversQuestion &&
         selectedSource !== '' &&
         selectedSource !== SourceType.LEFTOVERS
-    const showLeftoversDate = showUseForLeftovers && useForLeftovers
+    const showLeftoversEntries = showUseForLeftovers && useForLeftovers
 
     const handleContinue = async () => {
         if (!trigger || !onContinue) {
@@ -44,7 +44,7 @@ export default function AddMealPlanPrimaryStep({
         }
 
         const isValid = await trigger(
-            showLeftoversDate
+            showLeftoversEntries
                 ? ['mealTime', 'course', 'source', 'leftoversDate']
                 : ['mealTime', 'course', 'source'],
         )
@@ -84,7 +84,7 @@ export default function AddMealPlanPrimaryStep({
                         required
                         disabled={!isCourseEditable}
                         value={field.value}
-                        onChange={(value) => field.onChange(value as MealTime)}
+                        onChange={(value) => field.onChange(value as Course)}
                         onBlur={field.onBlur}
                         errorMessage={errors.course?.message}
                     />
@@ -125,23 +125,25 @@ export default function AddMealPlanPrimaryStep({
                     )}
                 />
             ) : null}
-            {showLeftoversDate ? (
-                <Controller
-                    name="leftoversDate"
-                    control={control}
-                    rules={{ required: 'Leftovers date is required' }}
-                    render={({ field }) => (
-                        <TextInput
-                            type={'date'}
-                            label={'When will the leftovers be used?'}
-                            required
-                            value={field.value}
-                            onChange={(value) => field.onChange(value)}
-                            onBlur={field.onBlur}
-                            errorMessage={errors.leftoversDate?.message}
-                        />
-                    )}
-                />
+            {showLeftoversEntries ? (
+                <>
+                    <Controller
+                        name="leftoversDate"
+                        control={control}
+                        rules={{ required: 'Leftovers date is required' }}
+                        render={({ field }) => (
+                            <TextInput
+                                type={'date'}
+                                label={'When will the leftovers be used?'}
+                                required
+                                value={field.value}
+                                onChange={(value) => field.onChange(value)}
+                                onBlur={field.onBlur}
+                                errorMessage={errors.leftoversDate?.message}
+                            />
+                        )}
+                    />
+                </>
             ) : null}
             <HStack mt={2} w={'full'} justifyContent={'space-between'}>
                 <Button type={'button'} onClick={onBack} colorStyle={'secondary'}>

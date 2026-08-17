@@ -169,6 +169,18 @@ describe('recipe page', () => {
                     cy.getInputByLabel(/when will the leftovers be used\?/i, 'input').type(
                         wednesdayDateString,
                     )
+                    cy.getInputByLabel(/what time will the leftovers be eaten\?/i, 'select').select(
+                        MealTime.LUNCH,
+                        {
+                            force: true,
+                        },
+                    )
+                    cy.getInputByLabel(
+                        /what course will the leftovers be eaten as\?/i,
+                        'select',
+                    ).select(Course.MAIN, {
+                        force: true,
+                    })
                     cy.clickButtonByText('Next')
                     cy.clickButtonByText('Submit')
                 })
@@ -177,7 +189,7 @@ describe('recipe page', () => {
                 .should('be.visible')
                 .and('have.attr', 'data-mode', 'add')
                 .within(() => {
-                    cy.contains(/setup meal plan for recipe/i).should('be.visible')
+                    cy.contains(/setup leftovers meal plan for recipe/i).should('be.visible')
                     cy.getInputByLabel(/meal time/i, 'select').select(MealTime.LUNCH, {
                         force: true,
                     })
@@ -230,16 +242,18 @@ describe('recipe page', () => {
                     expect(recipeMealPlans[0].course).to.equal(Course.MAIN)
                     expect(recipeMealPlans[0].date).to.equal(tuesdayDateString)
 
-                    const leftoveMealPlans = body.filter(
+                    const leftoverMealPlans = body.filter(
                         (mealPlan) =>
                             mealPlan.source.type === SourceType.LEFTOVERS &&
-                            mealPlan.source.fromDate === tuesdayDateString,
+                            mealPlan.source.fromDate === tuesdayDateString &&
+                            mealPlan.source.fromMealTime === MealTime.DINNER &&
+                            mealPlan.source.fromCourse === Course.MAIN,
                     )
 
-                    expect(leftoveMealPlans).to.have.length(1)
-                    expect(leftoveMealPlans[0].mealTime).to.equal(MealTime.LUNCH)
-                    expect(leftoveMealPlans[0].course).to.equal(Course.MAIN)
-                    expect(leftoveMealPlans[0].date).to.equal(wednesdayDateString)
+                    expect(leftoverMealPlans).to.have.length(1)
+                    expect(leftoverMealPlans[0].mealTime).to.equal(MealTime.LUNCH)
+                    expect(leftoverMealPlans[0].course).to.equal(Course.MAIN)
+                    expect(leftoverMealPlans[0].date).to.equal(wednesdayDateString)
                     expect(recipeMealPlans[0].title).to.equal(recipeTitle)
                 })
             })

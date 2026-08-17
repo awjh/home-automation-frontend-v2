@@ -1,7 +1,8 @@
 'use client'
 
 import {
-    GetExtractedExternalRecipeResponse,
+    DeleteMealPlanResponse,
+    GetExtractedExternalRecipeBasicsResponse,
     GetRecipesResponse,
     PostMealPlanResponse,
     PutMealPlanResponse,
@@ -15,22 +16,21 @@ import MealPlanPopups from '@features/MealPlanner/MealPlanPopups/MealPlanPopups'
 import ViewMealPlans from '@features/MealPlanner/ViewMealPlans/ViewMealPlans'
 import NavBar from '@features/NavBar/NavBar'
 import useColorMode from '@hooks/useColorMode'
+import useToaster from '@hooks/useToaster'
 import { useCallback, useRef, useState } from 'react'
 
 export interface MealPlansScreenProps {
-    getMealPlansForDateRange: (startDate: Date, endDate: Date) => Promise<MealPlan[]>
+    getMealPlansForDateRange: (props: { startDate: Date; endDate: Date }) => Promise<MealPlan[]>
     initialMeals: MealPlan[]
     initialDate: Date
-    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeBasicsResponse>
     searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
     onAddMealSubmit: (values: AddMealPlanFormValues) => Promise<PostMealPlanResponse>
     onEditMealSubmit: (
         mealPlan: MealPlan,
         values: AddMealPlanFormValues,
     ) => Promise<PutMealPlanResponse>
-    onDeleteMealSubmit: (
-        mealPlan: MealPlan,
-    ) => Promise<Pick<MealPlan, 'date' | 'mealTime' | 'course'>>
+    onDeleteMealSubmit: (mealPlan: MealPlan) => Promise<DeleteMealPlanResponse>
 }
 
 function getDateRangeForWeek(date: Date) {
@@ -54,6 +54,7 @@ export default function MealPlansScreen({
     onDeleteMealSubmit,
 }: MealPlansScreenProps) {
     const { keyColors } = useColorMode()
+    const toaster = useToaster()
 
     const [isLoading, setIsLoading] = useState(false)
     const [meals, setMeals] = useState(initialMeals)
@@ -69,7 +70,7 @@ export default function MealPlansScreen({
             setIsLoading(true)
 
             try {
-                const nextMeals = await getMealPlansForDateRange(startDate, endDate)
+                const nextMeals = await getMealPlansForDateRange({ startDate, endDate })
                 if (requestId === latestRequestId.current) {
                     setMeals(nextMeals)
                 }
@@ -119,19 +120,43 @@ export default function MealPlansScreen({
     )
 
     const onDeleteMealSuccess = useCallback(
-        (deletedMealPlan: Pick<MealPlan, 'date' | 'mealTime' | 'course'>) => {
+        (deletedMealPlan: DeleteMealPlanResponse) => {
+            const mealPlanKeysToDelete = new Set(
+                [deletedMealPlan, ...(deletedMealPlan.relatedMealPlans ?? [])].map(
+                    ({ date, mealTime, course }) => `${date}|${mealTime}|${course}`,
+                ),
+            )
+
+            const datesOfRelatedMealPlans = new Set(
+                (deletedMealPlan.relatedMealPlans ?? []).map(({ date }) => date),
+            )
+
             setMeals((currentMeals) =>
                 currentMeals.filter(
                     (mealPlan) =>
-                        !(
-                            mealPlan.date === deletedMealPlan.date &&
-                            mealPlan.mealTime === deletedMealPlan.mealTime &&
-                            mealPlan.course === deletedMealPlan.course
+                        !mealPlanKeysToDelete.has(
+                            `${mealPlan.date}|${mealPlan.mealTime}|${mealPlan.course}`,
                         ),
                 ),
             )
+
+            let description = `The meal plan for ${deletedMealPlan.date.split('-').reverse().join('/')} has been successfully deleted.`
+
+            if (datesOfRelatedMealPlans.size === 1) {
+                description += ` Related meal plan${datesOfRelatedMealPlans.size === 1 ? '' : 's'} for ${Array.from(
+                    datesOfRelatedMealPlans,
+                )
+                    .map((date) => date.split('-').reverse().join('/'))
+                    .join(', ')} have also been deleted.`
+            }
+
+            toaster.create({
+                title: 'Deleted meal plan',
+                description,
+                type: 'success',
+            })
         },
-        [],
+        [toaster],
     )
 
     return (

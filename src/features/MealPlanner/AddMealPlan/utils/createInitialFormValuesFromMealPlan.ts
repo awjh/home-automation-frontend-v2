@@ -12,6 +12,8 @@ const emptyFormValues: AddMealPlanFormValues = {
     title: '',
     author: '',
     fromDate: '',
+    fromMealTime: '',
+    fromCourse: '',
     bookTitle: '',
     pageNumber: '',
     series: '',
@@ -42,6 +44,8 @@ export function createInitialLeftoversFormValuesFromMealPlan(
         title: mealPlan.title,
         author: mealPlan.author,
         fromDate: mealPlan.date,
+        fromMealTime: mealPlan.mealTime,
+        fromCourse: mealPlan.course,
         prepDuration: mealPlan.duration.prepDuration.toString(),
         cookingDuration: mealPlan.duration.cookingDuration.toString(),
         standingTime: mealPlan.duration.standingTime.toString(),
@@ -93,6 +97,8 @@ export default function createInitialFormValuesFromMealPlan(
             return {
                 ...baseValues,
                 fromDate: mealPlan.source.fromDate,
+                fromMealTime: mealPlan.source.fromMealTime,
+                fromCourse: mealPlan.source.fromCourse,
             }
         case SourceType.FREEZER:
         case SourceType.READY_PREPARED:

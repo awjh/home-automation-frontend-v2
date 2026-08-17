@@ -1,5 +1,5 @@
 import type { GetMealPlansResponse, PostMealPlanBody } from '@awjh/home-automation-v2-api-models'
-import { MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
+import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { assertMealVisible } from './assertMealVisible'
 
 function openAddMealModal(date: string) {
@@ -119,6 +119,7 @@ export function addBookMealPlanViaUiWithLeftoversFollowUp(
     mealPlan: PostMealPlanBody,
     leftoversDate: string,
     leftoversMealTime: MealTime = MealTime.LUNCH,
+    leftoversCourse: string = Course.MAIN,
 ) {
     if (mealPlan.source.type !== SourceType.BOOK) {
         throw new Error('addBookMealPlanViaUiWithLeftoversFollowUp only supports book meals')
@@ -183,6 +184,7 @@ export function addBookMealPlanViaUiWithLeftoversFollowUp(
                 .and('have.value', SourceType.LEFTOVERS)
 
             cy.getInputByLabel(/meal time/i, 'select').select(leftoversMealTime, { force: true })
+            cy.getInputByLabel(/course/i, 'select').select(leftoversCourse, { force: true })
             cy.clickButtonByText('Next')
 
             cy.getInputByLabel(/title/i).should('have.value', mealPlan.title)
@@ -190,6 +192,11 @@ export function addBookMealPlanViaUiWithLeftoversFollowUp(
             cy.clickButtonByText('Next')
 
             cy.getInputByLabel(/original meal date/i).should('have.value', mealPlan.date)
+            cy.getInputByLabel(/original meal time/i, 'select').should(
+                'have.value',
+                mealPlan.mealTime,
+            )
+            cy.getInputByLabel(/original course/i, 'select').should('have.value', mealPlan.course)
             cy.clickButtonByText('Next')
 
             cy.getInputByLabel(/preparation time/i).should(
@@ -239,6 +246,8 @@ export function addBookMealPlanViaUiWithLeftoversFollowUp(
                     source: {
                         type: SourceType.LEFTOVERS,
                         fromDate: mealPlan.date,
+                        fromMealTime: mealPlan.mealTime,
+                        fromCourse: mealPlan.course,
                     },
                     title: mealPlan.title,
                     duration: mealPlan.duration,

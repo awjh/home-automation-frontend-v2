@@ -65,15 +65,24 @@ describe('meal plans', () => {
 
         cy.visitMealPlans()
 
+        const originalMealPlanDate = weekDates[0]
+        const originalMealPlanTime = MealTime.DINNER
+
         addMealPlanViaUi(
-            createBookMealPlan(weekDates[0], MealTime.DINNER, 'Cypress Sunday Traybake'),
+            createBookMealPlan(
+                originalMealPlanDate,
+                originalMealPlanTime,
+                'Cypress Sunday Traybake',
+            ),
         )
         addMealPlanViaUi(
             createLeftoversMealPlan(
                 weekDates[1],
                 MealTime.LUNCH,
                 'Cypress Sunday Traybake',
-                weekDates[0],
+                originalMealPlanDate,
+                originalMealPlanTime,
+                Course.MAIN,
             ),
         )
         addMealPlanViaUi(

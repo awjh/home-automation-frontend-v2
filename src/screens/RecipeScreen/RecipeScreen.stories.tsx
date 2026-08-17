@@ -5,7 +5,7 @@ import OnlineRecipeWithImage from '@test/mockData/recipes/OnlineRecipeWithImage'
 import formatAuthors from '@utils/formatAuthors'
 import MockDate from 'mockdate'
 import { useEffect } from 'react'
-import { expect, fireEvent, fn, waitFor, within } from 'storybook/test'
+import { expect, fireEvent, fn, screen, waitFor, within } from 'storybook/test'
 import RecipeScreen from './RecipeScreen'
 
 const mockingDate = new Date(2026, 4, 31)
@@ -131,7 +131,9 @@ export const AddsMealPlanAndLeftoversHighlightsClickedWeekdayButNotLeftovers: St
         })
 
         fireEvent.change(leftoversDateInput, { target: { value: '2026-06-04' } })
+
         await userEvent.click(popup.getByRole('button', { name: /next/i }))
+
         await userEvent.click(popup.getByRole('button', { name: /submit/i }))
 
         await waitFor(() => {
@@ -145,6 +147,8 @@ export const AddsMealPlanAndLeftoversHighlightsClickedWeekdayButNotLeftovers: St
                 title: args.recipe.title,
                 author: formatAuthors(args.recipe.authors),
                 fromDate: '',
+                fromMealTime: '',
+                fromCourse: '',
                 bookTitle: '',
                 pageNumber: '',
                 series: '',
@@ -164,11 +168,18 @@ export const AddsMealPlanAndLeftoversHighlightsClickedWeekdayButNotLeftovers: St
             )
         })
 
-        const leftoversPopup = canvas.getByText(/setup meal plan for recipe/i).closest('form')
+        const leftoversPopup = canvas
+            .getByText(/setup leftovers meal plan for recipe/i)
+            .closest('form')
 
         expect(leftoversPopup).not.toBeNull()
 
         const leftoversForm = within(leftoversPopup!)
+
+        await userEvent.selectOptions(
+            leftoversForm.getByLabelText(/meal time/i, { selector: 'select' }),
+            MealTime.LUNCH,
+        )
 
         await userEvent.click(leftoversForm.getByRole('button', { name: /next/i }))
         await userEvent.click(leftoversForm.getByRole('button', { name: /next/i }))
@@ -178,12 +189,11 @@ export const AddsMealPlanAndLeftoversHighlightsClickedWeekdayButNotLeftovers: St
 
         const cookInput = leftoversForm.getByLabelText(/Cooking time/i, { selector: 'input' })
         fireEvent.change(cookInput, { target: { value: '10' } })
-
         await userEvent.click(leftoversForm.getByRole('button', { name: /submit/i }))
 
         await waitFor(() => {
             expect(args.onAddMealSubmit).toHaveBeenNthCalledWith(2, {
-                mealTime: MealTime.DINNER,
+                mealTime: MealTime.LUNCH,
                 course: Course.MAIN,
                 source: SourceType.LEFTOVERS,
                 mealDate: '2026-06-04',
@@ -192,6 +202,8 @@ export const AddsMealPlanAndLeftoversHighlightsClickedWeekdayButNotLeftovers: St
                 title: args.recipe.title,
                 author: formatAuthors(args.recipe.authors),
                 fromDate: '2026-06-03',
+                fromMealTime: MealTime.DINNER,
+                fromCourse: Course.MAIN,
                 bookTitle: '',
                 pageNumber: '',
                 series: '',
@@ -247,6 +259,10 @@ export const DeletesMealPlanAndClearsWeekdayHighlight: Story = {
                 course: Course.MAIN,
             })
             expect(canvas.queryByText(/delete meal plan\?/i)).not.toBeInTheDocument()
+            expect(screen.getByText(/deleted meal plan/i)).toBeInTheDocument()
+            expect(
+                screen.getByText(/the meal plan for 25\/05\/2026 has been successfully deleted/i),
+            ).toBeInTheDocument()
             expect(canvas.getByText(/monday/i).closest('[data-status]')).toHaveAttribute(
                 'data-status',
                 'default',

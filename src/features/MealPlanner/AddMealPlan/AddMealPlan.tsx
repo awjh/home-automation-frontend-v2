@@ -1,16 +1,17 @@
 'use client'
 
 import {
-    GetExtractedExternalRecipeResponse,
+    GetExtractedExternalRecipeBasicsResponse,
     GetRecipesResponse,
 } from '@awjh/home-automation-v2-api-models'
 import PopupForm from '@molecules/PopupForm/PopupForm'
 import AddMealPlanForm from './AddMealPlanForm/AddMealPlanForm'
 import AddMealPlanFormValues from './AddMealPlanForm/defs/AddMealPlanFormValues'
 import FlowSource from './AddMealPlanForm/defs/FlowSource'
+import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 
 interface AddMealPlanProps {
-    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeBasicsResponse>
     initialValues: Partial<AddMealPlanFormValues> & { mealDate: string }
     isSourceEditable: boolean
     mode: 'add' | 'edit'
@@ -26,7 +27,11 @@ export default function AddMealPlan(props: AddMealPlanProps) {
     let heading = `${headingPrefix} ${props.initialValues?.mealDate?.split('-').reverse().join('/')}`
 
     if (props.flowSource === FlowSource.RECIPE_PAGE) {
-        heading = 'Setup meal plan for recipe'
+        if (props.initialValues?.source === SourceType.LEFTOVERS) {
+            heading = 'Setup leftovers meal plan for recipe'
+        } else {
+            heading = 'Setup meal plan for recipe'
+        }
     }
 
     const formKey = `${props.mode}:${props.initialValues.mealDate}:${props.flowSource}:${JSON.stringify(props.initialValues ?? {})}`

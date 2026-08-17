@@ -1,5 +1,5 @@
 import {
-    GetExtractedExternalRecipeResponse,
+    GetExtractedExternalRecipeBasicsResponse,
     GetRecipesResponse,
 } from '@awjh/home-automation-v2-api-models'
 import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
@@ -13,7 +13,7 @@ import AddMealPlanStepComponent from './steps/AddMealPlanStepComponent'
 import FlowSource from './defs/FlowSource'
 
 export interface AddMealPlanFormProps {
-    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
+    extractTitleFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeBasicsResponse>
     flowSource: FlowSource
     initialValues: Partial<AddMealPlanFormValues> & { mealDate: string }
     isMealTimeEditable: boolean

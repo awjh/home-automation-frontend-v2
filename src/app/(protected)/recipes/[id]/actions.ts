@@ -1,6 +1,7 @@
 'use server'
 
 import {
+    DeleteMealPlanResponse,
     GetRecipeResponse,
     PostMealPlanBody,
     PostMealPlanResponse,
@@ -106,7 +107,7 @@ export async function addMealPlanFromRecipePage(
 
 export async function deleteMealPlanFromRecipePage(
     mealPlan: Pick<MealPlan, 'date' | 'mealTime' | 'course'>,
-): Promise<Pick<MealPlan, 'date' | 'mealTime' | 'course'>> {
+): Promise<DeleteMealPlanResponse> {
     const headers = await getAuthHeaders()
 
     const res = await fetch(
@@ -121,9 +122,5 @@ export async function deleteMealPlanFromRecipePage(
         throw new Error('Failed to delete meal plan')
     }
 
-    return {
-        date: mealPlan.date,
-        mealTime: mealPlan.mealTime,
-        course: mealPlan.course,
-    }
+    return res.json()
 }

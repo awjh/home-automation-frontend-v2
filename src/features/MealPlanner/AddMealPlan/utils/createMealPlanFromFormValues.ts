@@ -138,6 +138,14 @@ export default function createMealPlanFromFormValues(values: AddMealPlanFormValu
                 throw new Error('Original meal date is required for leftovers meal plans')
             }
 
+            if (!values.fromMealTime) {
+                throw new Error('Original meal time is required for leftovers meal plans')
+            }
+
+            if (!values.fromCourse) {
+                throw new Error('Original meal course is required for leftovers meal plans')
+            }
+
             return {
                 author: trimmedAuthor,
                 course: Course.MAIN,
@@ -146,6 +154,8 @@ export default function createMealPlanFromFormValues(values: AddMealPlanFormValu
                 source: {
                     type: SourceType.LEFTOVERS,
                     fromDate: values.fromDate.trim(),
+                    fromMealTime: values.fromMealTime,
+                    fromCourse: values.fromCourse,
                 },
                 title: trimmedTitle,
                 duration: {
