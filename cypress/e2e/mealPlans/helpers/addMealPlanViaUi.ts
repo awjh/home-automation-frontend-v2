@@ -50,6 +50,16 @@ export default function addMealPlanViaUi(plan: PostMealPlanBody) {
                 cy.getInputByLabel(/original meal date/i)
                     .clear()
                     .type(plan.source.fromDate)
+                cy.getInputByLabel(/original meal time/i, 'select').select(
+                    plan.source.fromMealTime,
+                    { force: true },
+                )
+                cy.getInputByLabel(/original meal course/i, 'select').select(
+                    plan.source.fromCourse,
+                    {
+                        force: true,
+                    },
+                )
                 cy.clickButtonByText('Next')
                 break
             case SourceType.INTERNAL_RECIPE:
@@ -196,7 +206,10 @@ export function addBookMealPlanViaUiWithLeftoversFollowUp(
                 'have.value',
                 mealPlan.mealTime,
             )
-            cy.getInputByLabel(/original course/i, 'select').should('have.value', mealPlan.course)
+            cy.getInputByLabel(/original meal course/i, 'select').should(
+                'have.value',
+                mealPlan.course,
+            )
             cy.clickButtonByText('Next')
 
             cy.getInputByLabel(/preparation time/i).should(

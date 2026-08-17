@@ -169,18 +169,6 @@ describe('recipe page', () => {
                     cy.getInputByLabel(/when will the leftovers be used\?/i, 'input').type(
                         wednesdayDateString,
                     )
-                    cy.getInputByLabel(/what time will the leftovers be eaten\?/i, 'select').select(
-                        MealTime.LUNCH,
-                        {
-                            force: true,
-                        },
-                    )
-                    cy.getInputByLabel(
-                        /what course will the leftovers be eaten as\?/i,
-                        'select',
-                    ).select(Course.MAIN, {
-                        force: true,
-                    })
                     cy.clickButtonByText('Next')
                     cy.clickButtonByText('Submit')
                 })
