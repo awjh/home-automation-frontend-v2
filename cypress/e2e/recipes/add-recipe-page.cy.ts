@@ -1,12 +1,33 @@
 import { GetRecipeResponse } from '@awjh/home-automation-v2-api-models'
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
-import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
 
 describe('add recipe page', () => {
     const createdRecipeIds: string[] = []
 
     const clickWizardNext = () => {
         cy.contains('button', /^next$/i).click()
+    }
+
+    const setImageStepToNoImage = () => {
+        cy.getInputByLabel(/would you like to add an image/i, 'select').select('no', {
+            force: true,
+        })
+        clickWizardNext()
+    }
+
+    const acceptLookupSeededImage = () => {
+        clickWizardNext()
+    }
+
+    const setImageStepToUpload = (filePath: string) => {
+        cy.getInputByLabel(/would you like to add an image/i, 'select').select('yes', {
+            force: true,
+        })
+        cy.getInputByLabel(/how would you like to provide the image/i, 'select').select('upload', {
+            force: true,
+        })
+        cy.getInputByLabel(/image file/i, 'input').selectFile(filePath, { force: true })
+        clickWizardNext()
     }
 
     const setIngredientRow = (
@@ -86,62 +107,25 @@ describe('add recipe page', () => {
         cy.getByTestId(popupTestId).should('not.exist')
     }
 
-    const findRecipeByTitle = (title: string, retriesRemaining = 8): Cypress.Chainable<Recipe> => {
-        return cy.searchRecipes('').then((recipes) => {
-            const recipe = recipes.find((candidate) => candidate.title === title)
+    const getCreatedRecipeIdFromRedirect = (): Cypress.Chainable<string> => {
+        return cy
+            .location('pathname', { timeout: 20000 })
+            .should('match', /^\/recipes\/(?!add$)[^/]+$/)
+            .then((pathname) => {
+                const recipeId = pathname.split('/').pop()
 
-            if (recipe) {
-                return cy.wrap(recipe as Recipe)
-            }
-
-            if (retriesRemaining <= 0) {
-                throw new Error(`Unable to find recipe with title after retries: ${title}`)
-            }
-
-            return cy
-                .wait(500, { log: false })
-                .then(() => findRecipeByTitle(title, retriesRemaining - 1))
-        })
-    }
-
-    const extractRecipeIdFromResponseBody = (body: unknown): string | undefined => {
-        if (body && typeof body === 'object' && 'id' in body) {
-            const id = (body as { id?: unknown }).id
-            if (typeof id === 'string' && id.trim() !== '') {
-                return id
-            }
-        }
-
-        if (typeof body === 'string') {
-            try {
-                const parsed = JSON.parse(body) as { id?: unknown }
-                if (typeof parsed.id === 'string' && parsed.id.trim() !== '') {
-                    return parsed.id
+                if (!recipeId) {
+                    throw new Error(`Unable to extract recipe id from path: ${pathname}`)
                 }
-            } catch {
-                const regexMatch = body.match(/"id"\s*:\s*"([^"]+)"/)
-                if (regexMatch?.[1]) {
-                    return regexMatch[1]
-                }
-            }
-        }
 
-        return undefined
+                return cy.wrap(recipeId)
+            })
     }
 
-    const getCreatedRecipeId = (title: string): Cypress.Chainable<string> => {
-        return cy.wait('@submitAddRecipe').then((interception) => {
-            const id = extractRecipeIdFromResponseBody(interception.response?.body)
-
-            if (id) {
-                return cy.wrap(id)
-            }
-
-            return findRecipeByTitle(title).then((recipe) => cy.wrap(recipe.id))
-        })
-    }
-
-    const getRecipeById = (recipeId: string): Cypress.Chainable<GetRecipeResponse> => {
+    const getRecipeById = (
+        recipeId: string,
+        retriesRemaining = 8,
+    ): Cypress.Chainable<GetRecipeResponse> => {
         return cy
             .getCookie('stytch_session_jwt', { log: false })
             .then((sessionCookie) => {
@@ -152,13 +136,28 @@ describe('add recipe page', () => {
                 return cy.request<GetRecipeResponse>({
                     method: 'GET',
                     url: `${Cypress.env('API_BASE_URL')}/recipes/${encodeURIComponent(recipeId)}`,
+                    failOnStatusCode: false,
                     headers: {
                         Authorization: `Bearer ${sessionCookie.value}`,
                         'x-api-key': Cypress.env('API_KEY'),
                     },
                 })
             })
-            .its('body')
+            .then((response) => {
+                if (response.status === 200) {
+                    return cy.wrap(response.body)
+                }
+
+                if (retriesRemaining <= 0) {
+                    throw new Error(
+                        `Unable to fetch recipe after retries (id=${recipeId}, status=${response.status})`,
+                    )
+                }
+
+                return cy
+                    .wait(500, { log: false })
+                    .then(() => getRecipeById(recipeId, retriesRemaining - 1))
+            })
     }
 
     beforeEach(() => {
@@ -214,6 +213,8 @@ describe('add recipe page', () => {
         cy.getInputByLabel(/serves/i, 'input').type('4')
         clickWizardNext()
 
+        setImageStepToNoImage()
+
         setIngredientRow(0, {
             quantity: '500',
             measure: 'g',
@@ -231,10 +232,9 @@ describe('add recipe page', () => {
         clickWizardNext()
 
         cy.contains('button', /^italian$/i).click()
-        cy.intercept('POST', '**/recipes/add').as('submitAddRecipe')
         cy.contains('button', /^finish$/i).click()
 
-        getCreatedRecipeId(title).then((recipeId) => {
+        getCreatedRecipeIdFromRedirect().then((recipeId) => {
             createdRecipeIds.push(recipeId)
 
             getRecipeById(recipeId).then((recipe) => {
@@ -253,6 +253,7 @@ describe('add recipe page', () => {
                     measure: 'g',
                     preparation: 'peeled',
                 })
+                expect(recipe.image || null).to.equal(null)
             })
         })
     })
@@ -274,6 +275,8 @@ describe('add recipe page', () => {
             .clear()
             .type(title)
         clickWizardNext()
+
+        acceptLookupSeededImage()
 
         setIngredientRow(0, {
             quantity: '4',
@@ -309,10 +312,9 @@ describe('add recipe page', () => {
             .type('700')
         clickWizardNext()
 
-        cy.intercept('POST', '**/recipes/add').as('submitAddRecipe')
         cy.contains('button', /^finish$/i).click()
 
-        getCreatedRecipeId(title).then((recipeId) => {
+        getCreatedRecipeIdFromRedirect().then((recipeId) => {
             createdRecipeIds.push(recipeId)
 
             getRecipeById(recipeId).then((recipe) => {
@@ -363,7 +365,65 @@ describe('add recipe page', () => {
                 expect(
                     recipe.method[7].ingredients.map((ingredient) => ingredient.item),
                 ).to.deep.equal(['noodles'])
+
+                expect(typeof recipe.image).to.equal('string')
+                expect((recipe.image as string).length).to.be.greaterThan(0)
             })
+        })
+    })
+
+    it('uploads an image on a recipe and redirects to the new recipe page', () => {
+        const title = `Cypress Upload Recipe ${Date.now()}`
+
+        cy.visit('/recipes/add')
+
+        cy.getInputByLabel(/where is the recipe originally from/i, 'select').select('book', {
+            force: true,
+        })
+        cy.getInputByLabel(/book title/i, 'input').type('Cypress Book')
+        cy.getInputByLabel(/page number/i, 'input').type('101')
+        cy.getInputByLabel(/^series$/i, 'input').type('Test Series')
+        clickWizardNext()
+
+        cy.getInputByLabel(/recipe title/i, 'input').type(title)
+        cy.getInputByLabel(/recipe author/i, 'input').type('Cypress Chef')
+        cy.getInputByLabel(/cooking duration/i, 'input').type('35')
+        cy.getInputByLabel(/preparation duration/i, 'input').type('15')
+        cy.getInputByLabel(/standing time/i, 'input').type('5')
+        cy.getInputByLabel(/serves/i, 'input').type('4')
+        clickWizardNext()
+
+        setImageStepToUpload('public/recipe.jpg')
+
+        setIngredientRow(0, {
+            quantity: '500',
+            measure: 'g',
+            item: 'potatoes',
+            preparation: 'peeled',
+        })
+        cy.get('input[type="text"]').eq(2).type('{enter}')
+        clickWizardNext()
+
+        cy.get('textarea').eq(0).type('Roast until tender{enter}')
+        clickWizardNext()
+
+        cy.contains('button', /lookup calories/i).click()
+        cy.getInputByLabel(/calories/i, 'input').should('not.have.value', '0')
+        clickWizardNext()
+
+        cy.contains('button', /^italian$/i).click()
+        cy.contains('button', /^finish$/i).click()
+
+        getCreatedRecipeIdFromRedirect().then((recipeId) => {
+            createdRecipeIds.push(recipeId)
+
+            getRecipeById(recipeId).then((recipe) => {
+                expect(recipe.title).to.equal(title)
+                expect(typeof recipe.image).to.equal('string')
+                expect((recipe.image as string).length).to.be.greaterThan(0)
+            })
+
+            cy.get(`img[alt="${title}"]`).should('be.visible')
         })
     })
 })

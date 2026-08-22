@@ -11,6 +11,7 @@ const extractRecipeFromOnlineSource = fn(async () => extractedRecipe)
 const calculateCalories = fn(async () => ({ calories: 250, unresolvedIngredients: [] }))
 const addRecipe = fn(async () => ({ id: 'recipe-1' }))
 const editRecipe = fn(async () => ({ id: 'recipe-1' }))
+const uploadRecipeImage = fn(async () => ({ key: 'uploaded-image-key' }))
 
 const extractedRecipe = {
     title: 'Weeknight Lasagne',
@@ -100,10 +101,16 @@ const recipeToEdit: Recipe = {
 const meta: Meta<typeof AddRecipeScreen> = {
     title: 'Screens/AddRecipeScreen',
     component: AddRecipeScreen,
+    parameters: {
+        nextjs: {
+            appDirectory: true,
+        },
+    },
     args: {
         calculateCalories,
         addRecipe,
         extractRecipeFromOnlineSource,
+        uploadRecipeImage,
     },
 }
 
@@ -136,9 +143,9 @@ export const EditRendersAllValuesAddsTagAndSubmits: Story = {
             expect(canvas.getByLabelText(/recipe author/i, { selector: 'input' })).toHaveValue(
                 'Ada Lovelace',
             )
-            expect(canvas.getByLabelText(/recipe image/i, { selector: 'input' })).toHaveValue(
-                'https://example.com/image.png',
-            )
+            expect(
+                canvas.queryByLabelText(/recipe image/i, { selector: 'input' }),
+            ).not.toBeInTheDocument()
             expect(canvas.getByLabelText(/cooking duration/i, { selector: 'input' })).toHaveValue(
                 20,
             )
@@ -245,6 +252,11 @@ export const AddBookSourceLookupCaloriesAndSubmits: Story = {
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
 
         await waitFor(() => {
+            expect(canvas.getByText(/recipe image/i)).toBeInTheDocument()
+        })
+        await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
+
+        await waitFor(() => {
             expect(canvas.getByText(/add recipe ingredients/i)).toBeInTheDocument()
         })
 
@@ -315,6 +327,7 @@ export const AddOnlineLookupAmendMethodManualCaloriesAndSubmit: Story = {
             expect(args.extractRecipeFromOnlineSource).toHaveBeenCalledWith(testUrl)
         })
 
+        await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))

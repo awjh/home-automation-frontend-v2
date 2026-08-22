@@ -68,14 +68,12 @@ export const OpensAddMealPlanSubmitsAndAddsToMealList: Story = {
     play: async ({ canvas, userEvent, args }) => {
         await userEvent.click(canvas.getAllByRole('button', { name: /add a meal/i })[0])
 
-        const addMealPopup = canvas.getByText(/add meal for/i).closest('form')
-
-        expect(addMealPopup).not.toBeNull()
+        const addMealPopup = await waitFor(() => canvas.getByTestId('add-meal-plan-modal'))
 
         const expectedDate = new Date(startOfWeek)
         expectedDate.setDate(startOfWeek.getDate() + defaultInitialMeals.length)
 
-        await playBookFlow(within(addMealPopup!), userEvent, {
+        await playBookFlow(within(addMealPopup), userEvent, {
             extractTitleFromOnlineSource: args.extractTitleFromOnlineSource,
             assertSubmitted: async (values) => {
                 await waitFor(() => {
@@ -103,14 +101,12 @@ export const OpensAddMealPlanUsingExtractedOnlineTitle: Story = {
     play: async ({ canvas, userEvent, args }) => {
         await userEvent.click(canvas.getAllByRole('button', { name: /add a meal/i })[0])
 
-        const addMealPopup = canvas.getByText(/add meal for/i).closest('form')
-
-        expect(addMealPopup).not.toBeNull()
+        const addMealPopup = await waitFor(() => canvas.getByTestId('add-meal-plan-modal'))
 
         const expectedDate = new Date(startOfWeek)
         expectedDate.setDate(startOfWeek.getDate() + defaultInitialMeals.length)
 
-        await playOnlineFlowLeavingExtractedDetails(within(addMealPopup!), userEvent, {
+        await playOnlineFlowLeavingExtractedDetails(within(addMealPopup), userEvent, {
             extractTitleFromOnlineSource: args.extractTitleFromOnlineSource,
             assertSubmitted: async (values) => {
                 await waitFor(() => {
@@ -138,16 +134,14 @@ export const OpensLeftoversFollowUpAfterSuccessfulAdd: Story = {
     play: async ({ canvas, userEvent, args }) => {
         await userEvent.click(canvas.getAllByRole('button', { name: /add a meal/i })[0])
 
-        const addMealPopup = canvas.getByText(/add meal for/i).closest('form')
-
-        expect(addMealPopup).not.toBeNull()
+        const addMealPopup = await waitFor(() => canvas.getByTestId('add-meal-plan-modal'))
 
         const expectedDate = new Date(startOfWeek)
         expectedDate.setDate(startOfWeek.getDate() + defaultInitialMeals.length)
         const expectedFormattedDate = formatDate(expectedDate)
         const leftoversDate = '2026-04-11'
 
-        await playBookFlowMarkedForLeftovers(within(addMealPopup!), userEvent, {
+        await playBookFlowMarkedForLeftovers(within(addMealPopup), userEvent, {
             extractTitleFromOnlineSource: args.extractTitleFromOnlineSource,
             assertSubmitted: async (values) => {
                 await waitFor(() => {
@@ -161,7 +155,7 @@ export const OpensLeftoversFollowUpAfterSuccessfulAdd: Story = {
             searchInternalRecipes: args.searchInternalRecipes,
         })
 
-        const leftoversPopup = within(addMealPopup!)
+        const leftoversPopup = within(addMealPopup)
         const sourceSelect = leftoversPopup.getByLabelText(/source/i, { selector: 'select' })
 
         await waitFor(() => {
@@ -308,11 +302,9 @@ export const OpensEditMealPlanWithInitialValuesAndSubmits: Story = {
     play: async ({ canvas, userEvent, args }) => {
         await userEvent.click(canvas.getAllByRole('button', { name: /edit meal/i })[0])
 
-        const editMealPopup = canvas.getByText(/edit meal for/i).closest('form')
+        const editMealPopup = await waitFor(() => canvas.getByTestId('add-meal-plan-modal'))
 
-        expect(editMealPopup).not.toBeNull()
-
-        const popup = within(editMealPopup!)
+        const popup = within(editMealPopup)
         const mealTimeSelect = popup.getByLabelText(/meal time/i, { selector: 'select' })
 
         expect(mealTimeSelect).toBeDisabled()

@@ -9,24 +9,50 @@ describe('edit recipe page', () => {
         cy.contains('button', /^next$/i).click()
     }
 
-    const getRecipeById = (recipeId: string): Cypress.Chainable<GetRecipeResponse> => {
-        return cy
-            .getCookie('stytch_session_jwt', { log: false })
-            .then((sessionCookie) => {
-                if (!sessionCookie?.value) {
-                    throw new Error('Missing stytch_session_jwt cookie while fetching recipe by id')
-                }
+    const EDIT_RECIPE_FETCH_RETRIES = 10
+    const EDIT_RECIPE_FETCH_RETRY_DELAY_MS = 500
 
-                return cy.request<GetRecipeResponse>({
-                    method: 'GET',
-                    url: `${Cypress.env('API_BASE_URL')}/recipes/${encodeURIComponent(recipeId)}`,
-                    headers: {
-                        Authorization: `Bearer ${sessionCookie.value}`,
-                        'x-api-key': Cypress.env('API_KEY'),
-                    },
-                })
+    const getRecipeByIdResponse = (
+        recipeId: string,
+        failOnStatusCode = true,
+    ): Cypress.Chainable<Cypress.Response<GetRecipeResponse>> => {
+        return cy.getCookie('stytch_session_jwt', { log: false }).then((sessionCookie) => {
+            if (!sessionCookie?.value) {
+                throw new Error('Missing stytch_session_jwt cookie while fetching recipe by id')
+            }
+
+            return cy.request<GetRecipeResponse>({
+                method: 'GET',
+                url: `${Cypress.env('API_BASE_URL')}/recipes/${encodeURIComponent(recipeId)}`,
+                headers: {
+                    Authorization: `Bearer ${sessionCookie.value}`,
+                    'x-api-key': Cypress.env('API_KEY'),
+                },
+                failOnStatusCode,
             })
-            .its('body')
+        })
+    }
+
+    const getRecipeByIdWithTitle = (
+        recipeId: string,
+        expectedTitle: string,
+        retriesRemaining = EDIT_RECIPE_FETCH_RETRIES,
+    ): Cypress.Chainable<GetRecipeResponse> => {
+        return getRecipeByIdResponse(recipeId, false).then((response) => {
+            if (response.status === 200 && response.body.title === expectedTitle) {
+                return cy.wrap(response.body)
+            }
+
+            if (retriesRemaining <= 0) {
+                throw new Error(
+                    `Unable to find updated recipe title after retries: ${expectedTitle}`,
+                )
+            }
+
+            return cy.wait(EDIT_RECIPE_FETCH_RETRY_DELAY_MS, { log: false }).then(() => {
+                return getRecipeByIdWithTitle(recipeId, expectedTitle, retriesRemaining - 1)
+            })
+        })
     }
 
     beforeEach(() => {
@@ -87,9 +113,11 @@ describe('edit recipe page', () => {
             clickWizardNext()
 
             cy.contains('button', /^italian$/i).click()
+            cy.intercept('POST', '**/recipes/*/edit').as('submitEditRecipe')
             cy.contains('button', /^finish$/i).click()
+            cy.wait('@submitEditRecipe')
 
-            getRecipeById(recipeId).then((recipe) => {
+            getRecipeByIdWithTitle(recipeId, editedTitle).then((recipe) => {
                 expect(recipe.id).to.equal(recipeId)
                 expect(recipe.title).to.equal(editedTitle)
                 expect(recipe.originalSource.type).to.equal(SourceType.BOOK)

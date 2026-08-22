@@ -62,11 +62,9 @@ export const AddsMealPlanAndHighlightsClickedWeekday: Story = {
 
         await userEvent.click(canvas.getByText(/wednesday/i))
 
-        const addMealPopup = canvas.getByText(/setup meal plan for recipe/i).closest('form')
+        const addMealPopup = await waitFor(() => canvas.getByTestId('add-meal-plan-modal'))
 
-        expect(addMealPopup).not.toBeNull()
-
-        const popup = within(addMealPopup!)
+        const popup = within(addMealPopup)
 
         await userEvent.selectOptions(
             popup.getByLabelText(/meal time/i, { selector: 'select' }),
@@ -108,11 +106,9 @@ export const AddsMealPlanAndLeftoversHighlightsClickedWeekdayButNotLeftovers: St
 
         await userEvent.click(canvas.getByText(/wednesday/i))
 
-        const addMealPopup = canvas.getByText(/setup meal plan for recipe/i).closest('form')
+        const addMealPopup = await waitFor(() => canvas.getByTestId('add-meal-plan-modal'))
 
-        expect(addMealPopup).not.toBeNull()
-
-        const popup = within(addMealPopup!)
+        const popup = within(addMealPopup)
 
         await userEvent.selectOptions(
             popup.getByLabelText(/meal time/i, { selector: 'select' }),
@@ -168,13 +164,9 @@ export const AddsMealPlanAndLeftoversHighlightsClickedWeekdayButNotLeftovers: St
             )
         })
 
-        const leftoversPopup = canvas
-            .getByText(/setup leftovers meal plan for recipe/i)
-            .closest('form')
+        const leftoversPopup = await waitFor(() => canvas.getByTestId('add-meal-plan-modal'))
 
-        expect(leftoversPopup).not.toBeNull()
-
-        const leftoversForm = within(leftoversPopup!)
+        const leftoversForm = within(leftoversPopup)
 
         await userEvent.selectOptions(
             leftoversForm.getByLabelText(/meal time/i, { selector: 'select' }),

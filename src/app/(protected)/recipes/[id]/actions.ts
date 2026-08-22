@@ -11,6 +11,13 @@ import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlan
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
 import getEndpoint from '../../shared/getEndpoint'
 
+const RECIPE_FETCH_MAX_ATTEMPTS = 6
+const RECIPE_FETCH_RETRY_DELAY_MS = 350
+
+function wait(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 export async function getRecipe(id: string): Promise<GetRecipeResponse> {
     const callApiEndpoint = await getEndpoint({
         endpoint: `/recipes/{id}`,
@@ -18,13 +25,25 @@ export async function getRecipe(id: string): Promise<GetRecipeResponse> {
     })
 
     try {
-        const recipe = await callApiEndpoint<GetRecipeResponse>({
-            pathParams: {
-                id,
-            },
-        })
+        for (let attempt = 1; attempt <= RECIPE_FETCH_MAX_ATTEMPTS; attempt += 1) {
+            try {
+                const recipe = await callApiEndpoint<GetRecipeResponse>({
+                    pathParams: {
+                        id,
+                    },
+                })
 
-        return recipe
+                return recipe
+            } catch (error) {
+                if (attempt === RECIPE_FETCH_MAX_ATTEMPTS) {
+                    throw error
+                }
+
+                await wait(RECIPE_FETCH_RETRY_DELAY_MS)
+            }
+        }
+
+        throw new Error('Failed to fetch recipe')
     } catch (error) {
         console.error('Error fetching recipe:', error)
         throw new Error('Failed to fetch recipe')
@@ -63,7 +82,7 @@ export async function getRecipeImageDataUrl(
         return imageDataUrl
     } catch (error) {
         console.error('Error fetching image:', error)
-        throw new Error('Failed to fetch image')
+        return undefined
     }
 }
 

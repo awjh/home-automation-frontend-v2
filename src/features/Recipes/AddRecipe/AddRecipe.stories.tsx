@@ -9,6 +9,7 @@ const extractRecipeFromOnlineSource = fn(async () => extractedRecipe)
 const calculateCalories = fn(async () => ({ calories: 250, unresolvedIngredients: [] }))
 const addRecipe = fn(async () => ({ id: 'recipe-1' }))
 const editRecipe = fn(async () => ({ id: 'recipe-1' }))
+const uploadRecipeImage = fn(async () => ({ key: 'uploaded-image-key' }))
 
 const extractedRecipe = {
     title: 'Weeknight Lasagne',
@@ -58,10 +59,16 @@ const extractedRecipe = {
 const meta: Meta<typeof AddRecipe> = {
     title: 'Features/Recipes/AddRecipe/AddRecipe',
     component: AddRecipe,
+    parameters: {
+        nextjs: {
+            appDirectory: true,
+        },
+    },
     args: {
         calculateCalories,
         addRecipe,
         extractRecipeFromOnlineSource,
+        uploadRecipeImage,
     },
 }
 
@@ -107,6 +114,13 @@ async function fillBasicDetails(
     await userEvent.click(canvas.getByRole('button', { name: /next/i }))
 }
 
+async function skipImageStep(canvas: PlayContext['canvas'], userEvent: PlayContext['userEvent']) {
+    await waitFor(() => {
+        expect(canvas.getByText(/recipe image/i)).toBeInTheDocument()
+    })
+    await userEvent.click(canvas.getByRole('button', { name: /next/i }))
+}
+
 async function fillIngredients(canvas: PlayContext['canvas'], userEvent: PlayContext['userEvent']) {
     const textboxes = canvas.getAllByRole('textbox')
     await userEvent.type(textboxes[0], '2')
@@ -145,6 +159,7 @@ export const CanCompleteFullWizardFlow: Story = {
     play: async ({ args, canvas, userEvent }) => {
         await fillOriginalSource(canvas, userEvent)
         await fillBasicDetails(canvas, userEvent)
+        await skipImageStep(canvas, userEvent)
         await fillIngredients(canvas, userEvent)
         await fillMethods(canvas, userEvent)
         await fillCalories(canvas, userEvent)
@@ -189,6 +204,7 @@ export const CanGoBackAndForthAcrossSteps: Story = {
         await userEvent.click(canvas.getByRole('button', { name: /next/i }))
 
         await fillBasicDetails(canvas, userEvent)
+        await skipImageStep(canvas, userEvent)
         await fillIngredients(canvas, userEvent)
         await fillMethods(canvas, userEvent)
         await fillCalories(canvas, userEvent)
@@ -336,9 +352,6 @@ export const LookupSeedsFollowingSteps: Story = {
             expect(canvas.getByLabelText(/recipe author/i, { selector: 'input' })).toHaveValue(
                 'Test Chef',
             )
-            expect(canvas.getByLabelText(/recipe image/i, { selector: 'input' })).toHaveValue(
-                'https://example.com/lasagne.jpg',
-            )
             expect(canvas.getByLabelText(/cooking duration/i, { selector: 'input' })).toHaveValue(
                 40,
             )
@@ -347,6 +360,15 @@ export const LookupSeedsFollowingSteps: Story = {
             ).toHaveValue(20)
             expect(canvas.getByLabelText(/standing time/i, { selector: 'input' })).toHaveValue(10)
             expect(canvas.getByLabelText(/serves/i, { selector: 'input' })).toHaveValue(6)
+        })
+
+        await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
+
+        await waitFor(() => {
+            expect(canvas.getByText(/recipe image/i)).toBeInTheDocument()
+            expect(canvas.getByLabelText(/image url/i, { selector: 'input' })).toHaveValue(
+                'https://example.com/lasagne.jpg',
+            )
         })
 
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
@@ -409,9 +431,9 @@ export const EditRendersAllValuesAddsTagAndSubmits: Story = {
             expect(canvas.getByLabelText(/recipe author/i, { selector: 'input' })).toHaveValue(
                 'Ada Lovelace',
             )
-            expect(canvas.getByLabelText(/recipe image/i, { selector: 'input' })).toHaveValue(
-                'https://example.com/image.png',
-            )
+            expect(
+                canvas.queryByLabelText(/recipe image/i, { selector: 'input' }),
+            ).not.toBeInTheDocument()
             expect(canvas.getByLabelText(/cooking duration/i, { selector: 'input' })).toHaveValue(
                 20,
             )
@@ -518,6 +540,11 @@ export const AddBookSourceLookupCaloriesAndSubmits: Story = {
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
 
         await waitFor(() => {
+            expect(canvas.getByText(/recipe image/i)).toBeInTheDocument()
+        })
+        await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
+
+        await waitFor(() => {
             expect(canvas.getByText(/add recipe ingredients/i)).toBeInTheDocument()
         })
 
@@ -591,6 +618,7 @@ export const AddOnlineLookupAmendMethodManualCaloriesAndSubmit: Story = {
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
         await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
+        await userEvent.click(canvas.getByRole('button', { name: /^next$/i }))
 
         await waitFor(() => {
             expect(canvas.getByText(/add recipe method/i)).toBeInTheDocument()
@@ -618,6 +646,7 @@ export const AddOnlineLookupAmendMethodManualCaloriesAndSubmit: Story = {
                 expect.objectContaining({
                     title: 'Weeknight Lasagne',
                     calories: 610,
+                    image: 'uploaded-image-key',
                     originalSource: {
                         type: SourceType.ONLINE,
                         url: testUrl,

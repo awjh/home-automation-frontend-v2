@@ -32,10 +32,6 @@ async function fillBaseDetails(canvas: PlayContext['canvas'], userEvent: PlayCon
         canvas.getByLabelText(/recipe author/i, { selector: 'input' }),
         'Alice Cook',
     )
-    await userEvent.type(
-        canvas.getByLabelText(/recipe image/i, { selector: 'input' }),
-        'https://example.com/pasta.jpg',
-    )
     await userEvent.type(canvas.getByLabelText(/cooking duration/i, { selector: 'input' }), '25')
     await userEvent.type(
         canvas.getByLabelText(/preparation duration/i, { selector: 'input' }),
@@ -67,7 +63,6 @@ export const CanGoNext: Story = {
                 expect.objectContaining({
                     authors: ['Alice Cook'],
                     recipeTitle: 'Tomato Pasta',
-                    image: 'https://example.com/pasta.jpg',
                     cookingDuration: '25',
                     prepDuration: '10',
                     standingTime: '5',
@@ -123,7 +118,6 @@ export const CanAddMultipleAuthors: Story = {
                 expect.objectContaining({
                     authors: ['Alice Cook', 'Bob Baker'],
                     recipeTitle: 'Tomato Pasta',
-                    image: 'https://example.com/pasta.jpg',
                     cookingDuration: '25',
                     prepDuration: '10',
                     standingTime: '5',
@@ -171,7 +165,6 @@ export const CanSelectQuantityProduced: Story = {
                 expect.objectContaining({
                     authors: ['Alice Cook'],
                     recipeTitle: 'Tomato Pasta',
-                    image: 'https://example.com/pasta.jpg',
                     cookingDuration: '25',
                     prepDuration: '10',
                     standingTime: '5',

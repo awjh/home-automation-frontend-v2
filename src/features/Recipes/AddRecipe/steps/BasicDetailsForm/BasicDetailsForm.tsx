@@ -15,7 +15,6 @@ export enum ProducesType {
 export type BasicDetailsFormValues = {
     recipeTitle: string
     authors: string[]
-    image: string
     cookingDuration: string
     prepDuration: string
     standingTime: string
@@ -37,7 +36,6 @@ const BasicDetailsForm = forwardRef<{ submit: () => Promise<boolean> }, BasicDet
             () => ({
                 recipeTitle: '',
                 authors: [''],
-                image: '',
                 cookingDuration: '',
                 prepDuration: '',
                 standingTime: '',
@@ -122,19 +120,6 @@ const BasicDetailsForm = forwardRef<{ submit: () => Promise<boolean> }, BasicDet
                                     requiredMessage={'At least one author is required'}
                                     addIcon={<LuUserPlus />}
                                     deleteIcon={<LuUserMinus />}
-                                />
-                                <Controller
-                                    name={'image'}
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextInput
-                                            label={`Recipe Image`}
-                                            type={'text'}
-                                            required={false}
-                                            errorMessage={errors.image?.message}
-                                            {...field}
-                                        />
-                                    )}
                                 />
                                 <Controller
                                     name={'cookingDuration'}

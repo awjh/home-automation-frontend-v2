@@ -1,3 +1,5 @@
+'use client'
+
 import {
     PostCalculateCaloriesBody,
     PostCalculateCaloriesResponse,
@@ -12,13 +14,25 @@ import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Recipe, RecipeTags } from '@awjh/home-automation-v2-api-models/recipes'
 import { Text, VStack } from '@chakra-ui/react'
 import Button from '@atoms/Button/Button'
+import {
+    isSupportedImageContentType,
+    UploadRecipeImageInput,
+    UploadRecipeImageResponse,
+} from '@defs/Image'
 import useColorMode from '@hooks/useColorMode'
-import { useRef, useState } from 'react'
+import fileToBase64 from '@utils/fileToBase64'
+import { useRouter } from 'next/navigation'
+import { useMemo, useRef, useState } from 'react'
 import BasicDetailsForm, {
     ProducesType,
     BasicDetailsFormValues,
 } from './steps/BasicDetailsForm/BasicDetailsForm'
 import CaloriesForm, { CaloriesFormValues } from './steps/CaloriesForm/CaloriesForm'
+import ImageForm, {
+    HasImageOption,
+    ImageFormValues,
+    ImageSourceOption,
+} from './steps/ImageForm/ImageForm'
 import IngredientsForm from './steps/IngredientsForm/IngredientsForm'
 import { IngredientsFormValues } from './steps/IngredientsForm/IngredientsSectionForm/IngredientsSectionForm'
 import MethodForm, { MethodFormValues } from './steps/MethodForm/MethodForm'
@@ -30,6 +44,7 @@ import TaggingForm from './steps/TaggingForm/TaggingForm'
 type AddRecipeState = {
     originalSource?: OriginalSourceFormValues
     basicDetails?: BasicDetailsFormValues
+    image?: ImageFormValues
     ingredients?: IngredientsFormValues
     method?: MethodFormValues
     calories?: CaloriesFormValues
@@ -51,12 +66,14 @@ type AddRecipeCreateProps = AddRecipeSharedProps & {
     recipe?: never
     addRecipe: (recipe: PostRecipeBody) => Promise<PostRecipeResponse>
     editRecipe?: never
+    uploadRecipeImage: (input: UploadRecipeImageInput) => Promise<UploadRecipeImageResponse>
 }
 
 type AddRecipeEditProps = AddRecipeSharedProps & {
     recipe: Recipe
     editRecipe: (recipeId: string, recipe: PutRecipeBody) => Promise<PutRecipeResponse>
     addRecipe?: never
+    uploadRecipeImage?: never
 }
 
 type AddRecipeProps = AddRecipeCreateProps | AddRecipeEditProps
@@ -65,7 +82,6 @@ type RecipeFormSeed = {
     originalSource?: Recipe['originalSource']
     title: string
     authors?: string[]
-    image?: string
     duration?: Recipe['duration']
     produces?: Recipe['produces']
     ingredients?: Recipe['ingredients']
@@ -132,7 +148,6 @@ function mapRecipeSeedToFormState(recipe: RecipeFormSeed): Omit<AddRecipeState, 
     const basicDetails = {
         recipeTitle: recipe.title,
         authors: recipe.authors ?? [''],
-        image: recipe.image ?? '',
         cookingDuration: String(recipe.duration?.cookingDuration ?? ''),
         prepDuration: String(recipe.duration?.prepDuration ?? ''),
         standingTime: String(recipe.duration?.standingTime ?? ''),
@@ -179,7 +194,7 @@ function mapRecipeSeedToFormState(recipe: RecipeFormSeed): Omit<AddRecipeState, 
     }
 }
 
-function buildPostRecipeBody(formValues: AddRecipeState): PostRecipeBody {
+function buildPostRecipeBody(formValues: AddRecipeState, imageKey?: string): PostRecipeBody {
     const { basicDetails, ingredients, method, originalSource, tags } = formValues
 
     const mappedIngredients =
@@ -271,7 +286,7 @@ function buildPostRecipeBody(formValues: AddRecipeState): PostRecipeBody {
             occasion: tags?.occasion ?? [],
             equipment: tags?.equipment ?? [],
         },
-        image: basicDetails?.image?.trim() || undefined,
+        image: imageKey,
         authors: (basicDetails?.authors ?? []).filter(Boolean),
         method: mappedMethod,
         produces,
@@ -282,13 +297,74 @@ type AddRecipeStepHandle = {
     submit: () => Promise<boolean>
 }
 
+async function resolveImageKey(
+    imageValues: ImageFormValues | undefined,
+    uploadRecipeImage: (input: UploadRecipeImageInput) => Promise<UploadRecipeImageResponse>,
+): Promise<string | undefined> {
+    if (!imageValues || imageValues.hasImage !== HasImageOption.YES) {
+        return undefined
+    }
+
+    if (imageValues.imageSource === ImageSourceOption.UPLOAD) {
+        if (!imageValues.imageFile) {
+            return undefined
+        }
+
+        if (!isSupportedImageContentType(imageValues.imageFile.type)) {
+            throw new Error(`Unsupported image content type: ${imageValues.imageFile.type}`)
+        }
+
+        const data = await fileToBase64(imageValues.imageFile)
+
+        const { key } = await uploadRecipeImage({
+            source: 'file',
+            contentType: imageValues.imageFile.type,
+            data,
+        })
+
+        return key
+    }
+
+    if (!imageValues.imageUrl) {
+        return undefined
+    }
+
+    const { key } = await uploadRecipeImage({ source: 'url', url: imageValues.imageUrl })
+
+    return key
+}
+
+type AddRecipeStepKey =
+    | 'originalSource'
+    | 'basicDetails'
+    | 'image'
+    | 'ingredients'
+    | 'method'
+    | 'calories'
+    | 'tagging'
+
 export default function AddRecipe(props: AddRecipeProps) {
     const { recipe, calculateCalories, extractRecipeFromOnlineSource } = props
     const { keyColors } = useColorMode()
+    const router = useRouter()
     const [stepIndex, setStepIndex] = useState(0)
     const [formValues, setFormValues] = useState<AddRecipeState>(() => mapRecipeToFormState(recipe))
     const activeFormRef = useRef<AddRecipeStepHandle | null>(null)
     const [blockNext, setBlockNext] = useState(false)
+
+    const steps = useMemo<AddRecipeStepKey[]>(() => {
+        const stepKeys: AddRecipeStepKey[] = ['originalSource', 'basicDetails']
+
+        if (!recipe) {
+            stepKeys.push('image')
+        }
+
+        stepKeys.push('ingredients', 'method', 'calories', 'tagging')
+
+        return stepKeys
+    }, [recipe])
+
+    const lastStepIndex = steps.length - 1
 
     const handleNext = (nextValues: Partial<AddRecipeState>) => {
         setFormValues((currentValues) => ({ ...currentValues, ...nextValues }))
@@ -300,8 +376,8 @@ export default function AddRecipe(props: AddRecipeProps) {
             return
         }
 
-        if (stepIndex < 5) {
-            setStepIndex((currentStep) => Math.min(currentStep + 1, 5))
+        if (stepIndex < lastStepIndex) {
+            setStepIndex((currentStep) => Math.min(currentStep + 1, lastStepIndex))
         }
     }
 
@@ -317,14 +393,18 @@ export default function AddRecipe(props: AddRecipeProps) {
         const nextState = { ...formValues, tags }
         setFormValues(nextState)
 
-        const payload = buildPostRecipeBody(nextState)
-
         if (props.editRecipe) {
+            const payload = buildPostRecipeBody(nextState, props.recipe.image)
             await props.editRecipe(props.recipe.id, payload as PutRecipeBody)
+            router.push(`/recipes/${props.recipe.id}`)
             return
         }
 
-        await props.addRecipe(payload)
+        const imageKey = await resolveImageKey(nextState.image, props.uploadRecipeImage)
+        const payload = buildPostRecipeBody(nextState, imageKey)
+
+        const result = await props.addRecipe(payload)
+        router.push(`/recipes/${result.id}`)
     }
 
     const searchInternalRecipes = async (): Promise<GetRecipesResponse> =>
@@ -333,8 +413,8 @@ export default function AddRecipe(props: AddRecipeProps) {
         }) as unknown as GetRecipesResponse
 
     const renderStep = () => {
-        switch (stepIndex) {
-            case 0:
+        switch (steps[stepIndex]) {
+            case 'originalSource':
                 return (
                     <OriginalSourceForm
                         ref={activeFormRef}
@@ -347,18 +427,25 @@ export default function AddRecipe(props: AddRecipeProps) {
                                 ...currentValues,
                                 ...mapRecipeSeedToFormState({
                                     ...result,
-                                    image: result.originalImageUrl,
                                     authors:
                                         result.authors.length > 0
                                             ? result.authors
                                             : currentValues.basicDetails?.authors,
                                 }),
+                                image: result.originalImageUrl
+                                    ? {
+                                          hasImage: HasImageOption.YES,
+                                          imageSource: ImageSourceOption.URL,
+                                          imageUrl: result.originalImageUrl,
+                                          imageFile: null,
+                                      }
+                                    : currentValues.image,
                             }))
                         }}
                         isLookupLoading={(val: boolean) => setBlockNext(val)}
                     />
                 )
-            case 1:
+            case 'basicDetails':
                 return (
                     <BasicDetailsForm
                         ref={activeFormRef}
@@ -366,7 +453,15 @@ export default function AddRecipe(props: AddRecipeProps) {
                         onSubmitStep={(values) => handleNext({ basicDetails: values })}
                     />
                 )
-            case 2:
+            case 'image':
+                return (
+                    <ImageForm
+                        ref={activeFormRef}
+                        initialValues={formValues.image}
+                        onSubmitStep={(values) => handleNext({ image: values })}
+                    />
+                )
+            case 'ingredients':
                 return (
                     <IngredientsForm
                         ref={activeFormRef}
@@ -375,7 +470,7 @@ export default function AddRecipe(props: AddRecipeProps) {
                         onSubmitStep={(values) => handleNext({ ingredients: values })}
                     />
                 )
-            case 3:
+            case 'method':
                 return (
                     <MethodForm
                         ref={activeFormRef}
@@ -384,7 +479,7 @@ export default function AddRecipe(props: AddRecipeProps) {
                         onSubmitStep={(values) => handleNext({ method: values })}
                     />
                 )
-            case 4:
+            case 'calories':
                 return (
                     <CaloriesForm
                         ref={activeFormRef}
@@ -416,7 +511,7 @@ export default function AddRecipe(props: AddRecipeProps) {
     return (
         <VStack alignItems={'stretch'} gap={4} px={6} w={'full'}>
             <Text color={keyColors.primary} fontSize={'xl'} fontWeight={'bold'}>
-                {recipe ? 'Edit' : 'Add'} Recipe ({stepIndex + 1} of 6)
+                {recipe ? 'Edit' : 'Add'} Recipe ({stepIndex + 1} of {steps.length})
             </Text>
             {renderStep()}
             <VStack alignItems={'stretch'} gap={3}>
@@ -435,7 +530,7 @@ export default function AddRecipe(props: AddRecipeProps) {
                         onClick={handleWizardNext}
                         disabled={blockNext}
                     >
-                        {stepIndex === 5 ? 'Finish' : 'Next'}
+                        {stepIndex === lastStepIndex ? 'Finish' : 'Next'}
                     </Button>
                 </div>
             </VStack>
