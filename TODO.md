@@ -1,14 +1,8 @@
 TODO
 
-Finish migrating all actions to new better typed actions
+Page:
 
-Finish full page planning
-
-When someone selects online as a source, when they hit button to lookup then lookup
-
-Make actual add recipe page which can take the JSON and then also add an edit recipe page which uses the same form
-
-Cypress tests
+- Need to work out what we want to do with images, I think its in the form?
 
 JSON entry for form to support AI
 

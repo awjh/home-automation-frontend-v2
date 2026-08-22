@@ -4,8 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Box } from '@chakra-ui/react'
 import searchRecipes from '@test/storybookHelpers/searchRecipes'
 
-const onNext = fn()
-const onBack = fn()
+const onSubmitStep = fn()
 
 const meta: Meta<typeof IngredientsForm> = {
     title: 'Features/Recipes/AddRecipe/AddRecipeForm/steps/IngredientsForm',
@@ -19,8 +18,7 @@ const meta: Meta<typeof IngredientsForm> = {
     ],
     args: {
         searchInternalRecipes: searchRecipes,
-        onNext,
-        onBack,
+        onSubmitStep,
     },
 }
 
@@ -69,7 +67,7 @@ export const CanDeleteSectionAndIngredients: Story = {
 
 export const CanDeleteOnlyIngredientRow: Story = {
     play: async ({ canvas, canvasElement, userEvent }: PlayContext) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const firstDraftRow = canvas.getAllByRole('textbox')
         await userEvent.type(firstDraftRow[0], '1')
@@ -105,8 +103,8 @@ export const CanDeleteOnlyIngredientRow: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(onNext).toHaveBeenCalledOnce()
-            expect(onNext).toHaveBeenCalledWith({
+            expect(onSubmitStep).toHaveBeenCalledOnce()
+            expect(onSubmitStep).toHaveBeenCalledWith({
                 sections: [
                     {
                         name: 'Main Recipe',
@@ -127,7 +125,7 @@ export const CanDeleteOnlyIngredientRow: Story = {
 
 export const CanSubmitWithIngredients: Story = {
     play: async ({ canvas, canvasElement, userEvent }: PlayContext) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const textboxes = canvas.getAllByRole('textbox')
         await userEvent.type(textboxes[0], '2')
@@ -142,8 +140,8 @@ export const CanSubmitWithIngredients: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(onNext).toHaveBeenCalledOnce()
-            expect(onNext).toHaveBeenCalledWith({
+            expect(onSubmitStep).toHaveBeenCalledOnce()
+            expect(onSubmitStep).toHaveBeenCalledWith({
                 sections: [
                     {
                         name: 'Main Recipe',
@@ -164,7 +162,7 @@ export const CanSubmitWithIngredients: Story = {
 
 export const CanSubmitWithIngredientsAcrossSections: Story = {
     play: async ({ canvas, canvasElement, userEvent }: PlayContext) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         let textboxes = canvas.getAllByRole('textbox')
         await userEvent.type(textboxes[0], '1')
@@ -196,8 +194,8 @@ export const CanSubmitWithIngredientsAcrossSections: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(onNext).toHaveBeenCalledOnce()
-            expect(onNext).toHaveBeenCalledWith({
+            expect(onSubmitStep).toHaveBeenCalledOnce()
+            expect(onSubmitStep).toHaveBeenCalledWith({
                 sections: [
                     {
                         name: 'Main Recipe',
@@ -230,7 +228,7 @@ export const CanSubmitWithIngredientsAcrossSections: Story = {
 // This is failing since it seems to try and validate on the draft row - can we just turn off validation for the draft row? Let it validate theres a value or when its moved instead?
 export const CanDragIngredientBetweenSectionsAndSubmit: Story = {
     play: async ({ canvas, canvasElement, userEvent }: PlayContext) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
         const alertSpy = fn()
         const originalAlert = window.alert
         window.alert = alertSpy
@@ -304,8 +302,8 @@ export const CanDragIngredientBetweenSectionsAndSubmit: Story = {
 
             await waitFor(() => {
                 expect(alertSpy).not.toHaveBeenCalled()
-                expect(onNext).toHaveBeenCalledOnce()
-                expect(onNext).toHaveBeenCalledWith({
+                expect(onSubmitStep).toHaveBeenCalledOnce()
+                expect(onSubmitStep).toHaveBeenCalledWith({
                     sections: [
                         {
                             name: 'Main Recipe',
@@ -340,7 +338,7 @@ export const CanDragIngredientBetweenSectionsAndSubmit: Story = {
 
 export const CanLinkIngredientToInternalRecipe: Story = {
     play: async ({ canvas, canvasElement, userEvent }: PlayContext) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const textboxes = canvas.getAllByRole('textbox')
         await userEvent.type(textboxes[0], '1')
@@ -371,8 +369,8 @@ export const CanLinkIngredientToInternalRecipe: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(onNext).toHaveBeenCalledOnce()
-            expect(onNext).toHaveBeenCalledWith({
+            expect(onSubmitStep).toHaveBeenCalledOnce()
+            expect(onSubmitStep).toHaveBeenCalledWith({
                 sections: [
                     {
                         name: 'Main Recipe',
@@ -394,7 +392,7 @@ export const CanLinkIngredientToInternalRecipe: Story = {
 
 export const ShowsAlertWhenDraftRowHasUnsubmittedData: Story = {
     play: async ({ canvas, canvasElement, userEvent }: PlayContext) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const alertSpy = fn()
         const originalAlert = window.alert
@@ -412,7 +410,7 @@ export const ShowsAlertWhenDraftRowHasUnsubmittedData: Story = {
                 expect(alertSpy).toHaveBeenCalledWith(
                     'Please clear the draft row or press Enter to add it before continuing.',
                 )
-                expect(onNext).not.toHaveBeenCalled()
+                expect(onSubmitStep).not.toHaveBeenCalled()
             })
         } finally {
             window.alert = originalAlert
@@ -422,7 +420,7 @@ export const ShowsAlertWhenDraftRowHasUnsubmittedData: Story = {
 
 export const CanSubmitOnlyNonDeletedIngredients: Story = {
     play: async ({ canvas, canvasElement, userEvent }: PlayContext) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         let textboxes = canvas.getAllByRole('textbox')
         let draftRowStartIndex = textboxes.length - 4
@@ -471,8 +469,8 @@ export const CanSubmitOnlyNonDeletedIngredients: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(onNext).toHaveBeenCalledOnce()
-            expect(onNext).toHaveBeenCalledWith({
+            expect(onSubmitStep).toHaveBeenCalledOnce()
+            expect(onSubmitStep).toHaveBeenCalledWith({
                 sections: [
                     {
                         name: 'Main Recipe',

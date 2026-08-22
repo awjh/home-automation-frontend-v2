@@ -27,8 +27,7 @@ export type BasicDetailsFormValues = {
 
 export interface BasicDetailsFormProps {
     initialValues?: BasicDetailsFormValues
-    onNext: (values: BasicDetailsFormValues) => void
-    onBack: () => void
+    onSubmitStep: (values: BasicDetailsFormValues) => void
 }
 
 const BasicDetailsForm = forwardRef<{ submit: () => Promise<boolean> }, BasicDetailsFormProps>(
@@ -58,7 +57,7 @@ const BasicDetailsForm = forwardRef<{ submit: () => Promise<boolean> }, BasicDet
             formState: { errors },
             reset,
         } = useForm<BasicDetailsFormValues>({
-            defaultValues: emptyValues,
+            defaultValues: props.initialValues ?? emptyValues,
             mode: 'onTouched',
         })
 
@@ -67,7 +66,7 @@ const BasicDetailsForm = forwardRef<{ submit: () => Promise<boolean> }, BasicDet
                 new Promise<boolean>((resolve) => {
                     handleSubmit(
                         (input) => {
-                            props.onNext(input)
+                            props.onSubmitStep(input)
                             resolve(true)
                         },
                         () => resolve(false),
@@ -82,7 +81,7 @@ const BasicDetailsForm = forwardRef<{ submit: () => Promise<boolean> }, BasicDet
         const selectedProducesType = useWatch({ control, name: 'producesType' })
 
         const submitHandler = (input: BasicDetailsFormValues) => {
-            props.onNext(input)
+            props.onSubmitStep(input)
         }
 
         return (

@@ -3,16 +3,14 @@ import { expect, fireEvent, fn, waitFor } from 'storybook/test'
 import CaloriesForm from './CaloriesForm'
 import { ProducesType } from '../BasicDetailsForm/BasicDetailsForm'
 
-const onNext = fn()
-const onBack = fn()
+const onSubmitStep = fn()
 
 const meta: Meta<typeof CaloriesForm> = {
     title: 'Features/Recipes/AddRecipe/AddRecipeForm/steps/CaloriesForm',
     component: CaloriesForm,
     decorators: [(Story) => <Story />],
     args: {
-        onNext,
-        onBack,
+        onSubmitStep,
         ingredientSections: [
             {
                 name: 'Section 1',
@@ -140,8 +138,7 @@ export const LookupError: Story = {
 
 export const CanSubmitCalories: Story = {
     play: async ({ args, canvas, canvasElement, userEvent }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         expect(canvas.queryByRole('button', { name: /back/i })).not.toBeInTheDocument()
 
@@ -150,8 +147,7 @@ export const CanSubmitCalories: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledWith({ calories: '650' })
-            expect(args.onBack).not.toHaveBeenCalled()
+            expect(args.onSubmitStep).toHaveBeenCalledWith({ calories: '650' })
         })
     },
 }

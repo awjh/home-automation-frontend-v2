@@ -8,16 +8,14 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, fn, waitFor } from 'storybook/test'
 import TaggingForm from './TaggingForm'
 
-const onNext = fn()
-const onBack = fn()
+const onSubmitStep = fn()
 
 const meta: Meta<typeof TaggingForm> = {
     title: 'Features/Recipes/AddRecipe/AddRecipeForm/steps/TaggingForm',
     component: TaggingForm,
     decorators: [(Story) => <Story />],
     args: {
-        onNext,
-        onBack,
+        onSubmitStep,
     },
 }
 
@@ -55,14 +53,13 @@ export const Default: Story = {}
 
 export const CanSubmitWithoutSelectingTags: Story = {
     play: async ({ canvasElement, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledTimes(1)
-            expect(args.onNext).toHaveBeenCalledWith({
+            expect(args.onSubmitStep).toHaveBeenCalledTimes(1)
+            expect(args.onSubmitStep).toHaveBeenCalledWith({
                 cuisine: [],
                 mealType: [],
                 meat: [],
@@ -70,15 +67,13 @@ export const CanSubmitWithoutSelectingTags: Story = {
                 occasion: [],
                 equipment: [],
             } satisfies RecipeTags)
-            expect(args.onBack).not.toHaveBeenCalled()
         })
     },
 }
 
 export const CanSelectSomeTagsAndSubmit: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         const [selectedCuisine] = getEnumValues<Cuisine>(Cuisine)
         const [selectedMealType] = getEnumValues<MealType>(MealType)
@@ -91,8 +86,8 @@ export const CanSelectSomeTagsAndSubmit: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledTimes(1)
-            expect(args.onNext).toHaveBeenCalledWith({
+            expect(args.onSubmitStep).toHaveBeenCalledTimes(1)
+            expect(args.onSubmitStep).toHaveBeenCalledWith({
                 cuisine: [selectedCuisine],
                 mealType: [selectedMealType],
                 meat: [selectedMeat],
@@ -100,7 +95,6 @@ export const CanSelectSomeTagsAndSubmit: Story = {
                 occasion: [],
                 equipment: [],
             } satisfies RecipeTags)
-            expect(args.onBack).not.toHaveBeenCalled()
         })
     },
 }
@@ -115,8 +109,7 @@ export const CanSelectSomeTagsAndGoBack: Story = {
 
 export const CanDeselectTagsBeforeSubmit: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         const [selectedCuisine] = getEnumValues<Cuisine>(Cuisine)
         const [selectedMealType] = getEnumValues<MealType>(MealType)
@@ -130,8 +123,8 @@ export const CanDeselectTagsBeforeSubmit: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledTimes(1)
-            expect(args.onNext).toHaveBeenCalledWith({
+            expect(args.onSubmitStep).toHaveBeenCalledTimes(1)
+            expect(args.onSubmitStep).toHaveBeenCalledWith({
                 cuisine: [],
                 mealType: [],
                 meat: [],
@@ -139,7 +132,6 @@ export const CanDeselectTagsBeforeSubmit: Story = {
                 occasion: [],
                 equipment: [],
             } satisfies RecipeTags)
-            expect(args.onBack).not.toHaveBeenCalled()
         })
     },
 }

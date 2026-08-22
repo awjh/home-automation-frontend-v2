@@ -21,8 +21,7 @@ import {
 
 interface TaggingFormProps {
     initialValues?: RecipeTags
-    onNext: (tags: RecipeTags) => void
-    onBack: () => void
+    onSubmitStep: (tags: RecipeTags) => void
 }
 
 function getEnumValues<T extends string>(enumObject: Record<string, string>) {
@@ -60,7 +59,7 @@ const TaggingForm = forwardRef<{ submit: () => Promise<boolean> }, TaggingFormPr
 
         useImperativeHandle(ref, () => ({
             submit: async () => {
-                props.onNext({
+                props.onSubmitStep({
                     cuisine: cuisineOptions.filter((value) => selectedCuisine.has(value)),
                     mealType: mealTypeOptions.filter((value) => selectedMealType.has(value)),
                     meat: meatOptions.filter((value) => selectedMeat.has(value)),
@@ -91,7 +90,7 @@ const TaggingForm = forwardRef<{ submit: () => Promise<boolean> }, TaggingFormPr
         const submitHandler = (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault()
 
-            props.onNext({
+            props.onSubmitStep({
                 cuisine: cuisineOptions.filter((value) => selectedCuisine.has(value)),
                 mealType: mealTypeOptions.filter((value) => selectedMealType.has(value)),
                 meat: meatOptions.filter((value) => selectedMeat.has(value)),

@@ -4,8 +4,7 @@ import { expect, fireEvent, fn, waitFor, within } from 'storybook/test'
 import { type IngredientsFormSection } from '../IngredientsForm/IngredientsSectionForm/IngredientsSectionForm'
 import MethodForm from './MethodForm'
 
-const onNext = fn()
-const onBack = fn()
+const onSubmitStep = fn()
 
 const ingredientSections: IngredientsFormSection[] = [
     {
@@ -38,8 +37,7 @@ const meta: Meta<typeof MethodForm> = {
         ),
     ],
     args: {
-        onNext,
-        onBack,
+        onSubmitStep,
     },
 }
 
@@ -75,7 +73,7 @@ export const CanAddMethodStepWithEnter: Story = {
 
 export const AddedMethodStepRemainsEditable: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const inputs = canvas.getAllByRole('textbox')
 
@@ -94,8 +92,8 @@ export const AddedMethodStepRemainsEditable: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledOnce()
-            expect(args.onNext).toHaveBeenCalledWith({
+            expect(args.onSubmitStep).toHaveBeenCalledOnce()
+            expect(args.onSubmitStep).toHaveBeenCalledWith({
                 steps: [
                     {
                         description: 'Preheat oven to 180C',
@@ -125,7 +123,7 @@ export const EnterDoesNotCreateNewLine: Story = {
 
 export const ShowsAlertWhenDraftStepIsNotSubmitted: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const alertSpy = fn()
         const originalAlert = window.alert
@@ -139,7 +137,7 @@ export const ShowsAlertWhenDraftStepIsNotSubmitted: Story = {
 
             await waitFor(() => {
                 expect(alertSpy).toHaveBeenCalledOnce()
-                expect(args.onNext).not.toHaveBeenCalled()
+                expect(args.onSubmitStep).not.toHaveBeenCalled()
             })
         } finally {
             window.alert = originalAlert
@@ -149,7 +147,7 @@ export const ShowsAlertWhenDraftStepIsNotSubmitted: Story = {
 
 export const CanDeleteMethodRow: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const inputs = canvas.getAllByRole('textbox')
 
@@ -183,8 +181,8 @@ export const CanDeleteMethodRow: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledOnce()
-            expect(args.onNext).toHaveBeenCalledWith({
+            expect(args.onSubmitStep).toHaveBeenCalledOnce()
+            expect(args.onSubmitStep).toHaveBeenCalledWith({
                 steps: [
                     {
                         description: 'Step two',
@@ -201,7 +199,7 @@ export const CanAddStepThenSelectIngredient: Story = {
         ingredientSections,
     },
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const inputs = canvas.getAllByRole('textbox')
 
@@ -237,8 +235,8 @@ export const CanAddStepThenSelectIngredient: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledOnce()
-            expect(args.onNext).toHaveBeenCalledWith({
+            expect(args.onSubmitStep).toHaveBeenCalledOnce()
+            expect(args.onSubmitStep).toHaveBeenCalledWith({
                 steps: [
                     {
                         description: 'Saute vegetables',
@@ -263,7 +261,7 @@ export const CanReopenIngredientPopupAndAddAnotherIngredient: Story = {
         ingredientSections,
     },
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const inputs = canvas.getAllByRole('textbox')
 
@@ -311,8 +309,8 @@ export const CanReopenIngredientPopupAndAddAnotherIngredient: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledOnce()
-            expect(args.onNext).toHaveBeenCalledWith({
+            expect(args.onSubmitStep).toHaveBeenCalledOnce()
+            expect(args.onSubmitStep).toHaveBeenCalledWith({
                 steps: [
                     {
                         description: 'Cook filling',
@@ -344,7 +342,7 @@ export const CanReopenIngredientPopupAndCancelToKeepExistingIngredients: Story =
         ingredientSections,
     },
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
+        onSubmitStep.mockClear()
 
         const inputs = canvas.getAllByRole('textbox')
 
@@ -393,8 +391,8 @@ export const CanReopenIngredientPopupAndCancelToKeepExistingIngredients: Story =
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledOnce()
-            expect(args.onNext).toHaveBeenCalledWith({
+            expect(args.onSubmitStep).toHaveBeenCalledOnce()
+            expect(args.onSubmitStep).toHaveBeenCalledWith({
                 steps: [
                     {
                         description: 'Cook filling',

@@ -32,8 +32,7 @@ interface CaloriesFormProps {
         ingredients: PostCalculateCaloriesBody['ingredients']
         produces: Recipe['produces']
     }): Promise<PostCalculateCaloriesResponse>
-    onNext: (calories: CaloriesFormValues) => void
-    onBack: () => void
+    onSubmitStep: (calories: CaloriesFormValues) => void
 }
 
 const CaloriesForm = forwardRef<{ submit: () => Promise<boolean> }, CaloriesFormProps>(
@@ -78,7 +77,7 @@ const CaloriesForm = forwardRef<{ submit: () => Promise<boolean> }, CaloriesForm
                 new Promise<boolean>((resolve) => {
                     handleSubmit(
                         (data) => {
-                            props.onNext(data)
+                            props.onSubmitStep(data)
                             resolve(true)
                         },
                         () => resolve(false),
@@ -91,7 +90,7 @@ const CaloriesForm = forwardRef<{ submit: () => Promise<boolean> }, CaloriesForm
         }, [props.initialValues, reset])
 
         const submitHandler = (data: CaloriesFormValues) => {
-            props.onNext(data)
+            props.onSubmitStep(data)
         }
 
         return (

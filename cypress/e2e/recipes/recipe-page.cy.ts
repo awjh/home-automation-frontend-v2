@@ -51,7 +51,7 @@ describe('recipe page', () => {
 
         cy.createRecipe({
             ...buildBookRecipe(recipeTitle),
-            image: 'recipe.jpg',
+            image: '/recipe.jpg',
         }).then((recipeId) => {
             createdRecipeIds.push(recipeId)
 

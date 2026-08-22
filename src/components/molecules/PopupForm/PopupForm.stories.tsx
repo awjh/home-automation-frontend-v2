@@ -38,16 +38,16 @@ export const Default: Story = {
 export const CallsOnCloseWhenBackdropClicked: Story = {
     render: Default.render,
     play: async ({ canvasElement, args, userEvent }) => {
-        const form = canvasElement.querySelector('form')
+        const popup = canvasElement.querySelector('[data-cy="popup-form"]')
 
         if (
-            !(form instanceof HTMLElement) ||
-            !(form.previousElementSibling instanceof HTMLElement)
+            !(popup instanceof HTMLElement) ||
+            !(popup.previousElementSibling instanceof HTMLElement)
         ) {
             throw new Error('PopupForm backdrop could not be found.')
         }
 
-        await userEvent.click(form.previousElementSibling)
+        await userEvent.click(popup.previousElementSibling)
 
         await waitFor(() => {
             expect(args.onClose).toHaveBeenCalledOnce()

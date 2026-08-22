@@ -1,13 +1,11 @@
 import Button from '@atoms/Button/Button'
 import SelectInput from '@atoms/SelectInput/SelectInput'
 import TextInput from '@atoms/TextInput/TextInput'
-import { GetExtractedExternalRecipeBasicsResponse } from '@awjh/home-automation-v2-api-models'
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Fieldset, HStack, VStack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
-import { extractRecipeFromOnlineSource } from '../../../../../app/(protected)/recipes/add/actions'
 import useToaster from '@hooks/useToaster'
 
 export type OriginalSourceFormValues = {
@@ -22,8 +20,8 @@ export type OriginalSourceFormValues = {
 export interface OriginalSourceFormProps {
     initialValues?: OriginalSourceFormValues
     extractRecipeFromOnlineSource: (url: string) => Promise<void>
-    onNext: (values: OriginalSourceFormValues) => void
-    onBack: () => void
+    isLookupLoading: (val: boolean) => void
+    onSubmitStep: (values: OriginalSourceFormValues) => void
 }
 
 const OriginalSourceForm = forwardRef<{ submit: () => Promise<boolean> }, OriginalSourceFormProps>(
@@ -53,18 +51,22 @@ const OriginalSourceForm = forwardRef<{ submit: () => Promise<boolean> }, Origin
         )
 
         const { control, handleSubmit, reset, getValues } = useForm<OriginalSourceFormValues>({
-            defaultValues: emptyValues,
+            defaultValues: props.initialValues ?? emptyValues,
             mode: 'onTouched',
         })
 
         const [lookupLoading, setLookupLoading] = useState(false)
+
+        useEffect(() => {
+            props.isLookupLoading(lookupLoading)
+        }, [lookupLoading, props])
 
         useImperativeHandle(ref, () => ({
             submit: () =>
                 new Promise<boolean>((resolve) => {
                     handleSubmit(
                         (input) => {
-                            props.onNext(input)
+                            props.onSubmitStep(input)
                             resolve(true)
                         },
                         () => resolve(false),
@@ -79,7 +81,7 @@ const OriginalSourceForm = forwardRef<{ submit: () => Promise<boolean> }, Origin
         const selectedSourceType = useWatch({ control, name: 'sourceType' })
 
         const submitHandler = (input: OriginalSourceFormValues) => {
-            props.onNext(input)
+            props.onSubmitStep(input)
         }
 
         return (
@@ -177,7 +179,7 @@ const OriginalSourceForm = forwardRef<{ submit: () => Promise<boolean> }, Origin
                             />
                         )}
                         {selectedSourceType === SourceType.ONLINE && (
-                            <HStack alignItems={'end'}>
+                            <HStack alignItems={'end'} w={'full'}>
                                 <Controller
                                     name={'url'}
                                     control={control}
@@ -201,7 +203,9 @@ const OriginalSourceForm = forwardRef<{ submit: () => Promise<boolean> }, Origin
                                         setLookupLoading(true)
 
                                         try {
-                                            await extractRecipeFromOnlineSource(getValues('url'))
+                                            await props.extractRecipeFromOnlineSource(
+                                                getValues('url'),
+                                            )
                                             // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                         } catch (_error) {
                                             toaster.create({

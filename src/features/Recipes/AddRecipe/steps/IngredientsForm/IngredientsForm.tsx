@@ -16,8 +16,7 @@ import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
 interface IngredientsFormProps {
     initialValues?: IngredientsFormValues
     searchInternalRecipes: (keywords: string) => Promise<GetRecipesResponse>
-    onNext: (values: IngredientsFormValues) => void
-    onBack: () => void
+    onSubmitStep: (values: IngredientsFormValues) => void
 }
 
 const IngredientsForm = forwardRef<{ submit: () => Promise<boolean> }, IngredientsFormProps>(
@@ -56,7 +55,7 @@ const IngredientsForm = forwardRef<{ submit: () => Promise<boolean> }, Ingredien
                                 return
                             }
 
-                            props.onNext({
+                            props.onSubmitStep({
                                 sections: input.sections.map((section) => ({
                                     ...section,
                                     ingredients: trimTrailingEmptyIngredients(section.ingredients),
@@ -98,7 +97,7 @@ const IngredientsForm = forwardRef<{ submit: () => Promise<boolean> }, Ingredien
                 return
             }
 
-            props.onNext({
+            props.onSubmitStep({
                 sections: input.sections.map((section) => ({
                     ...section,
                     ingredients: trimTrailingEmptyIngredients(section.ingredients),

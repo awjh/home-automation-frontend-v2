@@ -4,7 +4,9 @@ import {
     PostRecipeResponse,
     GetRecipesResponse,
     PostRecipeBody,
-    GetExtractedExternalRecipeBasicsResponse,
+    PutRecipeBody,
+    PutRecipeResponse,
+    GetExtractedExternalRecipeResponse,
 } from '@awjh/home-automation-v2-api-models'
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Recipe, RecipeTags } from '@awjh/home-automation-v2-api-models/recipes'
@@ -25,7 +27,7 @@ import OriginalSourceForm, {
 } from './steps/OriginalSourceForm/OriginalSourceForm'
 import TaggingForm from './steps/TaggingForm/TaggingForm'
 
-type AddRecipeFormState = {
+type AddRecipeState = {
     originalSource?: OriginalSourceFormValues
     basicDetails?: BasicDetailsFormValues
     ingredients?: IngredientsFormValues
@@ -34,9 +36,7 @@ type AddRecipeFormState = {
     tags?: RecipeTags
 }
 
-type AddRecipeFormProps = {
-    recipe?: Recipe
-    addRecipe: (recipe: PostRecipeBody) => Promise<PostRecipeResponse>
+type AddRecipeSharedProps = {
     calculateCalories({
         ingredients,
         produces,
@@ -44,49 +44,90 @@ type AddRecipeFormProps = {
         ingredients: PostCalculateCaloriesBody['ingredients']
         produces: Recipe['produces']
     }): Promise<PostCalculateCaloriesResponse>
-    extractRecipeFromOnlineSource(url: string): Promise<GetExtractedExternalRecipeBasicsResponse>
+    extractRecipeFromOnlineSource(url: string): Promise<GetExtractedExternalRecipeResponse>
 }
 
-export function mapRecipeToFormState(recipe?: Recipe): AddRecipeFormState {
+type AddRecipeCreateProps = AddRecipeSharedProps & {
+    recipe?: never
+    addRecipe: (recipe: PostRecipeBody) => Promise<PostRecipeResponse>
+    editRecipe?: never
+}
+
+type AddRecipeEditProps = AddRecipeSharedProps & {
+    recipe: Recipe
+    editRecipe: (recipeId: string, recipe: PutRecipeBody) => Promise<PutRecipeResponse>
+    addRecipe?: never
+}
+
+type AddRecipeProps = AddRecipeCreateProps | AddRecipeEditProps
+
+type RecipeFormSeed = {
+    originalSource?: Recipe['originalSource']
+    title: string
+    authors?: string[]
+    image?: string
+    duration?: Recipe['duration']
+    produces?: Recipe['produces']
+    ingredients?: Recipe['ingredients']
+    method?: Recipe['method']
+    tags?: RecipeTags
+}
+
+function mapOriginalSourceToFormState(
+    originalSource?:
+        | Recipe['originalSource']
+        | GetExtractedExternalRecipeResponse['originalSource'],
+): OriginalSourceFormValues | undefined {
+    if (!originalSource) {
+        return undefined
+    }
+
+    switch (originalSource.type) {
+        case SourceType.BOOK:
+            return {
+                sourceType: SourceType.BOOK,
+                title: originalSource.title,
+                page: String(originalSource.page),
+                series: originalSource.series ?? '',
+                issue: '',
+                url: '',
+            }
+        case SourceType.MAGAZINE:
+            return {
+                sourceType: SourceType.MAGAZINE,
+                title: originalSource.title,
+                page: String(originalSource.page),
+                series: '',
+                issue: originalSource.issue,
+                url: '',
+            }
+        default:
+            return {
+                sourceType: SourceType.ONLINE,
+                title: '',
+                page: '',
+                series: '',
+                issue: '',
+                url: originalSource.url,
+            }
+    }
+}
+
+export function mapRecipeToFormState(recipe?: Recipe): AddRecipeState {
     if (!recipe) {
         return {}
     }
 
-    const originalSource = (() => {
-        if (!recipe.originalSource) {
-            return undefined
-        }
+    return {
+        ...mapRecipeSeedToFormState(recipe),
+        calories: {
+            calories: String(recipe.calories ?? ''),
+        },
+    }
+}
 
-        switch (recipe.originalSource.type) {
-            case SourceType.BOOK:
-                return {
-                    sourceType: SourceType.BOOK,
-                    title: recipe.originalSource.title,
-                    page: String(recipe.originalSource.page),
-                    series: recipe.originalSource.series ?? '',
-                    issue: '',
-                    url: '',
-                }
-            case SourceType.MAGAZINE:
-                return {
-                    sourceType: SourceType.MAGAZINE,
-                    title: recipe.originalSource.title,
-                    page: String(recipe.originalSource.page),
-                    series: '',
-                    issue: recipe.originalSource.issue,
-                    url: '',
-                }
-            default:
-                return {
-                    sourceType: SourceType.ONLINE,
-                    title: '',
-                    page: '',
-                    series: '',
-                    issue: '',
-                    url: recipe.originalSource.url,
-                }
-        }
-    })()
+function mapRecipeSeedToFormState(recipe: RecipeFormSeed): Omit<AddRecipeState, 'calories'> {
+    const originalSource = mapOriginalSourceToFormState(recipe.originalSource)
 
     const basicDetails = {
         recipeTitle: recipe.title,
@@ -134,14 +175,11 @@ export function mapRecipeToFormState(recipe?: Recipe): AddRecipeFormState {
         basicDetails,
         ingredients,
         method,
-        calories: {
-            calories: String(recipe.calories ?? ''),
-        },
         tags: recipe.tags,
     }
 }
 
-function buildPostRecipeBody(formValues: AddRecipeFormState): PostRecipeBody {
+function buildPostRecipeBody(formValues: AddRecipeState): PostRecipeBody {
     const { basicDetails, ingredients, method, originalSource, tags } = formValues
 
     const mappedIngredients =
@@ -244,25 +282,16 @@ type AddRecipeStepHandle = {
     submit: () => Promise<boolean>
 }
 
-export default function AddRecipeForm({
-    recipe,
-    calculateCalories,
-    addRecipe,
-    extractRecipeFromOnlineSource,
-}: AddRecipeFormProps) {
+export default function AddRecipe(props: AddRecipeProps) {
+    const { recipe, calculateCalories, extractRecipeFromOnlineSource } = props
     const { keyColors } = useColorMode()
     const [stepIndex, setStepIndex] = useState(0)
-    const [formValues, setFormValues] = useState<AddRecipeFormState>(() =>
-        mapRecipeToFormState(recipe),
-    )
+    const [formValues, setFormValues] = useState<AddRecipeState>(() => mapRecipeToFormState(recipe))
     const activeFormRef = useRef<AddRecipeStepHandle | null>(null)
+    const [blockNext, setBlockNext] = useState(false)
 
-    const handleNext = (nextValues: Partial<AddRecipeFormState>) => {
+    const handleNext = (nextValues: Partial<AddRecipeState>) => {
         setFormValues((currentValues) => ({ ...currentValues, ...nextValues }))
-    }
-
-    const handleBack = () => {
-        setStepIndex((currentStep) => Math.max(currentStep - 1, 0))
     }
 
     const handleWizardNext = async () => {
@@ -284,6 +313,20 @@ export default function AddRecipeForm({
         setStepIndex((currentStep) => Math.max(currentStep - 1, 0))
     }
 
+    const handleTaggingSubmit = async (tags: RecipeTags) => {
+        const nextState = { ...formValues, tags }
+        setFormValues(nextState)
+
+        const payload = buildPostRecipeBody(nextState)
+
+        if (props.editRecipe) {
+            await props.editRecipe(props.recipe.id, payload as PutRecipeBody)
+            return
+        }
+
+        await props.addRecipe(payload)
+    }
+
     const searchInternalRecipes = async (): Promise<GetRecipesResponse> =>
         ({
             recipes: [],
@@ -296,15 +339,23 @@ export default function AddRecipeForm({
                     <OriginalSourceForm
                         ref={activeFormRef}
                         initialValues={formValues.originalSource}
-                        onNext={(values) => handleNext({ originalSource: values })}
-                        onBack={handleBack}
+                        onSubmitStep={(values) => handleNext({ originalSource: values })}
                         extractRecipeFromOnlineSource={async (url: string) => {
                             const result = await extractRecipeFromOnlineSource(url)
 
-                            // TODO update the form states with the extracted recipe data
-                            // add stories to original source form for button click and toasts
-                            // and then also this form for the checking it sets up ingredients etc
+                            setFormValues((currentValues) => ({
+                                ...currentValues,
+                                ...mapRecipeSeedToFormState({
+                                    ...result,
+                                    image: result.originalImageUrl,
+                                    authors:
+                                        result.authors.length > 0
+                                            ? result.authors
+                                            : currentValues.basicDetails?.authors,
+                                }),
+                            }))
                         }}
+                        isLookupLoading={(val: boolean) => setBlockNext(val)}
                     />
                 )
             case 1:
@@ -312,8 +363,7 @@ export default function AddRecipeForm({
                     <BasicDetailsForm
                         ref={activeFormRef}
                         initialValues={formValues.basicDetails}
-                        onNext={(values) => handleNext({ basicDetails: values })}
-                        onBack={handleBack}
+                        onSubmitStep={(values) => handleNext({ basicDetails: values })}
                     />
                 )
             case 2:
@@ -322,8 +372,7 @@ export default function AddRecipeForm({
                         ref={activeFormRef}
                         initialValues={formValues.ingredients}
                         searchInternalRecipes={searchInternalRecipes}
-                        onNext={(values) => handleNext({ ingredients: values })}
-                        onBack={handleBack}
+                        onSubmitStep={(values) => handleNext({ ingredients: values })}
                     />
                 )
             case 3:
@@ -332,8 +381,7 @@ export default function AddRecipeForm({
                         ref={activeFormRef}
                         initialValues={formValues.method}
                         ingredientSections={formValues.ingredients?.sections ?? []}
-                        onNext={(values) => handleNext({ method: values })}
-                        onBack={handleBack}
+                        onSubmitStep={(values) => handleNext({ method: values })}
                     />
                 )
             case 4:
@@ -351,8 +399,7 @@ export default function AddRecipeForm({
                         }
                         calculateCalories={calculateCalories}
                         initialValues={formValues.calories}
-                        onNext={(values) => handleNext({ calories: values })}
-                        onBack={handleBack}
+                        onSubmitStep={(values) => handleNext({ calories: values })}
                     />
                 )
             default:
@@ -360,19 +407,14 @@ export default function AddRecipeForm({
                     <TaggingForm
                         ref={activeFormRef}
                         initialValues={formValues.tags}
-                        onNext={async (values) => {
-                            const nextState = { ...formValues, tags: values }
-                            setFormValues(nextState)
-                            await addRecipe(buildPostRecipeBody(nextState))
-                        }}
-                        onBack={handleBack}
+                        onSubmitStep={handleTaggingSubmit}
                     />
                 )
         }
     }
 
     return (
-        <VStack alignItems={'stretch'} gap={4}>
+        <VStack alignItems={'stretch'} gap={4} px={6} w={'full'}>
             <Text color={keyColors.primary} fontSize={'xl'} fontWeight={'bold'}>
                 {recipe ? 'Edit' : 'Add'} Recipe ({stepIndex + 1} of 6)
             </Text>
@@ -382,12 +424,17 @@ export default function AddRecipeForm({
                     <Button
                         type={'button'}
                         colorStyle={'secondary'}
-                        disabled={stepIndex === 0}
+                        disabled={stepIndex === 0 || blockNext}
                         onClick={handleWizardBack}
                     >
                         Back
                     </Button>
-                    <Button type={'button'} colorStyle={'primary'} onClick={handleWizardNext}>
+                    <Button
+                        type={'button'}
+                        colorStyle={'primary'}
+                        onClick={handleWizardNext}
+                        disabled={blockNext}
+                    >
                         {stepIndex === 5 ? 'Finish' : 'Next'}
                     </Button>
                 </div>

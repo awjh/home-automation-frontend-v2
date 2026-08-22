@@ -25,7 +25,7 @@ export default function PopupForm(props: PopupFormProps & { children: React.Reac
                 opacity={0.75}
                 onClick={props.onClose}
             ></Flex>
-            <chakra.form
+            <chakra.div
                 mt={20}
                 zIndex={1}
                 maxW={props.maxW ?? '450px'}
@@ -36,10 +36,8 @@ export default function PopupForm(props: PopupFormProps & { children: React.Reac
                 borderColor={keyColors.primary}
                 display={'flex'}
                 flexDirection={'column'}
-                noValidate
-                onSubmit={(event) => {
-                    event.preventDefault()
-                }}
+                role={'dialog'}
+                aria-modal={'true'}
                 {...Object.fromEntries(
                     Object.entries(props.dataProps).map(([key, value]) => [`data-${key}`, value]),
                 )}
@@ -65,7 +63,7 @@ export default function PopupForm(props: PopupFormProps & { children: React.Reac
                 >
                     {props.children}
                 </Flex>
-            </chakra.form>
+            </chakra.div>
         </Flex>
     )
 }

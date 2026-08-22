@@ -9,41 +9,26 @@ import {
 import MealPlan from '@defs/MealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
-import { cookies } from 'next/headers'
-
-async function getSessionJwt() {
-    const cookieStore = await cookies()
-    const sessionJwt = cookieStore.get('stytch_session_jwt')?.value
-
-    if (!sessionJwt) {
-        throw new Error('Not authenticated')
-    }
-
-    return sessionJwt
-}
-
-async function getAuthHeaders() {
-    const sessionJwt = await getSessionJwt()
-
-    return {
-        Authorization: `Bearer ${sessionJwt}`,
-        'x-api-key': process.env.API_KEY!,
-    }
-}
+import getEndpoint from '../../shared/getEndpoint'
 
 export async function getRecipe(id: string): Promise<GetRecipeResponse> {
-    const headers = await getAuthHeaders()
-
-    const res = await fetch(`${process.env.API_BASE_URL!}/recipes/${encodeURIComponent(id)}`, {
-        cache: 'no-store',
-        headers,
+    const callApiEndpoint = await getEndpoint({
+        endpoint: `/recipes/{id}`,
+        method: 'get',
     })
 
-    if (!res.ok) {
+    try {
+        const recipe = await callApiEndpoint<GetRecipeResponse>({
+            pathParams: {
+                id,
+            },
+        })
+
+        return recipe
+    } catch (error) {
+        console.error('Error fetching recipe:', error)
         throw new Error('Failed to fetch recipe')
     }
-
-    return res.json()
 }
 
 export async function getRecipeImageDataUrl(
@@ -62,43 +47,45 @@ export async function getRecipeImageDataUrl(
         return imageId
     }
 
-    const headers = await getAuthHeaders()
+    const callApiEndpoint = await getEndpoint({
+        endpoint: `/images/{service}/{filekey}`,
+        method: 'get',
+    })
 
-    const res = await fetch(
-        `${process.env.API_BASE_URL!}/images/recipe/${encodeURIComponent(imageId)}`,
-        {
-            cache: 'no-store',
-            headers,
-        },
-    )
+    try {
+        const imageDataUrl = await callApiEndpoint<string>({
+            pathParams: {
+                service: 'recipe',
+                filekey: imageId,
+            },
+        })
 
-    if (!res.ok) {
-        // Fallback to a public asset path when an image id is not available in backend storage.
-        return `/${imageId}`
+        return imageDataUrl
+    } catch (error) {
+        console.error('Error fetching image:', error)
+        throw new Error('Failed to fetch image')
     }
-
-    const imageBuffer = Buffer.from(await res.arrayBuffer())
-    const contentType = res.headers.get('content-type') ?? 'image/jpeg'
-
-    return `data:${contentType};base64,${imageBuffer.toString('base64')}`
 }
 
 export async function addMealPlanFromRecipePage(
     values: AddMealPlanFormValues,
 ): Promise<PostMealPlanResponse> {
-    const headers = await getAuthHeaders()
     const mealPlan: PostMealPlanBody = createMealPlanFromFormValues(values)
 
-    const res = await fetch(`${process.env.API_BASE_URL!}/meal-plans`, {
-        method: 'POST',
-        headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mealPlan),
+    const callApiEndpoint = await getEndpoint({
+        endpoint: '/meal-plans',
+        method: 'post',
     })
 
-    if (!res.ok) {
+    try {
+        await callApiEndpoint<PostMealPlanResponse>({
+            additionalHeaders: {
+                'Content-Type': 'application/json',
+            },
+            body: mealPlan,
+        })
+    } catch (error) {
+        console.error('Error adding meal plan:', error)
         throw new Error('Failed to add meal plan')
     }
 
@@ -108,19 +95,23 @@ export async function addMealPlanFromRecipePage(
 export async function deleteMealPlanFromRecipePage(
     mealPlan: Pick<MealPlan, 'date' | 'mealTime' | 'course'>,
 ): Promise<DeleteMealPlanResponse> {
-    const headers = await getAuthHeaders()
+    const callApiEndpoint = await getEndpoint({
+        endpoint: `/meal-plans/{date}/{mealTime}/{course}`,
+        method: 'delete',
+    })
 
-    const res = await fetch(
-        `${process.env.API_BASE_URL!}/meal-plans/${encodeURIComponent(mealPlan.date)}/${encodeURIComponent(mealPlan.mealTime)}/${encodeURIComponent(mealPlan.course)}`,
-        {
-            method: 'DELETE',
-            headers,
-        },
-    )
+    try {
+        const result = await callApiEndpoint<DeleteMealPlanResponse>({
+            pathParams: {
+                date: mealPlan.date,
+                mealTime: mealPlan.mealTime,
+                course: mealPlan.course,
+            },
+        })
 
-    if (!res.ok) {
+        return result
+    } catch (error) {
+        console.error('Error deleting meal plan:', error)
         throw new Error('Failed to delete meal plan')
     }
-
-    return res.json()
 }

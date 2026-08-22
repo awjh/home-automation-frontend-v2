@@ -137,6 +137,17 @@ export default async function getEndpoint<E extends Endpoint, M extends Method<E
             throw new Error('Failed to call API endpoint')
         }
 
-        return res.json() as Promise<R>
+        const content = res.headers.get('content-type')
+
+        if (content && content.includes('application/json')) {
+            return res.json() as Promise<R>
+        } else if (content && content.includes('image/')) {
+            const imageBuffer = Buffer.from(await res.arrayBuffer())
+            const contentType = res.headers.get('content-type') ?? 'image/jpeg'
+
+            return `data:${contentType};base64,${imageBuffer.toString('base64')}` as unknown as Promise<R>
+        }
+
+        return res.text() as unknown as Promise<R>
     }
 }

@@ -2,16 +2,17 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, fn, waitFor } from 'storybook/test'
 import OriginalSourceForm from './OriginalSourceForm'
 
-const onNext = fn()
-const onBack = fn()
+const onSubmitStep = fn()
+const extractRecipeFromOnlineSource = fn(async () => undefined)
 
 const meta: Meta<typeof OriginalSourceForm> = {
     title: 'Features/Recipes/AddRecipe/AddRecipeForm/steps/OriginalSourceForm',
     component: OriginalSourceForm,
     decorators: [(Story) => <Story />],
     args: {
-        onNext,
-        onBack,
+        onSubmitStep,
+        extractRecipeFromOnlineSource,
+        isLookupLoading: fn(),
     },
 }
 
@@ -83,13 +84,12 @@ export const Default: Story = {}
 
 export const CanSubmitOnlineSource: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         await submitOnlineSource(canvas, canvasElement, userEvent)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledWith(
+            expect(args.onSubmitStep).toHaveBeenCalledWith(
                 expect.objectContaining({
                     sourceType: 'online',
                     title: '',
@@ -105,14 +105,13 @@ export const CanSubmitOnlineSource: Story = {
 
 export const CanSubmitBookSource: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         await selectSourceType(canvas, userEvent, 'book')
         await submitBookSource(canvas, canvasElement, userEvent)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledWith(
+            expect(args.onSubmitStep).toHaveBeenCalledWith(
                 expect.objectContaining({
                     sourceType: 'book',
                     title: 'The Recipe Book',
@@ -128,14 +127,13 @@ export const CanSubmitBookSource: Story = {
 
 export const CanSubmitMagazineSource: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         await selectSourceType(canvas, userEvent, 'magazine')
         await submitMagazineSource(canvas, canvasElement, userEvent)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledWith(
+            expect(args.onSubmitStep).toHaveBeenCalledWith(
                 expect.objectContaining({
                     sourceType: 'magazine',
                     title: 'Food Monthly',
@@ -151,8 +149,7 @@ export const CanSubmitMagazineSource: Story = {
 
 export const ValidatesOnlineSource: Story = {
     play: async ({ canvas, canvasElement }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         submitCurrentForm(canvasElement)
 
@@ -164,8 +161,7 @@ export const ValidatesOnlineSource: Story = {
 
 export const ValidatesBookSource: Story = {
     play: async ({ canvas, canvasElement, userEvent }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         await selectSourceType(canvas, userEvent, 'book')
         submitCurrentForm(canvasElement)
@@ -179,8 +175,7 @@ export const ValidatesBookSource: Story = {
 
 export const ValidatesMagazineSource: Story = {
     play: async ({ canvas, canvasElement, userEvent }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         await selectSourceType(canvas, userEvent, 'magazine')
         submitCurrentForm(canvasElement)
@@ -189,6 +184,26 @@ export const ValidatesMagazineSource: Story = {
             expect(canvas.getByText(/magazine title is required/i)).toBeInTheDocument()
             expect(canvas.getByText(/page number is required/i)).toBeInTheDocument()
             expect(canvas.getByText(/issue is required/i)).toBeInTheDocument()
+        })
+    },
+}
+
+export const CanLookupOnlineSource: Story = {
+    play: async ({ canvas, userEvent, args }) => {
+        extractRecipeFromOnlineSource.mockClear()
+
+        await userEvent.type(
+            canvas.getByLabelText(/url/i, { selector: 'input' }),
+            'https://example.com/recipe',
+        )
+
+        await userEvent.click(canvas.getByRole('button', { name: /extract/i }))
+
+        await waitFor(() => {
+            expect(args.extractRecipeFromOnlineSource).toHaveBeenCalledTimes(1)
+            expect(args.extractRecipeFromOnlineSource).toHaveBeenCalledWith(
+                'https://example.com/recipe',
+            )
         })
     },
 }

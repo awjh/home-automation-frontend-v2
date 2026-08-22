@@ -2,16 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, fn, waitFor } from 'storybook/test'
 import BasicDetailsForm from './BasicDetailsForm'
 
-const onNext = fn()
-const onBack = fn()
+const onSubmitStep = fn()
 
 const meta: Meta<typeof BasicDetailsForm> = {
     title: 'Features/Recipes/AddRecipe/AddRecipeForm/steps/BasicDetailsForm',
     component: BasicDetailsForm,
     decorators: [(Story) => <Story />],
     args: {
-        onNext,
-        onBack,
+        onSubmitStep,
     },
 }
 
@@ -59,14 +57,13 @@ export const CanGoBack: Story = {
 
 export const CanGoNext: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         await fillBaseDetails(canvas, userEvent)
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledWith(
+            expect(args.onSubmitStep).toHaveBeenCalledWith(
                 expect.objectContaining({
                     authors: ['Alice Cook'],
                     recipeTitle: 'Tomato Pasta',
@@ -84,8 +81,7 @@ export const CanGoNext: Story = {
 
 export const ShowsValidationErrorsWhenRequiredFieldsAreMissing: Story = {
     play: async ({ canvas, canvasElement, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         submitCurrentForm(canvasElement)
 
@@ -96,15 +92,14 @@ export const ShowsValidationErrorsWhenRequiredFieldsAreMissing: Story = {
             expect(canvas.getByText(/preparation duration is required/i)).toBeInTheDocument()
             expect(canvas.getByText(/standing time is required/i)).toBeInTheDocument()
             expect(canvas.getByText(/number of portions is required/i)).toBeInTheDocument()
-            expect(args.onNext).not.toHaveBeenCalled()
+            expect(args.onSubmitStep).not.toHaveBeenCalled()
         })
     },
 }
 
 export const CanAddMultipleAuthors: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         await fillBaseDetails(canvas, userEvent)
 
@@ -124,7 +119,7 @@ export const CanAddMultipleAuthors: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledWith(
+            expect(args.onSubmitStep).toHaveBeenCalledWith(
                 expect.objectContaining({
                     authors: ['Alice Cook', 'Bob Baker'],
                     recipeTitle: 'Tomato Pasta',
@@ -142,8 +137,7 @@ export const CanAddMultipleAuthors: Story = {
 
 export const CanSelectQuantityProduced: Story = {
     play: async ({ canvas, canvasElement, userEvent, args }) => {
-        onNext.mockClear()
-        onBack.mockClear()
+        onSubmitStep.mockClear()
 
         await fillBaseDetails(canvas, userEvent)
 
@@ -173,7 +167,7 @@ export const CanSelectQuantityProduced: Story = {
         submitCurrentForm(canvasElement)
 
         await waitFor(() => {
-            expect(args.onNext).toHaveBeenCalledWith(
+            expect(args.onSubmitStep).toHaveBeenCalledWith(
                 expect.objectContaining({
                     authors: ['Alice Cook'],
                     recipeTitle: 'Tomato Pasta',

@@ -1,4 +1,3 @@
-import Button from '@atoms/Button/Button'
 import { Box, Fieldset, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { Ingredient } from '@awjh/home-automation-v2-api-models/recipes'
 import useColorMode from '@hooks/useColorMode'
@@ -54,8 +53,7 @@ export function trimTrailingEmptyMethodSteps(steps: MethodFormStep[]) {
 interface MethodFormProps {
     initialValues?: MethodFormValues
     ingredientSections: IngredientsFormSection[]
-    onNext: (values: MethodFormValues) => void
-    onBack: () => void
+    onSubmitStep: (values: MethodFormValues) => void
 }
 
 const MethodForm = forwardRef<{ submit: () => Promise<boolean> }, MethodFormProps>(
@@ -87,7 +85,7 @@ const MethodForm = forwardRef<{ submit: () => Promise<boolean> }, MethodFormProp
                                 return
                             }
 
-                            props.onNext({
+                            props.onSubmitStep({
                                 steps: trimTrailingEmptyMethodSteps(input.steps),
                             })
                             resolve(true)
@@ -115,7 +113,7 @@ const MethodForm = forwardRef<{ submit: () => Promise<boolean> }, MethodFormProp
                 return
             }
 
-            props.onNext({
+            props.onSubmitStep({
                 steps: trimTrailingEmptyMethodSteps(input.steps),
             })
         }

@@ -1,13 +1,12 @@
-// import AddRecipeScreen from '@screens/AddRecipeScreen/AddRecipeScreen'
-// import { calculateCalories, extractRecipeFromOnlineSource } from './actions'
+import AddRecipeScreen from '@screens/AddRecipeScreen/AddRecipeScreen'
+import { addRecipe, calculateCalories, extractRecipeFromOnlineSource } from './actions'
 
 export default async function AddRecipe() {
-    return null
-
-    // return (
-    //     <AddRecipeScreen
-    //         extractRecipeFromOnlineSource={extractRecipeFromOnlineSource}
-    //         calculateCalories={calculateCalories}
-    //     />
-    // )
+    return (
+        <AddRecipeScreen
+            addRecipe={addRecipe}
+            extractRecipeFromOnlineSource={extractRecipeFromOnlineSource}
+            calculateCalories={calculateCalories}
+        />
+    )
 }

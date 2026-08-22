@@ -1,13 +1,20 @@
+'use client'
+
 import {
     PostCalculateCaloriesBody,
     PostCalculateCaloriesResponse,
     PostRecipeBody,
     PostRecipeResponse,
+    PutRecipeBody,
+    PutRecipeResponse,
+    GetExtractedExternalRecipeResponse,
 } from '@awjh/home-automation-v2-api-models'
 import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
+import { VStack } from '@chakra-ui/react'
+import NavBar from '@features/NavBar/NavBar'
+import AddRecipe from '@features/Recipes/AddRecipe/AddRecipe'
 
-export interface AddRecipeScreenProps {
-    recipe?: Recipe
+type AddRecipeScreenSharedProps = {
     calculateCalories({
         ingredients,
         produces,
@@ -15,13 +22,42 @@ export interface AddRecipeScreenProps {
         ingredients: PostCalculateCaloriesBody['ingredients']
         produces: Recipe['produces']
     }): Promise<PostCalculateCaloriesResponse>
-    addRecipe: (recipe: PostRecipeBody) => Promise<PostRecipeResponse>
+    extractRecipeFromOnlineSource: (url: string) => Promise<GetExtractedExternalRecipeResponse>
 }
 
-export default function AddRecipeScreen({
-    recipe,
-    calculateCalories,
-    addRecipe,
-}: AddRecipeScreenProps) {
-    return null
+type AddRecipeScreenCreateProps = AddRecipeScreenSharedProps & {
+    recipe?: never
+    addRecipe: (recipe: PostRecipeBody) => Promise<PostRecipeResponse>
+    editRecipe?: never
+}
+
+type AddRecipeScreenEditProps = Omit<AddRecipeScreenSharedProps, 'recipe'> & {
+    recipe: Recipe
+    editRecipe: (recipeId: string, recipe: PutRecipeBody) => Promise<PutRecipeResponse>
+    addRecipe?: never
+}
+
+export type AddRecipeScreenProps = AddRecipeScreenCreateProps | AddRecipeScreenEditProps
+
+export default function AddRecipeScreen(props: AddRecipeScreenProps) {
+    return (
+        <VStack width={'full'}>
+            <NavBar />
+            {props.editRecipe ? (
+                <AddRecipe
+                    recipe={props.recipe}
+                    calculateCalories={props.calculateCalories}
+                    extractRecipeFromOnlineSource={props.extractRecipeFromOnlineSource}
+                    editRecipe={props.editRecipe}
+                />
+            ) : (
+                <AddRecipe
+                    recipe={props.recipe}
+                    calculateCalories={props.calculateCalories}
+                    extractRecipeFromOnlineSource={props.extractRecipeFromOnlineSource}
+                    addRecipe={props.addRecipe}
+                />
+            )}
+        </VStack>
+    )
 }

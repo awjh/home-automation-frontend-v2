@@ -22,18 +22,13 @@ describe('meal plans', () => {
     const createdRecipeIds: string[] = []
 
     beforeEach(() => {
-        cy.loginAsTestUser()
-        cy.clearAllMealPlans()
+        cy.loginAsTestUser().then(() => {
+            cy.clearAllMealPlans()
+        })
     })
 
     afterEach(() => {
-        cy.getCookie('stytch_session_jwt', { log: false }).then((sessionCookie) => {
-            if (!sessionCookie) {
-                return
-            }
-
-            cy.clearAllMealPlans()
-        })
+        cy.clearAllMealPlans()
 
         cy.then(() => {
             createdRecipeIds.forEach((recipeId) => {

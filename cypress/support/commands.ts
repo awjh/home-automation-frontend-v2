@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import { jwtDecode } from 'jwt-decode'
 import type {
     GetMealPlansResponse,
     GetRecipesResponse,
@@ -33,6 +34,20 @@ function getAuthHeaders() {
     })
 }
 
+function isJwtExpired(jwt: string): boolean {
+    try {
+        const payload = jwtDecode<{ exp?: number }>(jwt)
+
+        if (typeof payload.exp !== 'number') {
+            return true
+        }
+
+        return payload.exp * 1000 <= Date.now()
+    } catch {
+        return true
+    }
+}
+
 declare global {
     namespace Cypress {
         interface Chainable {
@@ -41,7 +56,7 @@ declare global {
             createRecipe(recipe: PostRecipeBody): Chainable<PostRecipeResponse['id']>
             deleteRecipe(recipeId: string): Chainable<void>
             getByTestId(testId: string): Chainable<JQuery<HTMLElement>>
-            loginAsTestUser(): Chainable<void>
+            loginAsTestUser(redirectPath?: string): Chainable<void>
             searchRecipes(keywords: string): Chainable<GetRecipesResponse>
             visitMealPlans(): Chainable<void>
             getInputByLabel(
@@ -68,40 +83,56 @@ Cypress.Commands.add('clickButtonByText', (label: string) => {
     cy.contains('button', new RegExp(`^${label}$`, 'i')).click()
 })
 
-Cypress.Commands.add('loginAsTestUser', () => {
-    const mealPlansPath = '/meal-plans'
+Cypress.Commands.add('loginAsTestUser', (redirectPath = '/meal-plans') => {
+    if (!redirectPath.startsWith('/')) {
+        throw new Error(
+            `loginAsTestUser redirectPath must start with '/'. Received: ${redirectPath}`,
+        )
+    }
 
     cy.env(['CYPRESS_USER', 'CYPRESS_USER_PASSWORD']).then((values) => {
         const email = requireEnvString('CYPRESS_USER', values.CYPRESS_USER)
         const password = requireEnvString('CYPRESS_USER_PASSWORD', values.CYPRESS_USER_PASSWORD)
 
         cy.session(
-            email,
+            [email, redirectPath],
             () => {
                 cy.intercept('POST', '**/sdk/v1/passwords/authenticate').as('stytchAuthenticate')
-                cy.visit(`/login?redirect=${encodeURIComponent(mealPlansPath)}`)
+                cy.visit(`/login?redirect=${encodeURIComponent(redirectPath)}`)
                 cy.get('input[type="email"]').clear().type(email)
                 cy.get('input[type="password"]').clear().type(password, { log: false })
                 cy.contains('button', /^log in$/i).click()
                 cy.wait('@stytchAuthenticate')
                     .its('response.statusCode')
                     .should('be.oneOf', [200, 204])
-                cy.location('pathname', { timeout: 15000 }).should('eq', mealPlansPath)
+                cy.location('pathname', { timeout: 15000 }).should('eq', redirectPath)
                 cy.getCookie('stytch_session_jwt', { timeout: 15000 }).should('exist')
             },
             {
                 cacheAcrossSpecs: true,
                 validate: () => {
                     cy.getCookie('stytch_session_jwt').then((sessionCookie) => {
+                        if (!sessionCookie?.value) {
+                            cy.clearCookie('stytch_session_jwt')
+                            throw new Error('No stytch_session_jwt cookie found; forcing re-login')
+                        }
+
+                        if (isJwtExpired(sessionCookie.value)) {
+                            cy.clearCookie('stytch_session_jwt')
+                            throw new Error(
+                                `Expired stytch_session_jwt for ${redirectPath}; forcing re-login`,
+                            )
+                        }
+
                         cy.wrap(sessionCookie, { log: false }).should('exist')
                     })
 
                     cy.request({
-                        url: mealPlansPath,
+                        url: redirectPath,
                         followRedirect: false,
                         failOnStatusCode: false,
                     }).then((response) => {
-                        expect(response.status).to.eq(200)
+                        expect(response.status).to.be.oneOf([200, 204, 301, 302, 303, 307, 308])
                     })
                 },
             },
