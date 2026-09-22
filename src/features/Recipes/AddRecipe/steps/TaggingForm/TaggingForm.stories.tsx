@@ -2,6 +2,9 @@ import {
     Cuisine,
     MealType,
     Meat,
+    Dietary,
+    Occasion,
+    Equipment,
     type RecipeTags,
 } from '@awjh/home-automation-v2-api-models/recipes'
 import type { Meta, StoryObj } from '@storybook/react-vite'
@@ -10,11 +13,21 @@ import TaggingForm from './TaggingForm'
 
 const onSubmitStep = fn()
 
+const tags: RecipeTags = {
+    cuisine: Object.values(Cuisine),
+    mealType: Object.values(MealType),
+    meat: Object.values(Meat),
+    dietary: Object.values(Dietary),
+    occasion: Object.values(Occasion),
+    equipment: Object.values(Equipment),
+}
+
 const meta: Meta<typeof TaggingForm> = {
     title: 'Features/Recipes/AddRecipe/AddRecipeForm/steps/TaggingForm',
     component: TaggingForm,
     decorators: [(Story) => <Story />],
     args: {
+        tags,
         onSubmitStep,
     },
 }

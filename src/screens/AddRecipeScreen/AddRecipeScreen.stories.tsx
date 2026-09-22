@@ -1,11 +1,29 @@
 import { GetExtractedExternalRecipeResponse } from '@awjh/home-automation-v2-api-models'
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
-import { Cuisine, MealType, type Recipe } from '@awjh/home-automation-v2-api-models/recipes'
+import {
+    Cuisine,
+    MealType,
+    Meat,
+    Dietary,
+    Occasion,
+    Equipment,
+    type Recipe,
+    type RecipeTags,
+} from '@awjh/home-automation-v2-api-models/recipes'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, waitFor } from 'storybook/test'
 import AddRecipeScreen from './AddRecipeScreen'
 
 const testUrl = 'https://example.com/recipe'
+
+const tags: RecipeTags = {
+    cuisine: Object.values(Cuisine),
+    mealType: Object.values(MealType),
+    meat: Object.values(Meat),
+    dietary: Object.values(Dietary),
+    occasion: Object.values(Occasion),
+    equipment: Object.values(Equipment),
+}
 
 const extractRecipeFromOnlineSource = fn(async () => extractedRecipe)
 const calculateCalories = fn(async () => ({ calories: 250, unresolvedIngredients: [] }))
@@ -107,6 +125,7 @@ const meta: Meta<typeof AddRecipeScreen> = {
         },
     },
     args: {
+        tags,
         calculateCalories,
         addRecipe,
         extractRecipeFromOnlineSource,

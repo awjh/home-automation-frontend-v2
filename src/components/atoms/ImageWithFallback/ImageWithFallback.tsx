@@ -10,9 +10,18 @@ export interface ImageWithFallbackProps {
     h: ConditionalValue<Tokens['sizes'] | CssProperties['height']>
     src: string | undefined
     alt: string
+    hideOnMobileOnError?: boolean
+    fallbackColor?: 'subtle' | 'lessSubtle'
 }
 
-export default function ImageWithFallback({ w, h, src, alt }: ImageWithFallbackProps) {
+export default function ImageWithFallback({
+    w,
+    h,
+    src,
+    alt,
+    hideOnMobileOnError: hideOnError = true,
+    fallbackColor = 'subtle',
+}: ImageWithFallbackProps) {
     const { keyColors } = useColorMode()
     const [failedSrc, setFailedSrc] = useState<string | null>(null)
     const hasError = failedSrc === src || !src
@@ -20,14 +29,16 @@ export default function ImageWithFallback({ w, h, src, alt }: ImageWithFallbackP
     if (hasError) {
         return (
             <Box
-                display={{ base: 'none', md: 'flex' }}
+                display={{ base: hideOnError ? 'none' : 'flex', md: 'flex' }}
                 alignItems={'center'}
                 justifyContent={'center'}
+                w={w}
+                h={h}
                 minW={w}
-                minH={h}
                 maxW={w}
+                minH={h}
                 maxH={h}
-                bg={keyColors.subtle}
+                bg={keyColors[fallbackColor]}
                 color={keyColors.primary}
             >
                 <LuImageOff />
@@ -39,11 +50,14 @@ export default function ImageWithFallback({ w, h, src, alt }: ImageWithFallbackP
         <Image
             src={src}
             alt={alt}
+            w={w}
+            h={h}
             minW={w}
             maxW={w}
             minH={h}
             maxH={h}
             objectFit={'cover'}
+            objectPosition={'center'}
             onError={() => setFailedSrc(src)}
         />
     )

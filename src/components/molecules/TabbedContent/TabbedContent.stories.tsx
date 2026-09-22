@@ -56,3 +56,53 @@ export const SwitchesRenderedContent: Story = {
         expect(canvas.queryByText(/ingredients content/i)).not.toBeInTheDocument()
     },
 }
+
+const childrenByTabWithCounters = {
+    Overview: (
+        <Box p={4}>
+            <Text>Overview content</Text>
+        </Box>
+    ),
+    Ingredients: {
+        counter: 1,
+        content: (
+            <Box p={4}>
+                <Text>Ingredients content</Text>
+            </Box>
+        ),
+    },
+    Method: {
+        counter: 2,
+        content: (
+            <Box p={4}>
+                <Text>Method content 1</Text>
+                <Text>Method content 2</Text>
+            </Box>
+        ),
+    },
+}
+
+export const TabbedContentWithCounters: Story = {
+    render: (args) => <TabbedContent {...args} childrenByTab={childrenByTabWithCounters} />,
+}
+
+export const SwitchesRenderedContentWithCounters: Story = {
+    render: TabbedContentWithCounters.render,
+    play: async ({ canvas, userEvent, args }) => {
+        expect(canvas.getByText(/overview content/i)).toBeInTheDocument()
+        expect(canvas.queryByText(/ingredients content/i)).not.toBeInTheDocument()
+
+        await userEvent.click(canvas.getByRole('button', { name: /ingredients \(1\)/i }))
+
+        expect(args.onTabChange).toHaveBeenCalledWith('Ingredients')
+        expect(canvas.getByText(/ingredients content/i)).toBeInTheDocument()
+        expect(canvas.queryByText(/overview content/i)).not.toBeInTheDocument()
+
+        await userEvent.click(canvas.getByRole('button', { name: /method \(2\)/i }))
+
+        expect(args.onTabChange).toHaveBeenCalledWith('Method')
+        expect(canvas.getByText(/method content 1/i)).toBeInTheDocument()
+        expect(canvas.getByText(/method content 2/i)).toBeInTheDocument()
+        expect(canvas.queryByText(/ingredients content/i)).not.toBeInTheDocument()
+    },
+}

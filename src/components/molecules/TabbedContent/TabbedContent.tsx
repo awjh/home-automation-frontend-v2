@@ -3,7 +3,14 @@ import { Box, VStack } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 
 export interface TabbedContentProps {
-    childrenByTab: Record<string, React.ReactNode>
+    childrenByTab: Record<
+        string,
+        | React.ReactNode
+        | {
+              counter: number
+              content: React.ReactNode
+          }
+    >
     initialActiveTab?: string
     onTabChange?: (tab: string) => void
 }
@@ -13,30 +20,38 @@ export default function TabbedContent({
     initialActiveTab,
     onTabChange,
 }: TabbedContentProps) {
-    const tabs = Object.keys(childrenByTab)
-    const fallbackTab = tabs[0]
+    const tabs = Object.entries(childrenByTab).map(([tabName, tab]) =>
+        typeof tab === 'object' && 'counter' in tab!
+            ? {
+                  name: tabName,
+                  counter: tab.counter,
+              }
+            : tabName,
+    )
+    const tabNames = tabs.map((tab) => (typeof tab === 'string' ? tab : tab.name))
+    const fallbackTab = tabNames[0]
     const [activeTab, setActiveTab] = useState(initialActiveTab ?? fallbackTab)
 
     useEffect(() => {
-        if (!tabs.length) {
+        if (!tabNames.length) {
             return
         }
 
-        if (!activeTab || !tabs.includes(activeTab)) {
+        if (!activeTab || !tabNames.includes(activeTab)) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setActiveTab(
-                initialActiveTab && tabs.includes(initialActiveTab)
+                initialActiveTab && tabNames.includes(initialActiveTab)
                     ? initialActiveTab
                     : fallbackTab,
             )
         }
-    }, [activeTab, fallbackTab, initialActiveTab, tabs])
+    }, [activeTab, fallbackTab, initialActiveTab, tabNames])
 
     if (!fallbackTab) {
         return null
     }
 
-    const selectedTab = activeTab && tabs.includes(activeTab) ? activeTab : fallbackTab
+    const selectedTab = activeTab && tabNames.includes(activeTab) ? activeTab : fallbackTab
 
     return (
         <VStack w={'full'} gap={0} alignItems={'stretch'}>
@@ -49,7 +64,10 @@ export default function TabbedContent({
                 }}
             />
             <Box w={'full'} data-active-tab={selectedTab}>
-                {childrenByTab[selectedTab]}
+                {typeof childrenByTab[selectedTab] === 'object' &&
+                'counter' in childrenByTab[selectedTab]!
+                    ? childrenByTab[selectedTab].content
+                    : childrenByTab[selectedTab]}
             </Box>
         </VStack>
     )

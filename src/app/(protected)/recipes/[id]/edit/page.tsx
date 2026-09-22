@@ -1,7 +1,7 @@
 import AddRecipeScreen from '@screens/AddRecipeScreen/AddRecipeScreen'
 import { getRecipe } from '../actions'
 import { calculateCalories, extractRecipeFromOnlineSource } from '../../add/actions'
-import { editRecipe } from './actions'
+import { editRecipe, getRecipeSearchFilters } from './actions'
 
 interface EditRecipePageProps {
     params: Promise<{ id: string }>
@@ -9,11 +9,15 @@ interface EditRecipePageProps {
 
 export default async function EditRecipePage({ params }: EditRecipePageProps) {
     const { id } = await params
-    const recipe = await getRecipe(id)
+    const [recipe, recipeSearchFilters] = await Promise.all([
+        getRecipe(id),
+        getRecipeSearchFilters(),
+    ])
 
     return (
         <AddRecipeScreen
             recipe={recipe}
+            tags={recipeSearchFilters.tags}
             editRecipe={editRecipe}
             extractRecipeFromOnlineSource={extractRecipeFromOnlineSource}
             calculateCalories={calculateCalories}

@@ -57,3 +57,57 @@ export const SwitchesActiveTabStyling: Story = {
         }
     },
 }
+
+const tabsWithCounter = [
+    'Ingredients',
+    { counter: 5, name: 'Method' },
+    { counter: 2, name: 'Notes' },
+    'Nutrition',
+    'Source',
+]
+
+export const TabButtonsWithCounter: Story = {
+    args: {
+        tabs: tabsWithCounter,
+        activeTab: 'Ingredients',
+        onTabChange: fn(),
+    },
+}
+
+export const SwitchesActiveTabStylingWithCounter: Story = {
+    args: {
+        tabs: tabsWithCounter,
+        activeTab: 'Ingredients',
+        onTabChange: fn(),
+    },
+    play: async ({ canvas, userEvent, args }) => {
+        expect(canvas.getByRole('button', { name: /ingredients/i })).toHaveAttribute(
+            'data-active',
+            'true',
+        )
+
+        const buttonNames = tabsWithCounter.map((tab) =>
+            typeof tab === 'string' ? tab : `${tab.name} (${tab.counter})`,
+        )
+        const tabNames = tabsWithCounter.map((tab) => (typeof tab === 'string' ? tab : tab.name))
+
+        for (let i = 0; i < buttonNames.length; i++) {
+            const tab = buttonNames[i]
+
+            const tabButton = canvas.getByRole('button', {
+                name: tab,
+            })
+
+            await userEvent.click(tabButton)
+
+            expect(args.onTabChange).toHaveBeenCalledWith(tabNames[i])
+            expect(tabButton).toHaveAttribute('data-active', 'true')
+
+            for (const otherTab of buttonNames.filter((candidate) => candidate !== tab)) {
+                expect(canvas.getByRole('button', { name: otherTab })).not.toHaveAttribute(
+                    'data-active',
+                )
+            }
+        }
+    },
+}

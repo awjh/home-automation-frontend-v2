@@ -1,12 +1,10 @@
-import DescriptionTable, { DescriptionTableProps } from '@atoms/DescriptionTable/DescriptionTable'
 import Tag from '@atoms/Tag/Tag'
 import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
 import { Heading, HStack, VStack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
-import formatDuration from '@utils/formatDuration'
-import joinValues from '@utils/joinValues'
-import OriginalSource from '../OriginalSource/OriginalSource'
 import formatAuthors from '@utils/formatAuthors'
+import OriginalSource from '../OriginalSource/OriginalSource'
+import RecipeDescriptionTable from '../RecipeDescriptionTable/RecipeDescriptionTable'
 
 export type RecipeSummaryProps = Pick<
     Recipe,
@@ -23,37 +21,6 @@ export default function RecipeSummary({
     produces,
 }: RecipeSummaryProps) {
     const { keyColors } = useColorMode()
-
-    const descriptionTableData: DescriptionTableProps['data'] = [
-        { key: 'Calories', value: calories },
-    ]
-
-    if (duration.standingTime > 0) {
-        descriptionTableData.push(
-            {
-                key: 'Active duration',
-                value: formatDuration(duration.cookingDuration + duration.prepDuration),
-            },
-            {
-                key: 'Standing time',
-                value: formatDuration(duration.standingTime),
-            },
-        )
-    } else {
-        descriptionTableData.push({
-            key: 'Duration',
-            value: formatDuration(duration.cookingDuration + duration.prepDuration),
-        })
-    }
-
-    if ('serves' in produces) {
-        descriptionTableData.push({ key: 'Serves', value: produces.serves })
-    } else {
-        descriptionTableData.push({
-            key: 'Produces',
-            value: joinValues(produces.quantity, produces.measure),
-        })
-    }
 
     return (
         <VStack alignItems={'start'} gap={{ base: 4, md: 2, lg: 4 }}>
@@ -83,7 +50,7 @@ export default function RecipeSummary({
                         <Tag key={tag} value={tag} />
                     ))}
             </HStack>
-            <DescriptionTable data={descriptionTableData} />
+            <RecipeDescriptionTable recipe={{ calories, duration, produces }} />
         </VStack>
     )
 }

@@ -9,13 +9,14 @@ import {
     PutRecipeResponse,
     GetExtractedExternalRecipeResponse,
 } from '@awjh/home-automation-v2-api-models'
-import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
+import { Recipe, RecipeTags } from '@awjh/home-automation-v2-api-models/recipes'
 import { VStack } from '@chakra-ui/react'
 import { UploadRecipeImageInput, UploadRecipeImageResponse } from '@defs/Image'
 import NavBar from '@features/NavBar/NavBar'
 import AddRecipe from '@features/Recipes/AddRecipe/AddRecipe'
 
 type AddRecipeScreenSharedProps = {
+    tags: RecipeTags
     calculateCalories({
         ingredients,
         produces,
@@ -49,6 +50,7 @@ export default function AddRecipeScreen(props: AddRecipeScreenProps) {
             {props.editRecipe ? (
                 <AddRecipe
                     recipe={props.recipe}
+                    tags={props.tags}
                     calculateCalories={props.calculateCalories}
                     extractRecipeFromOnlineSource={props.extractRecipeFromOnlineSource}
                     editRecipe={props.editRecipe}
@@ -56,6 +58,7 @@ export default function AddRecipeScreen(props: AddRecipeScreenProps) {
             ) : (
                 <AddRecipe
                     recipe={props.recipe}
+                    tags={props.tags}
                     calculateCalories={props.calculateCalories}
                     extractRecipeFromOnlineSource={props.extractRecipeFromOnlineSource}
                     addRecipe={props.addRecipe}

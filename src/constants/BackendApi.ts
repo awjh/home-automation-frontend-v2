@@ -2,7 +2,7 @@ const BackendApi = {
     openapi: '3.0.1',
     info: {
         title: 'home-automation-api-v2-dev',
-        version: '2026-08-16T06:47:15Z',
+        version: '2026-08-23T08:57:34Z',
     },
     servers: [
         {
@@ -81,6 +81,7 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/get-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/GetItem',
                     httpMethod: 'POST',
@@ -120,7 +121,6 @@ const BackendApi = {
                             '{"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECIPE~$context.authorizer.userId"},"sk":{"S":"$input.params(\'id\')"}}}',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             put: {
@@ -204,6 +204,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-recipe-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/put-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -243,7 +244,6 @@ const BackendApi = {
                             '\n    \n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $input.params(\'id\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECIPE~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$data.id" }\n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            \n                \n                \n                \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "book")\n                    "originalSource": { "M": {\n        \n#set($data_originalSource_has_series = $data.originalSource.containsKey(\'series\'))\n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "title": { "S": "$data.originalSource.title" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            #if($data_originalSource_has_series),#end\n        \n                #if($data_originalSource_has_series)\n                    "series": { "S": "$data.originalSource.series" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "online")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "url": { "S": "$data.originalSource.url" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "magazine")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "title": { "S": "$data.originalSource.title" }\n            ,\n        \n            "issue": { "S": "$data.originalSource.issue" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$data.image" }\n                    ,\n                #end\n            \n            "authors": { "L": [\n        #foreach($data_authors_item in $data.authors)\n            {"S": "$data_authors_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "calories": { "N": "$data.calories" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item in $data.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_has_section = $data_ingredients_item.containsKey(\'section\'))\n        \n                #if($data_ingredients_item_has_section)\n                    "section": { "S": "$data_ingredients_item.section" }\n                    ,\n                #end\n            \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item_ingredients_item in $data_ingredients_item.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_ingredients_item_has_measure = $data_ingredients_item_ingredients_item.containsKey(\'measure\'))\n#set($data_ingredients_item_ingredients_item_has_preparation = $data_ingredients_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_ingredients_item_ingredients_item_has_internalRecipe = $data_ingredients_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_ingredients_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_ingredients_item_ingredients_item_has_measure)\n                    "measure": { "S": "$data_ingredients_item_ingredients_item.measure" }\n                    ,\n                #end\n            \n            "item": { "S": "$data_ingredients_item_ingredients_item.item" }\n            #if($data_ingredients_item_ingredients_item_has_preparation || $data_ingredients_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_ingredients_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$data_ingredients_item_ingredients_item.preparation" }\n                    #if($data_ingredients_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_ingredients_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$data_ingredients_item_ingredients_item.internalRecipe.recipeId" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "method": { "L": [\n        #foreach($data_method_item in $data.method)\n            {"M": {\n        \n        \n            "text": { "S": "$data_method_item.text" }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_method_item_ingredients_item in $data_method_item.ingredients)\n            {"M": {\n        \n#set($data_method_item_ingredients_item_has_measure = $data_method_item_ingredients_item.containsKey(\'measure\'))\n#set($data_method_item_ingredients_item_has_preparation = $data_method_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_method_item_ingredients_item_has_internalRecipe = $data_method_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_method_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_method_item_ingredients_item_has_measure)\n                    "measure": { "S": "$data_method_item_ingredients_item.measure" }\n                    ,\n                #end\n            \n            "item": { "S": "$data_method_item_ingredients_item.item" }\n            #if($data_method_item_ingredients_item_has_preparation || $data_method_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_method_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$data_method_item_ingredients_item.preparation" }\n                    #if($data_method_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_method_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$data_method_item_ingredients_item.internalRecipe.recipeId" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            \n                \n                \n                \n                #set($data_produces_M_has_quantity = $data.produces.containsKey(\'quantity\'))\n                #if($data_produces_M_has_quantity)\n                    "produces": { "M": {\n        \n#set($data_produces_has_measure = $data.produces.containsKey(\'measure\'))\n        \n            "quantity": { "N": "$data.produces.quantity" }\n            #if($data_produces_has_measure),#end\n        \n                #if($data_produces_has_measure)\n                    "measure": { "S": "$data.produces.measure" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_produces_M_has_serves = $data.produces.containsKey(\'serves\'))\n                #if($data_produces_M_has_serves)\n                    "produces": { "M": {\n        \n        \n            "serves": { "N": "$data.produces.serves" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "tags": { "M": {\n        \n        \n            "cuisine": { "L": [\n        #foreach($data_tags_cuisine_item in $data.tags.cuisine)\n            {"S": "$data_tags_cuisine_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "mealType": { "L": [\n        #foreach($data_tags_mealType_item in $data.tags.mealType)\n            {"S": "$data_tags_mealType_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "meat": { "L": [\n        #foreach($data_tags_meat_item in $data.tags.meat)\n            {"S": "$data_tags_meat_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "dietary": { "L": [\n        #foreach($data_tags_dietary_item in $data.tags.dietary)\n            {"S": "$data_tags_dietary_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "occasion": { "L": [\n        #foreach($data_tags_occasion_item in $data.tags.occasion)\n            {"S": "$data_tags_occasion_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "equipment": { "L": [\n        #foreach($data_tags_equipment_item in $data.tags.equipment)\n            {"S": "$data_tags_equipment_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             delete: {
@@ -316,6 +316,7 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/delete-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/DeleteItem',
@@ -356,7 +357,6 @@ const BackendApi = {
                             '\n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n\n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            {"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECIPE~$context.authorizer.userId"},"sk":{"S":"$id"}},"ConditionExpression":"attribute_exists(pk) AND attribute_exists(sk)"}\n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -399,6 +399,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -417,7 +418,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -519,6 +519,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-meal-plan-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/put-meal-plan-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
@@ -559,7 +560,6 @@ const BackendApi = {
                             '\n    \n    #set($date = $input.params(\'date\'))\n    #set($mealTime = $input.params(\'mealTime\'))\n    #set($course = $input.params(\'course\'))\n\n    #set($context.requestOverride.path.date = $date)\n    #set($context.requestOverride.path.mealTime = $mealTime)\n    #set($context.requestOverride.path.course = $course)\n\n        #if(!$date.matches(\'^\\d{4}-\\d{2}-\\d{2}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid date format. Expected \'YYYY-MM-DD\'. Got \'$date\'.","reason":"bad_request"}\n        #elseif($mealTime != \'breakfast\' && $mealTime != \'lunch\' && $mealTime != \'dinner\')\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid meal time.","reason":"bad_request"}\n        #elseif($course != \'starter\' && $course != \'main\' && $course != \'dessert\' && $course != \'side\')\n            #set($context.responseOverride.status = 400)\n\n            {"message":"Invalid course.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.date = $input.params(\'date\'))\n#set($data.mealTime = $input.params(\'mealTime\'))\n#set($data.course = $input.params(\'course\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$data.author" }\n            ,\n        \n            "course": { "S": "$data.course" }\n            ,\n        \n            "date": { "S": "$data.date" }\n            ,\n        \n            "mealTime": { "S": "$data.mealTime" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "title": { "S": "$data.source.title" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$data.source.series" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "url": { "S": "$data.source.url" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "title": { "S": "$data.source.title" }\n            ,\n        \n            "issue": { "S": "$data.source.issue" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "recipeId": { "S": "$data.source.recipeId" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "fromDate": { "S": "$data.source.fromDate" }\n            ,\n        \n            "fromMealTime": { "S": "$data.source.fromMealTime" }\n            ,\n        \n            "fromCourse": { "S": "$data.source.fromCourse" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             delete: {
@@ -658,11 +658,11 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:delete-meal-plan-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -721,6 +721,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -739,7 +740,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -861,6 +861,7 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/get-image-s3-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:s3:path/home-automation-images-dev/{userId}/{service}/{filekey}',
                     httpMethod: 'GET',
@@ -916,7 +917,6 @@ const BackendApi = {
                         'integration.request.path.userId': 'context.authorizer.userId',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -967,6 +967,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -985,7 +986,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1030,6 +1030,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1048,7 +1049,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1153,11 +1153,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-recipes-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-recipes-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             post: {
@@ -1231,6 +1231,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-recipe-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/post-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -1270,7 +1271,6 @@ const BackendApi = {
                             '\n        #set($id = $context.authorizer.uniqueRequestId)\n        #set($context.requestOverride.path.id = $id)\n\n        \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $id)\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECIPE~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$data.id" }\n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            \n                \n                \n                \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "book")\n                    "originalSource": { "M": {\n        \n#set($data_originalSource_has_series = $data.originalSource.containsKey(\'series\'))\n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "title": { "S": "$data.originalSource.title" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            #if($data_originalSource_has_series),#end\n        \n                #if($data_originalSource_has_series)\n                    "series": { "S": "$data.originalSource.series" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "online")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "url": { "S": "$data.originalSource.url" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "magazine")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "title": { "S": "$data.originalSource.title" }\n            ,\n        \n            "issue": { "S": "$data.originalSource.issue" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$data.image" }\n                    ,\n                #end\n            \n            "authors": { "L": [\n        #foreach($data_authors_item in $data.authors)\n            {"S": "$data_authors_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "calories": { "N": "$data.calories" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item in $data.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_has_section = $data_ingredients_item.containsKey(\'section\'))\n        \n                #if($data_ingredients_item_has_section)\n                    "section": { "S": "$data_ingredients_item.section" }\n                    ,\n                #end\n            \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item_ingredients_item in $data_ingredients_item.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_ingredients_item_has_measure = $data_ingredients_item_ingredients_item.containsKey(\'measure\'))\n#set($data_ingredients_item_ingredients_item_has_preparation = $data_ingredients_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_ingredients_item_ingredients_item_has_internalRecipe = $data_ingredients_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_ingredients_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_ingredients_item_ingredients_item_has_measure)\n                    "measure": { "S": "$data_ingredients_item_ingredients_item.measure" }\n                    ,\n                #end\n            \n            "item": { "S": "$data_ingredients_item_ingredients_item.item" }\n            #if($data_ingredients_item_ingredients_item_has_preparation || $data_ingredients_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_ingredients_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$data_ingredients_item_ingredients_item.preparation" }\n                    #if($data_ingredients_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_ingredients_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$data_ingredients_item_ingredients_item.internalRecipe.recipeId" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "method": { "L": [\n        #foreach($data_method_item in $data.method)\n            {"M": {\n        \n        \n            "text": { "S": "$data_method_item.text" }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_method_item_ingredients_item in $data_method_item.ingredients)\n            {"M": {\n        \n#set($data_method_item_ingredients_item_has_measure = $data_method_item_ingredients_item.containsKey(\'measure\'))\n#set($data_method_item_ingredients_item_has_preparation = $data_method_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_method_item_ingredients_item_has_internalRecipe = $data_method_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_method_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_method_item_ingredients_item_has_measure)\n                    "measure": { "S": "$data_method_item_ingredients_item.measure" }\n                    ,\n                #end\n            \n            "item": { "S": "$data_method_item_ingredients_item.item" }\n            #if($data_method_item_ingredients_item_has_preparation || $data_method_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_method_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$data_method_item_ingredients_item.preparation" }\n                    #if($data_method_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_method_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$data_method_item_ingredients_item.internalRecipe.recipeId" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            \n                \n                \n                \n                #set($data_produces_M_has_quantity = $data.produces.containsKey(\'quantity\'))\n                #if($data_produces_M_has_quantity)\n                    "produces": { "M": {\n        \n#set($data_produces_has_measure = $data.produces.containsKey(\'measure\'))\n        \n            "quantity": { "N": "$data.produces.quantity" }\n            #if($data_produces_has_measure),#end\n        \n                #if($data_produces_has_measure)\n                    "measure": { "S": "$data.produces.measure" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_produces_M_has_serves = $data.produces.containsKey(\'serves\'))\n                #if($data_produces_M_has_serves)\n                    "produces": { "M": {\n        \n        \n            "serves": { "N": "$data.produces.serves" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "tags": { "M": {\n        \n        \n            "cuisine": { "L": [\n        #foreach($data_tags_cuisine_item in $data.tags.cuisine)\n            {"S": "$data_tags_cuisine_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "mealType": { "L": [\n        #foreach($data_tags_mealType_item in $data.tags.mealType)\n            {"S": "$data_tags_mealType_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "meat": { "L": [\n        #foreach($data_tags_meat_item in $data.tags.meat)\n            {"S": "$data_tags_meat_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "dietary": { "L": [\n        #foreach($data_tags_dietary_item in $data.tags.dietary)\n            {"S": "$data_tags_dietary_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "occasion": { "L": [\n        #foreach($data_tags_occasion_item in $data.tags.occasion)\n            {"S": "$data_tags_occasion_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "equipment": { "L": [\n        #foreach($data_tags_equipment_item in $data.tags.equipment)\n            {"S": "$data_tags_equipment_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -1303,6 +1303,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1321,7 +1322,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1366,6 +1366,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1384,7 +1385,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1419,6 +1419,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1437,7 +1438,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1523,6 +1523,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-meal-plans-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/get-meal-plans-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/Query',
@@ -1563,7 +1564,6 @@ const BackendApi = {
                             '{"TableName":"home-automation-read-store-v2-dev","ConsistentRead":true,"KeyConditionExpression":"#pk = :pk AND #sk BETWEEN :startSk AND :endSk","ExpressionAttributeNames":{"#pk":"pk","#sk":"sk"},"ExpressionAttributeValues":{":pk":{"S":"MEAL_PLAN~$context.authorizer.userId"},":startSk":{"S":"$input.params(\'startDate\')~breakfast~dessert"},":endSk":{"S":"$input.params(\'endDate\')~lunch~starter"}}}',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             post: {
@@ -1637,6 +1637,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-meal-plan-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/post-meal-plan-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
@@ -1677,7 +1678,6 @@ const BackendApi = {
                             '\n        #set($context.requestOverride.path.body = $input.body)\n        #set($body = $input.path(\'$\'))\n\n        \n        #set($data = $input.path(\'$\'))\n\n        \n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$data.author" }\n            ,\n        \n            "course": { "S": "$data.course" }\n            ,\n        \n            "date": { "S": "$data.date" }\n            ,\n        \n            "mealTime": { "S": "$data.mealTime" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "title": { "S": "$data.source.title" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$data.source.series" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "url": { "S": "$data.source.url" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "title": { "S": "$data.source.title" }\n            ,\n        \n            "issue": { "S": "$data.source.issue" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "recipeId": { "S": "$data.source.recipeId" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "fromDate": { "S": "$data.source.fromDate" }\n            ,\n        \n            "fromMealTime": { "S": "$data.source.fromMealTime" }\n            ,\n        \n            "fromCourse": { "S": "$data.source.fromCourse" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -1710,6 +1710,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1728,7 +1729,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1781,6 +1781,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1799,7 +1800,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1886,11 +1886,11 @@ const BackendApi = {
                 'x-amazon-apigateway-request-validator':
                     'post-calculate-calories-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:post-calculate-calories-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -1923,6 +1923,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1941,7 +1942,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1976,6 +1976,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1994,7 +1995,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2080,11 +2080,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-image-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:post-image-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -2117,6 +2117,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2135,7 +2136,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2170,6 +2170,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2188,7 +2189,115 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                },
+            },
+        },
+        '/recipes/search-filters': {
+            get: {
+                operationId: 'GetRecipeSearchFilters',
+                responses: {
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetRecipeSearchFiltersSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
                     type: 'mock',
+                    responses: {
+                        default: {
+                            statusCode: '200',
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n        #set($headers = $input.params().get(\'header\'))\n        #set($origin = $headers.origin)\n        \n        #if(!$origin || $origin == "")\n            #set($origin = $headers.Origin)\n        #end\n        \n        #if($origin == "http://localhost:3000")\n            #set($context.responseOverride.header.Access-Control-Allow-Origin = "$origin")\n        #end\n    \n\n        {"tags":{"cuisine":["cajun","chinese","french","greek","indian","japanese","malay","mexican","persian","american","italian","british","korean","thai","vietnamese","african","spanish","turkish","caribbean","north african","middle eastern","dutch"],"mealType":["appetiser","dessert","breakfast","lunch","tea","side dish","spice mix","sauce"],"meat":["poultry","beef","lamb","pork","game","fish"],"dietary":["vegetarian","vegan","gluten free","dairy free"],"occasion":["christmas","eurovision","bbq"],"equipment":["slow cooker","air fryer","pressure cooker","water bath","ice cream maker"]},"filters":{"calories":{"min":0,"max":5000},"duration":{"prepDuration":{"min":0,"max":720},"cookingDuration":{"min":0,"max":720},"standingTime":{"min":0,"max":2880},"totalTime":{"min":0,"max":4320}},"serves":{"min":1,"max":100}}}\n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{"statusCode": 200}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    type: 'mock',
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -2276,11 +2385,11 @@ const BackendApi = {
                 'x-amazon-apigateway-request-validator':
                     'get-extracted-external-recipe-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-extracted-external-recipe-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -2313,6 +2422,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2331,7 +2441,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2407,6 +2516,7 @@ const BackendApi = {
                 'x-amazon-apigateway-request-validator':
                     'get-extracted-external-recipe-basics-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'http',
                     uri: 'https://api.spoonacular.com/recipes/extract',
                     httpMethod: 'GET',
                     responses: {
@@ -2446,7 +2556,6 @@ const BackendApi = {
                             "'3992c4c9a5544a89820805fbad0dc85e'",
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'http',
                 },
             },
             options: {
@@ -2479,6 +2588,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2497,7 +2607,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2523,6 +2632,200 @@ const BackendApi = {
                     },
                 },
                 additionalProperties: false,
+            },
+            GetRecipeSearchFiltersSuccessResponse: {
+                title: 'GetRecipeSearchFiltersSuccessResponse',
+                required: ['filters', 'tags'],
+                type: 'object',
+                properties: {
+                    filters: {
+                        type: 'object',
+                        properties: {
+                            duration: {
+                                type: 'object',
+                                properties: {
+                                    totalTime: {
+                                        required: ['max', 'min'],
+                                        type: 'object',
+                                        properties: {
+                                            min: {
+                                                type: 'number',
+                                            },
+                                            max: {
+                                                type: 'number',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                    prepDuration: {
+                                        required: ['max', 'min'],
+                                        type: 'object',
+                                        properties: {
+                                            min: {
+                                                type: 'number',
+                                            },
+                                            max: {
+                                                type: 'number',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                    cookingDuration: {
+                                        required: ['max', 'min'],
+                                        type: 'object',
+                                        properties: {
+                                            min: {
+                                                type: 'number',
+                                            },
+                                            max: {
+                                                type: 'number',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                    standingTime: {
+                                        required: ['max', 'min'],
+                                        type: 'object',
+                                        properties: {
+                                            min: {
+                                                type: 'number',
+                                            },
+                                            max: {
+                                                type: 'number',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            serves: {
+                                required: ['max', 'min'],
+                                type: 'object',
+                                properties: {
+                                    min: {
+                                        type: 'number',
+                                    },
+                                    max: {
+                                        type: 'number',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            calories: {
+                                required: ['max', 'min'],
+                                type: 'object',
+                                properties: {
+                                    min: {
+                                        type: 'number',
+                                    },
+                                    max: {
+                                        type: 'number',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                    tags: {
+                        required: [
+                            'cuisine',
+                            'dietary',
+                            'equipment',
+                            'mealType',
+                            'meat',
+                            'occasion',
+                        ],
+                        type: 'object',
+                        properties: {
+                            occasion: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['christmas', 'eurovision', 'bbq'],
+                                },
+                            },
+                            dietary: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['vegetarian', 'vegan', 'gluten free', 'dairy free'],
+                                },
+                            },
+                            mealType: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'appetiser',
+                                        'dessert',
+                                        'breakfast',
+                                        'lunch',
+                                        'tea',
+                                        'side dish',
+                                        'spice mix',
+                                        'sauce',
+                                    ],
+                                },
+                            },
+                            meat: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['poultry', 'beef', 'lamb', 'pork', 'game', 'fish'],
+                                },
+                            },
+                            cuisine: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'cajun',
+                                        'chinese',
+                                        'french',
+                                        'greek',
+                                        'indian',
+                                        'japanese',
+                                        'malay',
+                                        'mexican',
+                                        'persian',
+                                        'american',
+                                        'italian',
+                                        'british',
+                                        'korean',
+                                        'thai',
+                                        'vietnamese',
+                                        'african',
+                                        'spanish',
+                                        'turkish',
+                                        'caribbean',
+                                        'north african',
+                                        'middle eastern',
+                                        'dutch',
+                                    ],
+                                },
+                            },
+                            equipment: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'slow cooker',
+                                        'air fryer',
+                                        'pressure cooker',
+                                        'water bath',
+                                        'ice cream maker',
+                                    ],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                },
+                additionalProperties: false,
+                description:
+                    'The criteria that can be used to filter recipes when searching for them. This ensures an upto date list of things like tags',
             },
             PostMealPlanSuccessResponse: {
                 title: 'PostMealPlanSuccessResponse',
@@ -2628,6 +2931,8 @@ const BackendApi = {
                     },
                     image: {
                         type: 'string',
+                        description:
+                            'The S3 key of the image associated with the recipe. This is just the file key, not the full path including userId and service prefix.',
                     },
                     method: {
                         type: 'array',
@@ -3509,9 +3814,19 @@ const BackendApi = {
             },
             PostImageSuccessResponse: {
                 title: 'PostImageSuccessResponse',
-                required: ['fields', 'key', 'url'],
+                required: ['fields', 'fileKey', 'fullKey', 'url'],
                 type: 'object',
                 properties: {
+                    fullKey: {
+                        type: 'string',
+                        description:
+                            'The full key of the image in S3, including the userId and service prefix.',
+                    },
+                    fileKey: {
+                        type: 'string',
+                        description:
+                            'The file key of the image in S3, excluding the userId and service prefix.',
+                    },
                     fields: {
                         type: 'object',
                         additionalProperties: {
@@ -3519,9 +3834,6 @@ const BackendApi = {
                         },
                     },
                     url: {
-                        type: 'string',
-                    },
-                    key: {
                         type: 'string',
                     },
                 },
@@ -3586,6 +3898,8 @@ const BackendApi = {
                     },
                     image: {
                         type: 'string',
+                        description:
+                            'The S3 key of the image associated with the recipe. This is just the file key, not the full path including userId and service prefix.',
                     },
                     method: {
                         type: 'array',
@@ -4003,6 +4317,8 @@ const BackendApi = {
                         },
                         image: {
                             type: 'string',
+                            description:
+                                'The S3 key of the image associated with the recipe. This is just the file key, not the full path including userId and service prefix.',
                         },
                         produces: {
                             anyOf: [
@@ -4194,6 +4510,8 @@ const BackendApi = {
                     },
                     image: {
                         type: 'string',
+                        description:
+                            'The S3 key of the image associated with the recipe. This is just the file key, not the full path including userId and service prefix.',
                     },
                     method: {
                         type: 'array',
@@ -4855,18 +5173,18 @@ const BackendApi = {
                 in: 'header',
                 'x-amazon-apigateway-authtype': 'custom',
                 'x-amazon-apigateway-authorizer': {
+                    type: 'request',
                     authorizerUri:
                         'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:home-automation-api-v2-basic-user-authorizer-lambda-dev/invocations',
                     authorizerResultTtlInSeconds: 0,
                     identitySource: 'method.request.header.Authorization',
-                    type: 'request',
                 },
             },
         },
     },
     'x-amazon-apigateway-documentation': {
-        version: 'z9vx5n',
-        createdDate: '2026-08-16T06:47:18Z',
+        version: '2elwk6',
+        createdDate: '2026-08-23T08:57:36Z',
         documentationParts: [
             {
                 location: {

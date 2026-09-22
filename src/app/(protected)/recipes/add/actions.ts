@@ -2,6 +2,7 @@
 
 import {
     GetExtractedExternalRecipeResponse,
+    GetRecipeSearchFiltersResponse,
     PostCalculateCaloriesBody,
     PostCalculateCaloriesResponse,
     PostRecipeBody,
@@ -35,6 +36,22 @@ export async function addRecipe(recipe: PostRecipeBody): Promise<PostRecipeRespo
     } catch (error) {
         console.error('Error adding recipe:', error)
         throw new Error('Failed to add recipe')
+    }
+}
+
+export async function getRecipeSearchFilters(): Promise<GetRecipeSearchFiltersResponse> {
+    const callApiEndpoint = await getEndpoint({
+        endpoint: '/recipes/search-filters',
+        method: 'get',
+    })
+
+    try {
+        const result = await callApiEndpoint<GetRecipeSearchFiltersResponse>({})
+
+        return result
+    } catch (error) {
+        console.error('Error fetching recipe search filters:', error)
+        throw new Error('Failed to fetch recipe search filters')
     }
 }
 

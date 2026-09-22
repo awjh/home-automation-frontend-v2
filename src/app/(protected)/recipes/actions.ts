@@ -2,10 +2,9 @@
 
 import {
     GetRecipeSearchFiltersResponse,
-    PutRecipeBody,
-    PutRecipeResponse,
+    GetRecipesResponse,
 } from '@awjh/home-automation-v2-api-models'
-import getEndpoint from '../../../shared/getEndpoint'
+import getEndpoint from '../shared/getEndpoint'
 
 export async function getRecipeSearchFilters(): Promise<GetRecipeSearchFiltersResponse> {
     const callApiEndpoint = await getEndpoint({
@@ -23,29 +22,22 @@ export async function getRecipeSearchFilters(): Promise<GetRecipeSearchFiltersRe
     }
 }
 
-export async function editRecipe(
-    recipeId: string,
-    recipe: PutRecipeBody,
-): Promise<PutRecipeResponse> {
+export async function getRecipes(
+    queryParams: Record<'keywords' | 'tags' | 'filters', string>,
+): Promise<GetRecipesResponse> {
     const callApiEndpoint = await getEndpoint({
-        endpoint: `/recipes/{id}`,
-        method: 'put',
+        endpoint: '/recipes',
+        method: 'get',
     })
 
     try {
-        const result = await callApiEndpoint<PutRecipeResponse>({
-            additionalHeaders: {
-                'Content-Type': 'application/json',
-            },
-            pathParams: {
-                id: recipeId,
-            },
-            body: recipe,
+        const result = await callApiEndpoint<GetRecipesResponse>({
+            queryParams,
         })
 
         return result
     } catch (error) {
-        console.error('Error editing recipe:', error)
-        throw new Error('Failed to edit recipe')
+        console.error('Error fetching recipes:', error)
+        throw new Error('Failed to fetch recipes')
     }
 }

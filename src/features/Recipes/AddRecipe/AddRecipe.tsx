@@ -52,6 +52,7 @@ type AddRecipeState = {
 }
 
 type AddRecipeSharedProps = {
+    tags: RecipeTags
     calculateCalories({
         ingredients,
         produces,
@@ -344,7 +345,7 @@ type AddRecipeStepKey =
     | 'tagging'
 
 export default function AddRecipe(props: AddRecipeProps) {
-    const { recipe, calculateCalories, extractRecipeFromOnlineSource } = props
+    const { recipe, calculateCalories, extractRecipeFromOnlineSource, tags } = props
     const { keyColors } = useColorMode()
     const router = useRouter()
     const [stepIndex, setStepIndex] = useState(0)
@@ -502,6 +503,7 @@ export default function AddRecipe(props: AddRecipeProps) {
                     <TaggingForm
                         ref={activeFormRef}
                         initialValues={formValues.tags}
+                        tags={tags}
                         onSubmitStep={handleTaggingSubmit}
                     />
                 )
