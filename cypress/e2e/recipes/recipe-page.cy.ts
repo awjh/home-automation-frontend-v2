@@ -4,8 +4,6 @@ import { buildBookRecipe } from './recipeBuilders/buildRecipe'
 import getStartOfWeek from '../mealPlans/utils/getStartOfWeek'
 
 describe('recipe page', () => {
-    const createdRecipeIds: string[] = []
-
     beforeEach(() => {
         cy.loginAsTestUser()
         cy.clearAllMealPlans()
@@ -18,16 +16,7 @@ describe('recipe page', () => {
             }
 
             cy.clearAllMealPlans()
-        })
-
-        cy.then(() => {
-            createdRecipeIds.forEach((recipeId) => {
-                cy.deleteRecipe(recipeId)
-            })
-        })
-
-        cy.then(() => {
-            createdRecipeIds.length = 0
+            cy.deleteAllRecipes()
         })
     })
 
@@ -35,8 +24,6 @@ describe('recipe page', () => {
         const recipeTitle = `Cypress Recipe View ${Date.now()}`
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
-            createdRecipeIds.push(recipeId)
-
             cy.visit(`/recipes/${recipeId}`)
 
             cy.contains('h1', recipeTitle).should('be.visible')
@@ -53,8 +40,6 @@ describe('recipe page', () => {
             ...buildBookRecipe(recipeTitle),
             image: '/recipe.jpg',
         }).then((recipeId) => {
-            createdRecipeIds.push(recipeId)
-
             cy.visit(`/recipes/${recipeId}`)
 
             cy.get(`img[alt="${recipeTitle}"]`)
@@ -73,8 +58,6 @@ describe('recipe page', () => {
         nextWeekStart.setDate(nextWeekStart.getDate() + 7)
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
-            createdRecipeIds.push(recipeId)
-
             cy.visit(`/recipes/${recipeId}`)
 
             cy.contains(/monday/i).click()
@@ -143,8 +126,6 @@ describe('recipe page', () => {
         const wednesdayDateString = wednesdayDate.toISOString().split('T')[0]
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
-            createdRecipeIds.push(recipeId)
-
             cy.visit(`/recipes/${recipeId}`)
 
             cy.contains(/tuesday/i).click()
@@ -252,8 +233,6 @@ describe('recipe page', () => {
         const recipeTitle = `Cypress Recipe Remove ${Date.now()}`
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
-            createdRecipeIds.push(recipeId)
-
             cy.visit(`/recipes/${recipeId}`)
 
             cy.contains(/monday/i).click()

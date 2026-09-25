@@ -1,5 +1,9 @@
 TODO
 
+Cypress tests for search screen
+
+Need homepage
+
 Currently no support for editing an image in this frontend, do we care yet?
 
 JSON entry for form to support AI

@@ -55,6 +55,7 @@ declare global {
             createMealPlan(mealPlan: PostMealPlanBody): Chainable<void>
             createRecipe(recipe: PostRecipeBody): Chainable<PostRecipeResponse['id']>
             deleteRecipe(recipeId: string): Chainable<void>
+            deleteAllRecipes(): Chainable<void>
             getByTestId(testId: string): Chainable<JQuery<HTMLElement>>
             loginAsTestUser(redirectPath?: string): Chainable<void>
             searchRecipes(keywords: string): Chainable<GetRecipesResponse>
@@ -225,6 +226,17 @@ Cypress.Commands.add('deleteRecipe', (recipeId: string) => {
     })
 })
 
+Cypress.Commands.add('deleteAllRecipes', () => {
+    const foundRecipes = cy.searchRecipes('').then((recipes) => {
+        return recipes
+    })
+    foundRecipes.then((recipes) => {
+        recipes.forEach((recipe) => {
+            cy.deleteRecipe(recipe.id)
+        })
+    })
+})
+
 Cypress.Commands.add('searchRecipes', (keywords: string) => {
     return getRequiredEnv('API_BASE_URL').then((apiBaseUrl) => {
         return getAuthHeaders().then((headers) => {
@@ -234,7 +246,8 @@ Cypress.Commands.add('searchRecipes', (keywords: string) => {
                     url: `${apiBaseUrl}/recipes`,
                     headers,
                     qs: {
-                        keywords,
+                        // An empty keywords param is treated as a search for '' and matches nothing
+                        ...(keywords.trim() ? { keywords } : {}),
                         filters: JSON.stringify({}),
                         tags: JSON.stringify({
                             cuisine: [],

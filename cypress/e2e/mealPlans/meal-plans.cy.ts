@@ -19,8 +19,6 @@ import addDays from './utils/addDays'
 import getWeekDates from './utils/getWeekDates'
 
 describe('meal plans', () => {
-    const createdRecipeIds: string[] = []
-
     beforeEach(() => {
         cy.loginAsTestUser().then(() => {
             cy.clearAllMealPlans()
@@ -28,16 +26,13 @@ describe('meal plans', () => {
     })
 
     afterEach(() => {
-        cy.clearAllMealPlans()
+        cy.getCookie('stytch_session_jwt', { log: false }).then((sessionCookie) => {
+            if (!sessionCookie) {
+                return
+            }
 
-        cy.then(() => {
-            createdRecipeIds.forEach((recipeId) => {
-                cy.deleteRecipe(recipeId)
-            })
-        })
-
-        cy.then(() => {
-            createdRecipeIds.length = 0
+            cy.clearAllMealPlans()
+            cy.deleteAllRecipes()
         })
     })
 
@@ -48,7 +43,6 @@ describe('meal plans', () => {
         let internalMealPlan: PostMealPlanBody
 
         cy.createRecipe(buildBookRecipe(internalRecipeTitle)).then((recipeId) => {
-            createdRecipeIds.push(recipeId)
             internalMealPlan = createInternalRecipeMealPlan(
                 weekDates[2],
                 MealTime.LUNCH,

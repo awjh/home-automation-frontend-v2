@@ -1,5 +1,6 @@
 import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
 import { Separator, VStack } from '@chakra-ui/react'
+import { Fragment } from 'react'
 import SearchRecipeResult from '../SearchRecipeResult/SearchRecipeResult'
 import useColorMode from '@hooks/useColorMode'
 
@@ -13,7 +14,7 @@ export default function SearchRecipeResults(props: SearchRecipeResultsProps) {
     return (
         <VStack w={'full'} gap={0}>
             {props.recipes.map((recipe, index) => (
-                <>
+                <Fragment key={`recipe-result-fragment-${recipe.id}`}>
                     <SearchRecipeResult
                         key={`recipe-result-${recipe.id}`}
                         recipe={recipe}
@@ -22,7 +23,7 @@ export default function SearchRecipeResults(props: SearchRecipeResultsProps) {
                     {index != props.recipes.length - 1 && (
                         <Separator size="md" w={'full'} borderColor={keyColors.primary} />
                     )}
-                </>
+                </Fragment>
             ))}
         </VStack>
     )

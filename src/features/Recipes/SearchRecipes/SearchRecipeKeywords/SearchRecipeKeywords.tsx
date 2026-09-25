@@ -1,11 +1,10 @@
 'use client'
 
 import Button from '@atoms/Button/Button'
-import { HStack, Input, InputGroup } from '@chakra-ui/react'
+import { HStack, Input } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useMemo, useState, type FormEvent } from 'react'
-import { LuSearch } from 'react-icons/lu'
 
 function parseKeywordsFromSearchParams(searchParams: URLSearchParams): string {
     const keywordsFromSearchParams = searchParams.getAll('keywords')
@@ -52,25 +51,20 @@ export default function SearchRecipeKeywords() {
 
     return (
         <form noValidate onSubmit={handleSubmit}>
-            <HStack w={'full'} alignItems={'start'}>
-                <InputGroup
-                    endElementProps={{ color: keyColors.primary }}
-                    endElement={<LuSearch />}
-                >
-                    <Input
-                        aria-label={'Search keywords'}
-                        placeholder={'Search keywords'}
-                        borderColor={keyColors.primary}
-                        borderWidth={2}
-                        borderRadius={0}
-                        color={keyColors.primary}
-                        pl={4}
-                        value={keywordsInput}
-                        onChange={(event) => {
-                            setKeywordsInput(event.target.value)
-                        }}
-                    />
-                </InputGroup>
+            <HStack w={'full'} alignItems={'start'} px={{ base: 2, md: 0 }} pb={{ base: 1, md: 0 }}>
+                <Input
+                    aria-label={'Search keywords'}
+                    placeholder={'Search keywords'}
+                    borderColor={keyColors.primary}
+                    borderWidth={2}
+                    borderRadius={0}
+                    color={keyColors.primary}
+                    pl={4}
+                    value={keywordsInput}
+                    onChange={(event) => {
+                        setKeywordsInput(event.target.value)
+                    }}
+                />
                 <Button type={'submit'} colorStyle={'secondary'}>
                     Search
                 </Button>

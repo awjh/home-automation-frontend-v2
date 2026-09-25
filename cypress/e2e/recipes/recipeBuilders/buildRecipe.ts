@@ -1,7 +1,10 @@
 import { PostRecipeBody } from '@awjh/home-automation-v2-api-models'
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 
-export function buildBookRecipe(title: string): PostRecipeBody {
+export function buildBookRecipe(
+    title: string,
+    overrides: Partial<PostRecipeBody> = {},
+): PostRecipeBody {
     return {
         title,
         originalSource: {
@@ -44,5 +47,6 @@ export function buildBookRecipe(title: string): PostRecipeBody {
             occasion: [],
             equipment: [],
         },
+        ...overrides,
     }
 }

@@ -121,20 +121,23 @@ export default async function getEndpoint<E extends Endpoint, M extends Method<E
             return encodeURIComponent(value)
         })
 
-        const res = await fetch(
-            `${url}${resolvedEndpoint}${queryParams ? `?${new URLSearchParams(queryParams as Record<string, string>).toString()}` : ''}`,
-            {
-                method: method.toString().toUpperCase(),
-                headers: {
-                    ...(await getAuthHeaders()),
-                    ...additionalHeaders,
-                },
-                body: body ? JSON.stringify(body) : undefined,
+        const fullUrl = `${url}${resolvedEndpoint}${queryParams && JSON.stringify(queryParams) !== '{}' ? `?${new URLSearchParams(queryParams as Record<string, string>).toString()}` : ''}`
+        console.log(`Full URL: ${fullUrl}`)
+        console.log(`Query params: ${JSON.stringify(queryParams)}`)
+
+        const res = await fetch(fullUrl, {
+            method: method.toString().toUpperCase(),
+            headers: {
+                ...(await getAuthHeaders()),
+                ...additionalHeaders,
             },
-        )
+            body: body ? JSON.stringify(body) : undefined,
+        })
 
         if (!res.ok) {
-            throw new Error('Failed to call API endpoint')
+            throw new Error(
+                `Failed to call API endpoint. ERROR: ${res.status} ${res.statusText} ${await res.text()}`,
+            )
         }
 
         const content = res.headers.get('content-type')
