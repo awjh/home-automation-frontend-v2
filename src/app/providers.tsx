@@ -1,6 +1,7 @@
 'use client'
 
-import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { ChakraProvider } from '@chakra-ui/react'
+import system from '../theme/system'
 import { ThemeProvider } from 'next-themes'
 import { createStytchClient, StytchProvider } from '@stytch/nextjs'
 import Toaster from '@atoms/Toaster/Toaster'
@@ -11,7 +12,7 @@ const stytch = createStytchClient(process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN!, 
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     return (
-        <ChakraProvider value={defaultSystem}>
+        <ChakraProvider value={system}>
             <StytchProvider stytch={stytch} assumeHydrated={false}>
                 <ThemeProvider attribute="class" disableTransitionOnChange>
                     {children}

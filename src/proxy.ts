@@ -30,5 +30,5 @@ export function proxy(req: NextRequest) {
 
 // Protect specific routes
 export const config = {
-    matcher: ['/meal-plans'],
+    matcher: ['/', '/meal-plans'],
 }

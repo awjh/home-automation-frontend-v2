@@ -68,12 +68,13 @@ export default function useColorMode(): UseColorModeReturn {
     }
     return {
         colorMode: colorMode as ColorMode,
+        // Semantic tokens switch with the `dark` class in CSS, so they are correct from first paint
         keyColors: {
-            primary: colorMode === 'dark' ? 'teal.400' : 'teal.600',
-            buttonHoverBg: colorMode === 'dark' ? 'teal.200' : 'teal.500',
-            secondary: colorMode === 'dark' ? 'black' : 'white',
-            subtle: colorMode === 'dark' ? 'teal.800' : 'teal.100',
-            lessSubtle: colorMode === 'dark' ? 'teal.700' : 'teal.200',
+            primary: 'key.primary',
+            buttonHoverBg: 'key.buttonHoverBg',
+            secondary: 'key.secondary',
+            subtle: 'key.subtle',
+            lessSubtle: 'key.lessSubtle',
         },
         setColorMode: setTheme,
         toggleColorMode,

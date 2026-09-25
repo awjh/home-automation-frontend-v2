@@ -1,4 +1,5 @@
-import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { ChakraProvider } from '@chakra-ui/react'
+import system from '../src/theme/system'
 import '@fontsource/inter'
 import '@fontsource/lekton'
 import { withThemeByClassName } from '@storybook/addon-themes'
@@ -35,7 +36,7 @@ const preview: Preview = {
         (Story, context) => {
             const sbTheme = context?.globals?.theme === 'dark' ? 'dark' : 'light'
             return (
-                <ChakraProvider value={defaultSystem}>
+                <ChakraProvider value={system}>
                     <ThemeProvider attribute="class" disableTransitionOnChange>
                         {/* Sync toolbar → next-themes without locking it via forcedTheme */}
                         <StorybookThemeSync theme={sbTheme} />
