@@ -3,12 +3,12 @@
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import UpcomingMeal from '@features/Home/UpcomingMeals/defs/UpcomingMeal'
 import { getMealPlans } from './meal-plans/actions'
-import { getRecipe, getRecipeImageDataUrl } from './recipes/[id]/actions'
+import { getRecipe, getRecipeImageUrl } from './recipes/[id]/actions'
 
 async function getInternalRecipeImage(recipeId: string): Promise<string | undefined> {
     try {
         const recipe = await getRecipe(recipeId)
-        return await getRecipeImageDataUrl(recipe.image)
+        return await getRecipeImageUrl(recipe.image)
     } catch {
         // A missing image shouldn't stop the home page rendering; the card shows a fallback
         return undefined

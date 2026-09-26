@@ -2,6 +2,7 @@
 
 import {
     DeleteMealPlanResponse,
+    GetImageResponse,
     GetRecipeResponse,
     PostMealPlanBody,
     PostMealPlanResponse,
@@ -9,6 +10,7 @@ import {
 import MealPlan from '@defs/MealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
+import isDirectImageUrl from '@utils/isDirectImageUrl'
 import getEndpoint from '../../shared/getEndpoint'
 
 const RECIPE_FETCH_MAX_ATTEMPTS = 6
@@ -50,19 +52,12 @@ export async function getRecipe(id: string): Promise<GetRecipeResponse> {
     }
 }
 
-export async function getRecipeImageDataUrl(
-    imageId: string | undefined,
-): Promise<string | undefined> {
+export async function getRecipeImageUrl(imageId: string | undefined): Promise<string | undefined> {
     if (!imageId) {
         return undefined
     }
 
-    // Allow direct image paths/URLs as-is (useful for local public assets).
-    if (
-        imageId.startsWith('/') ||
-        imageId.startsWith('http://') ||
-        imageId.startsWith('https://')
-    ) {
+    if (isDirectImageUrl(imageId)) {
         return imageId
     }
 
@@ -72,16 +67,16 @@ export async function getRecipeImageDataUrl(
     })
 
     try {
-        const imageDataUrl = await callApiEndpoint<string>({
+        const { url } = await callApiEndpoint<GetImageResponse>({
             pathParams: {
                 service: 'recipe',
                 filekey: imageId,
             },
         })
 
-        return imageDataUrl
+        return url
     } catch (error) {
-        console.error('Error fetching image:', error)
+        console.error('Error fetching image URL:', error)
         return undefined
     }
 }

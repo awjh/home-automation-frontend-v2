@@ -3,7 +3,7 @@ import {
     addMealPlanFromRecipePage,
     deleteMealPlanFromRecipePage,
     getRecipe,
-    getRecipeImageDataUrl,
+    getRecipeImageUrl,
 } from './actions'
 
 interface ViewRecipeProps {
@@ -13,7 +13,7 @@ interface ViewRecipeProps {
 export default async function ViewRecipe({ params }: ViewRecipeProps) {
     const { id } = await params
     const recipe = await getRecipe(id)
-    const resolvedImage = await getRecipeImageDataUrl(recipe.image)
+    const resolvedImage = await getRecipeImageUrl(recipe.image)
     const recipeWithImage = {
         ...recipe,
         image: resolvedImage,

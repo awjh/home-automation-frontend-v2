@@ -27,6 +27,19 @@ async function getAuthHeaders() {
     }
 }
 
+// Array values are sent as repeated parameters (e.g. ?filekeys=a.jpg&filekeys=b.png)
+function buildQueryString(queryParams: Record<string, string | string[]> | undefined): string {
+    const searchParams = new URLSearchParams()
+
+    Object.entries(queryParams ?? {}).forEach(([key, value]) => {
+        ;[value].flat().forEach((item) => searchParams.append(key, item))
+    })
+
+    const queryString = searchParams.toString()
+
+    return queryString ? `?${queryString}` : ''
+}
+
 function getBaseUrl(): string {
     if (!process.env.API_BASE_URL) {
         throw new Error('API_BASE_URL is not defined')
@@ -59,7 +72,7 @@ type QueryParams<EP extends Endpoint, M extends Method<EP>> =
         ? [K] extends [never]
             ? undefined
             : [K] extends [string]
-              ? Record<K, string>
+              ? Record<K, string | string[]>
               : undefined
         : undefined
 
@@ -121,7 +134,7 @@ export default async function getEndpoint<E extends Endpoint, M extends Method<E
             return encodeURIComponent(value)
         })
 
-        const fullUrl = `${url}${resolvedEndpoint}${queryParams && JSON.stringify(queryParams) !== '{}' ? `?${new URLSearchParams(queryParams as Record<string, string>).toString()}` : ''}`
+        const fullUrl = `${url}${resolvedEndpoint}${buildQueryString(queryParams as Record<string, string | string[]> | undefined)}`
         console.log(`Full URL: ${fullUrl}`)
         console.log(`Query params: ${JSON.stringify(queryParams)}`)
 
@@ -144,11 +157,6 @@ export default async function getEndpoint<E extends Endpoint, M extends Method<E
 
         if (content && content.includes('application/json')) {
             return res.json() as Promise<R>
-        } else if (content && content.includes('image/')) {
-            const imageBuffer = Buffer.from(await res.arrayBuffer())
-            const contentType = res.headers.get('content-type') ?? 'image/jpeg'
-
-            return `data:${contentType};base64,${imageBuffer.toString('base64')}` as unknown as Promise<R>
         }
 
         return res.text() as unknown as Promise<R>

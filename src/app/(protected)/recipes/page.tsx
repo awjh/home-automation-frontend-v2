@@ -1,5 +1,5 @@
 import SearchRecipeScreen from '@screens/SearchRecipeScreen/SearchRecipesScreen'
-import { getRecipeSearchFilters, getRecipes } from './actions'
+import { getRecipeSearchFilters, getRecipes, withRecipeImageUrls } from './actions'
 
 export default async function SearchRecipes({
     searchParams,
@@ -10,7 +10,7 @@ export default async function SearchRecipes({
 
     const recipeSearchFilters = await getRecipeSearchFilters()
 
-    const recipes = await getRecipes(loadedSearchParams)
+    const recipes = await withRecipeImageUrls(await getRecipes(loadedSearchParams))
 
     return (
         <SearchRecipeScreen
