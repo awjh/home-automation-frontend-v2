@@ -3,6 +3,7 @@
 import {
     GetImagesResponse,
     GetRecipeSearchFiltersResponse,
+    GetRecipesQueryParameters,
     GetRecipesResponse,
 } from '@awjh/home-automation-v2-api-models'
 import isDirectImageUrl from '@utils/isDirectImageUrl'
@@ -26,8 +27,17 @@ export async function getRecipeSearchFilters(): Promise<GetRecipeSearchFiltersRe
     }
 }
 
+type PreviousRecipeId = NonNullable<GetRecipesQueryParameters['previousRecipeId']>
+
+// The search as it appears in the page URL, with tags and filters still JSON-encoded
+export type RecipeSearchQuery = {
+    [Key in Exclude<keyof GetRecipesQueryParameters, 'previousRecipeId'>]?: string
+}
+
+// Omitting previousRecipeId fetches the first page; otherwise the page after that recipe
 export async function getRecipes(
-    queryParams: Record<'keywords' | 'tags' | 'filters', string>,
+    searchQuery: RecipeSearchQuery,
+    previousRecipeId?: PreviousRecipeId,
 ): Promise<GetRecipesResponse> {
     const callApiEndpoint = await getEndpoint({
         endpoint: '/recipes',
@@ -36,7 +46,10 @@ export async function getRecipes(
 
     try {
         const result = await callApiEndpoint<GetRecipesResponse>({
-            queryParams,
+            queryParams: {
+                ...searchQuery,
+                ...(previousRecipeId && { previousRecipeId }),
+            },
         })
 
         return result
@@ -44,6 +57,13 @@ export async function getRecipes(
         console.error('Error fetching recipes:', error)
         throw new Error('Failed to fetch recipes')
     }
+}
+
+export async function getNextRecipesPage(
+    searchQuery: RecipeSearchQuery,
+    previousRecipeId: PreviousRecipeId,
+): Promise<GetRecipesResponse> {
+    return withRecipeImageUrls(await getRecipes(searchQuery, previousRecipeId))
 }
 
 async function getRecipeImageUrlsForKeys(filekeys: string[]): Promise<GetImagesResponse['images']> {

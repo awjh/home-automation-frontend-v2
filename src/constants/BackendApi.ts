@@ -2,7 +2,7 @@ const BackendApi = {
     openapi: '3.0.1',
     info: {
         title: 'home-automation-api-v2-dev',
-        version: '2026-09-26T07:52:13Z',
+        version: '2026-09-26T11:48:46Z',
     },
     servers: [
         {
@@ -986,6 +986,15 @@ const BackendApi = {
             get: {
                 operationId: 'GetRecipes',
                 parameters: [
+                    {
+                        name: 'previousRecipeId',
+                        in: 'query',
+                        description:
+                            'ID of the last recipe in the previous page of results. Omit to get the first page. Up to 15 recipes are returned per request; fewer than 15 means there are no more results.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "description": "ID of the last recipe in the previous page of results. Omit to get the first page. Up to 15 recipes are returned per request; fewer than 15 means there are no more results.",\n  "type": "string",\n  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"\n}',
+                        schema: {
+                            type: 'string',
+                        },
+                    },
                     {
                         name: 'keywords',
                         in: 'query',
@@ -2667,6 +2676,7 @@ const BackendApi = {
             },
             GetRecipeSearchFiltersSuccessResponse: {
                 title: 'GetRecipeSearchFiltersSuccessResponse',
+                required: ['filters', 'tags'],
                 type: 'object',
                 properties: {
                     filters: {
@@ -2760,6 +2770,14 @@ const BackendApi = {
                         additionalProperties: false,
                     },
                     tags: {
+                        required: [
+                            'cuisine',
+                            'dietary',
+                            'equipment',
+                            'mealType',
+                            'meat',
+                            'occasion',
+                        ],
                         type: 'object',
                         properties: {
                             occasion: {
@@ -5250,8 +5268,8 @@ const BackendApi = {
         },
     },
     'x-amazon-apigateway-documentation': {
-        version: '7rv3e0',
-        createdDate: '2026-09-26T07:52:41Z',
+        version: '1vdbxe',
+        createdDate: '2026-09-26T11:48:49Z',
         documentationParts: [
             {
                 location: {
@@ -5299,6 +5317,18 @@ const BackendApi = {
                 properties: {
                     description:
                         'Repeat the query parameter to pass multiple values, for example ?keywords=quick&keywords=easy.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "array",\n  "items": {\n    "type": "string"\n  }\n}',
+                },
+            },
+            {
+                location: {
+                    type: 'QUERY_PARAMETER',
+                    path: '/recipes',
+                    method: 'GET',
+                    name: 'previousRecipeId',
+                },
+                properties: {
+                    description:
+                        'ID of the last recipe in the previous page of results. Omit to get the first page. Up to 15 recipes are returned per request; fewer than 15 means there are no more results.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "description": "ID of the last recipe in the previous page of results. Omit to get the first page. Up to 15 recipes are returned per request; fewer than 15 means there are no more results.",\n  "type": "string",\n  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"\n}',
                 },
             },
             {

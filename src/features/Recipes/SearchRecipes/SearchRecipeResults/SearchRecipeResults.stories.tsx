@@ -1,5 +1,6 @@
 import { Box } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { fn } from 'storybook/test'
 import BookRecipe from '@test/mockData/recipes/BookRecipe'
 import MagazineRecipe from '@test/mockData/recipes/MagazineRecipe'
 import OnlineRecipe from '@test/mockData/recipes/OnlineRecipe'
@@ -36,3 +37,16 @@ export default meta
 type Story = StoryObj<typeof SearchRecipeResults>
 
 export const Default: Story = {}
+
+export const WithLoadMore: Story = {
+    args: {
+        onLoadNextPage: fn(),
+    },
+}
+
+export const LoadingNextPage: Story = {
+    args: {
+        onLoadNextPage: fn(),
+        isLoadingNextPage: true,
+    },
+}

@@ -90,6 +90,50 @@ function searchKeywords(keywords: string) {
     cy.get('button').contains('Search').click()
 }
 
+// The API returns this many recipes per page
+const PAGE_SIZE = 15
+
+function createRecipes(titles: string[], overrides: Partial<PostRecipeBody> = {}) {
+    titles.forEach((title) => cy.createRecipe(buildBookRecipe(title, overrides)))
+}
+
+function buildTitles(prefix: string, count: number) {
+    return Array.from({ length: count }, (_, index) => `${prefix} ${index + 1}`)
+}
+
+// Loading more runs a server action, which posts back to the /recipes page
+function interceptLoadMoreRequests() {
+    cy.intercept({ method: 'POST', pathname: '/recipes' }).as('loadMore')
+}
+
+function getLoadMoreButton() {
+    return cy.contains('button:visible', /^Load More$/)
+}
+
+function loadMore() {
+    getLoadMoreButton().click()
+    cy.wait('@loadMore')
+}
+
+function getVisibleResultTitles() {
+    return cy.get('h3:visible').then(($headings) => $headings.toArray().map((h) => h.innerText))
+}
+
+// Checks the rendered results rather than just the counter, and that no page was loaded twice
+function assertVisibleResults(viewport: Viewport, count: number) {
+    assertResultCount(viewport, count)
+    getVisibleResultTitles().then((titles) => {
+        expect(titles).to.have.length(count)
+        expect(new Set(titles).size).to.eq(count)
+    })
+}
+
+function assertAllResultsStartWith(prefix: string) {
+    getVisibleResultTitles().then((titles) => {
+        titles.forEach((title) => expect(title).to.match(new RegExp(`^${prefix} \\d+ - `)))
+    })
+}
+
 viewports.forEach((viewport) => {
     describe(`Search Recipe Page (${viewport.name})`, () => {
         beforeEach(() => {
@@ -254,6 +298,98 @@ viewports.forEach((viewport) => {
 
             openFilters(viewport)
             getTag(Cuisine.ITALIAN).should('have.attr', 'data-status', 'default')
+        })
+
+        it('loads the next page of results and starts from the first page again on refresh', () => {
+            const titles = buildTitles(`Cypress Paged Recipe ${Date.now()}`, PAGE_SIZE + 2)
+
+            createRecipes(titles)
+
+            cy.visit('/recipes')
+            interceptLoadMoreRequests()
+            assertVisibleResults(viewport, PAGE_SIZE)
+
+            loadMore()
+
+            assertVisibleResults(viewport, titles.length)
+            titles.forEach((title) => getVisibleResult(title).should('exist'))
+            getLoadMoreButton().should('not.exist')
+            // Pages beyond the first are not kept in the URL
+            cy.location('search').should('eq', '')
+
+            cy.reload()
+
+            assertVisibleResults(viewport, PAGE_SIZE)
+            getLoadMoreButton().should('be.visible')
+        })
+
+        it('does not show load more when all results fit on one page', () => {
+            createRecipes(buildTitles(`Cypress Single Page Recipe ${Date.now()}`, 3))
+
+            cy.visit('/recipes')
+            assertVisibleResults(viewport, 3)
+            getLoadMoreButton().should('not.exist')
+        })
+
+        it('returns to the first page when filters are applied after loading the next page', () => {
+            const suffix = Date.now()
+            const italianPrefix = `Cypress Italian ${suffix}`
+            const britishPrefix = `Cypress British ${suffix}`
+            const italianTitles = buildTitles(italianPrefix, PAGE_SIZE + 1)
+            const britishTitles = buildTitles(britishPrefix, 2)
+
+            createRecipes(italianTitles, { tags: withCuisine([Cuisine.ITALIAN]) })
+            createRecipes(britishTitles, { tags: withCuisine([Cuisine.BRITISH]) })
+
+            cy.visit('/recipes')
+            interceptLoadMoreRequests()
+            assertVisibleResults(viewport, PAGE_SIZE)
+
+            loadMore()
+            assertVisibleResults(viewport, italianTitles.length + britishTitles.length)
+
+            openFilters(viewport)
+            selectTag(Cuisine.ITALIAN)
+            applyFilters()
+
+            cy.location('search').should('contain', 'tags=')
+            showResults(viewport)
+            // Back to a single, filtered first page rather than the two pages already loaded
+            assertVisibleResults(viewport, PAGE_SIZE)
+            assertAllResultsStartWith(italianPrefix)
+
+            // The next page continues the filtered search
+            loadMore()
+            assertVisibleResults(viewport, italianTitles.length)
+            assertAllResultsStartWith(italianPrefix)
+            getLoadMoreButton().should('not.exist')
+        })
+
+        it('returns to the first page when keywords are searched after loading the next page', () => {
+            const suffix = Date.now()
+            const lasagnePrefix = `Cypress Lasagne ${suffix}`
+            const lasagneTitles = buildTitles(lasagnePrefix, PAGE_SIZE + 1)
+            const risottoTitles = buildTitles(`Cypress Risotto ${suffix}`, 2)
+
+            createRecipes([...lasagneTitles, ...risottoTitles])
+
+            cy.visit('/recipes')
+            interceptLoadMoreRequests()
+            assertVisibleResults(viewport, PAGE_SIZE)
+
+            loadMore()
+            assertVisibleResults(viewport, lasagneTitles.length + risottoTitles.length)
+
+            searchKeywords('Lasagne')
+
+            cy.location('search').should('contain', 'keywords=Lasagne')
+            assertVisibleResults(viewport, PAGE_SIZE)
+            assertAllResultsStartWith(lasagnePrefix)
+
+            loadMore()
+            assertVisibleResults(viewport, lasagneTitles.length)
+            assertAllResultsStartWith(lasagnePrefix)
+            getLoadMoreButton().should('not.exist')
         })
 
         it('opens a recipe when its title is clicked', () => {

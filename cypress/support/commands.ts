@@ -3,6 +3,7 @@
 import { jwtDecode } from 'jwt-decode'
 import type {
     GetMealPlansResponse,
+    GetRecipesQueryParameters,
     GetRecipesResponse,
     PostMealPlanBody,
     PostRecipeBody,
@@ -58,7 +59,11 @@ declare global {
             deleteAllRecipes(): Chainable<void>
             getByTestId(testId: string): Chainable<JQuery<HTMLElement>>
             loginAsTestUser(redirectPath?: string): Chainable<void>
-            searchRecipes(keywords: string): Chainable<GetRecipesResponse>
+            searchRecipes(
+                keywords: string,
+                previousRecipeId?: GetRecipesQueryParameters['previousRecipeId'],
+            ): Chainable<GetRecipesResponse>
+            searchAllRecipes(keywords: string): Chainable<GetRecipesResponse>
             visitMealPlans(): Chainable<void>
             getInputByLabel(
                 label: string | RegExp,
@@ -227,41 +232,56 @@ Cypress.Commands.add('deleteRecipe', (recipeId: string) => {
 })
 
 Cypress.Commands.add('deleteAllRecipes', () => {
-    const foundRecipes = cy.searchRecipes('').then((recipes) => {
-        return recipes
-    })
-    foundRecipes.then((recipes) => {
+    cy.searchAllRecipes('').then((recipes) => {
         recipes.forEach((recipe) => {
             cy.deleteRecipe(recipe.id)
         })
     })
 })
 
-Cypress.Commands.add('searchRecipes', (keywords: string) => {
-    return getRequiredEnv('API_BASE_URL').then((apiBaseUrl) => {
-        return getAuthHeaders().then((headers) => {
-            return cy
-                .request<GetRecipesResponse>({
-                    method: 'GET',
-                    url: `${apiBaseUrl}/recipes`,
-                    headers,
-                    qs: {
-                        // An empty keywords param is treated as a search for '' and matches nothing
-                        ...(keywords.trim() ? { keywords } : {}),
-                        filters: JSON.stringify({}),
-                        tags: JSON.stringify({
-                            cuisine: [],
-                            mealType: [],
-                            meat: [],
-                            dietary: [],
-                            occasion: [],
-                            equipment: [],
-                        }),
-                    },
-                })
-                .its('body')
+// Search results are paginated, so keep requesting the page after the last recipe until one comes back empty
+Cypress.Commands.add('searchAllRecipes', (keywords: string) => {
+    const searchFrom = (foundRecipes: GetRecipesResponse): Cypress.Chainable<GetRecipesResponse> =>
+        cy.searchRecipes(keywords, foundRecipes.at(-1)?.id).then((page: GetRecipesResponse) => {
+            if (page.length === 0) {
+                return cy.wrap(foundRecipes, { log: false })
+            }
+
+            return searchFrom([...foundRecipes, ...page])
         })
-    })
+
+    return searchFrom([])
 })
+
+Cypress.Commands.add(
+    'searchRecipes',
+    (keywords: string, previousRecipeId?: GetRecipesQueryParameters['previousRecipeId']) => {
+        return getRequiredEnv('API_BASE_URL').then((apiBaseUrl) => {
+            return getAuthHeaders().then((headers) => {
+                return cy
+                    .request<GetRecipesResponse>({
+                        method: 'GET',
+                        url: `${apiBaseUrl}/recipes`,
+                        headers,
+                        qs: {
+                            // An empty keywords param is treated as a search for '' and matches nothing
+                            ...(keywords.trim() ? { keywords } : {}),
+                            ...(previousRecipeId ? { previousRecipeId } : {}),
+                            filters: JSON.stringify({}),
+                            tags: JSON.stringify({
+                                cuisine: [],
+                                mealType: [],
+                                meat: [],
+                                dietary: [],
+                                occasion: [],
+                                equipment: [],
+                            }),
+                        },
+                    })
+                    .its('body')
+            })
+        })
+    },
+)
 
 export {}

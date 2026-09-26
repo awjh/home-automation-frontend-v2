@@ -58,7 +58,7 @@ describe('edit recipe page', () => {
     beforeEach(() => {
         cy.loginAsTestUser('/recipes/add')
 
-        cy.searchRecipes('').then((recipes) => {
+        cy.searchAllRecipes('').then((recipes) => {
             recipes.forEach((recipe) => {
                 createdRecipeIds.push(recipe.id)
             })

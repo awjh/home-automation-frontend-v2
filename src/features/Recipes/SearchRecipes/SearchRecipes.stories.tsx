@@ -10,7 +10,7 @@ import {
     Equipment,
 } from '@awjh/home-automation-v2-api-models/recipes'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
-import { expect, waitFor, type Mock } from 'storybook/test'
+import { expect, fn, waitFor, type Mock } from 'storybook/test'
 import SearchRecipes from './SearchRecipes'
 import BookRecipe from '@test/mockData/recipes/BookRecipe'
 import OnlineRecipe from '@test/mockData/recipes/OnlineRecipe'
@@ -78,6 +78,7 @@ const meta: Meta<typeof SearchRecipes> = {
         tags,
         filters,
         recipes: recipeList,
+        loadNextRecipesPage: fn(),
     },
 }
 
@@ -85,6 +86,46 @@ export default meta
 type Story = StoryObj<typeof SearchRecipes>
 
 export const Default: Story = {}
+
+const fullFirstPage = Array.from({ length: 15 }, (_, index) => ({
+    ...BookRecipe,
+    id: `recipe-page-1-${index}`,
+    title: `First Page Recipe ${index + 1}`,
+}))
+
+const lastPage = Array.from({ length: 3 }, (_, index) => ({
+    ...OnlineRecipe,
+    id: `recipe-page-2-${index}`,
+    title: `Last Page Recipe ${index + 1}`,
+}))
+
+export const LoadsNextPage: Story = {
+    args: {
+        recipes: fullFirstPage,
+        loadNextRecipesPage: fn(async () => lastPage),
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        expect(canvas.getByRole('heading', { name: 'Search Results (15)' })).toBeInTheDocument()
+
+        await userEvent.click(canvas.getByRole('button', { name: /^load more$/i }))
+
+        expect(args.loadNextRecipesPage).toHaveBeenCalledWith('recipe-page-1-14')
+        await waitFor(() =>
+            expect(
+                canvas.getByRole('heading', { name: 'Search Results (18)' }),
+            ).toBeInTheDocument(),
+        )
+        expect(canvas.getByRole('heading', { name: /^Last Page Recipe 3 - / })).toBeInTheDocument()
+        // A short page means there is nothing left to load
+        expect(canvas.queryByRole('button', { name: /^load more$/i })).not.toBeInTheDocument()
+    },
+}
+
+export const HidesLoadMoreWhenFirstPageIsNotFull: Story = {
+    play: async ({ canvas }) => {
+        expect(canvas.queryByRole('button', { name: /^load more$/i })).not.toBeInTheDocument()
+    },
+}
 
 export const TogglesFiltersAndAppliesThem: Story = {
     play: async ({ canvas, userEvent }) => {

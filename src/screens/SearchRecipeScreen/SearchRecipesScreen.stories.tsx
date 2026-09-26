@@ -10,7 +10,7 @@ import {
     Equipment,
 } from '@awjh/home-automation-v2-api-models/recipes'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
-import { expect, waitFor, type Mock } from 'storybook/test'
+import { expect, fn, waitFor, type Mock } from 'storybook/test'
 import SearchRecipeScreen from './SearchRecipesScreen'
 import BookRecipe from '@test/mockData/recipes/BookRecipe'
 import OnlineRecipe from '@test/mockData/recipes/OnlineRecipe'
@@ -78,6 +78,7 @@ const meta: Meta<typeof SearchRecipeScreen> = {
         tags,
         filters,
         recipes: recipeList,
+        loadNextRecipesPage: fn(),
     },
 }
 

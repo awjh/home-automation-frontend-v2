@@ -1,11 +1,15 @@
 import { GetRecipesResponse } from '@awjh/home-automation-v2-api-models'
-import { Separator, VStack } from '@chakra-ui/react'
+import Button from '@atoms/Button/Button'
+import { Box, Separator, VStack } from '@chakra-ui/react'
 import { Fragment } from 'react'
 import SearchRecipeResult from '../SearchRecipeResult/SearchRecipeResult'
 import useColorMode from '@hooks/useColorMode'
 
 export interface SearchRecipeResultsProps {
     recipes: GetRecipesResponse
+    // Omitted when there are no more pages to load
+    onLoadNextPage?: () => void
+    isLoadingNextPage?: boolean
 }
 
 export default function SearchRecipeResults(props: SearchRecipeResultsProps) {
@@ -25,6 +29,19 @@ export default function SearchRecipeResults(props: SearchRecipeResultsProps) {
                     )}
                 </Fragment>
             ))}
+            {props.onLoadNextPage && props.recipes.length > 0 && (
+                <Box py={4}>
+                    <Button
+                        type={'button'}
+                        colorStyle={'secondary'}
+                        onClick={props.onLoadNextPage}
+                        loading={props.isLoadingNextPage}
+                        loadingText={'Loading...'}
+                    >
+                        Load More
+                    </Button>
+                </Box>
+            )}
         </VStack>
     )
 }

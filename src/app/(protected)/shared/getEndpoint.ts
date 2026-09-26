@@ -67,12 +67,23 @@ type QueryParameterNames<T> = T extends { parameters: ReadonlyArray<infer P> }
 
 type PathParameterNames<T> = ParameterNamesByLocation<T, 'path'>
 
+type RequiredQueryParameterNames<T> = T extends { parameters: ReadonlyArray<infer P> }
+    ? P extends { in: 'query'; name: infer N; required: true }
+        ? N
+        : never
+    : never
+
+// Query parameters are optional unless the spec marks them as required
 type QueryParams<EP extends Endpoint, M extends Method<EP>> =
     QueryParameterNames<(typeof BackendApi)['paths'][EP][M]> extends infer K
         ? [K] extends [never]
             ? undefined
             : [K] extends [string]
-              ? Record<K, string | string[]>
+              ? Partial<Record<K, string | string[]>> &
+                    Record<
+                        RequiredQueryParameterNames<(typeof BackendApi)['paths'][EP][M]>,
+                        string | string[]
+                    >
               : undefined
         : undefined
 
