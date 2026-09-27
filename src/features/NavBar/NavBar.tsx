@@ -1,4 +1,4 @@
-import { Heading, HStack } from '@chakra-ui/react'
+import { Heading, HStack, Link } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
 import NavBarLinks from './NavBarLinks'
 
@@ -27,7 +27,13 @@ export default function NavBar({ showLinks = true }: NavBarProps) {
                 fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
                 fontWeight={'normal'}
             >
-                Home Automation
+                <Link
+                    href={'/'}
+                    color={keyColors.primary}
+                    _hover={{ textDecoration: 'underline', color: keyColors.primary }}
+                >
+                    Home Automation
+                </Link>
             </Heading>
             {showLinks && (
                 <NavBarLinks

@@ -3,13 +3,17 @@
 import {
     DeleteMealPlanResponse,
     GetImageResponse,
+    GetMealPlansResponse,
     GetRecipeResponse,
     PostMealPlanBody,
     PostMealPlanResponse,
 } from '@awjh/home-automation-v2-api-models'
+import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import MealPlan from '@defs/MealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
+import { RecipeMealPlanDate } from '@features/Recipes/ViewRecipe/RecipeMealPlans/RecipeMealPlans'
+import { formatDate } from '@utils/formatDate'
 import isDirectImageUrl from '@utils/isDirectImageUrl'
 import getEndpoint from '../../shared/getEndpoint'
 
@@ -78,6 +82,42 @@ export async function getRecipeImageUrl(imageId: string | undefined): Promise<st
     } catch (error) {
         console.error('Error fetching image URL:', error)
         return undefined
+    }
+}
+
+export async function getRecipeMealPlanDates(recipeId: string): Promise<RecipeMealPlanDate[]> {
+    // RecipeMealPlans shows this week plus the following two, so fetch that window with a
+    // day of slack either side as the server's timezone may differ from the browser's.
+    const startDate = new Date()
+    const daysSinceMonday = (startDate.getDay() + 6) % 7
+    startDate.setDate(startDate.getDate() - daysSinceMonday - 1)
+
+    const endDate = new Date(startDate)
+    endDate.setDate(startDate.getDate() + 23)
+
+    const callApiEndpoint = await getEndpoint({
+        endpoint: '/meal-plans',
+        method: 'get',
+    })
+
+    try {
+        const mealPlans = await callApiEndpoint<GetMealPlansResponse>({
+            queryParams: {
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate),
+            },
+        })
+
+        return mealPlans
+            .filter(
+                ({ source }) =>
+                    source.type === SourceType.INTERNAL_RECIPE && source.recipeId === recipeId,
+            )
+            .map(({ date, mealTime, course }) => ({ date, mealTime, course }))
+    } catch (error) {
+        // Highlighting planned days is non-essential, so don't fail the whole recipe page.
+        console.error('Error fetching recipe meal plans:', error)
+        return []
     }
 }
 

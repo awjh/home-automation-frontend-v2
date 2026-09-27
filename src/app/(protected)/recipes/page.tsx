@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import SearchRecipeScreen from '@screens/SearchRecipeScreen/SearchRecipesScreen'
 import {
     getNextRecipesPage,
@@ -6,6 +7,10 @@ import {
     RecipeSearchQuery,
     withRecipeImageUrls,
 } from './actions'
+
+export const metadata: Metadata = {
+    title: 'Search Recipes',
+}
 
 export default async function SearchRecipes({
     searchParams,

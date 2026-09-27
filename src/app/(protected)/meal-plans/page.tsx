@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import MealPlansScreen from '@screens/MealPlansScreen/MealPlansScreen'
 import {
     addMealPlan,
@@ -7,6 +8,10 @@ import {
     getMealPlans,
     updateMealPlan,
 } from './actions'
+
+export const metadata: Metadata = {
+    title: 'Meal Plans',
+}
 
 export default async function MealPlans() {
     const today = new Date()

@@ -1,5 +1,6 @@
 import type { GetMealPlansResponse } from '@awjh/home-automation-v2-api-models'
 import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
+import createInternalRecipeMealPlan from '@test/mockData/mealPlans/createInternalRecipeMealPlan'
 import { buildBookRecipe } from './recipeBuilders/buildRecipe'
 import addDays from '../mealPlans/utils/addDays'
 import formatIsoDate from '../mealPlans/utils/formatIsoDate'
@@ -48,6 +49,68 @@ describe('recipe page', () => {
                 .should('be.visible')
                 .and('have.attr', 'src')
                 .and('include', 'recipe.jpg')
+        })
+    })
+
+    it('highlights days the recipe is already planned for on page load', () => {
+        const recipeTitle = `Cypress Recipe Planned ${Date.now()}`
+        const otherRecipeTitle = `Cypress Recipe Other ${Date.now()}`
+        const mondayOfWeek = getMondayOfWeek()
+
+        cy.createRecipe(buildBookRecipe(otherRecipeTitle)).then((otherRecipeId) => {
+            cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
+                // This week's plans are highlighted, the following two weeks are subtle
+                cy.createMealPlan(
+                    createInternalRecipeMealPlan(
+                        formatIsoDate(addDays(mondayOfWeek, 2)),
+                        MealTime.DINNER,
+                        recipeTitle,
+                        recipeId,
+                    ),
+                )
+                cy.createMealPlan(
+                    createInternalRecipeMealPlan(
+                        formatIsoDate(addDays(mondayOfWeek, 7)),
+                        MealTime.DINNER,
+                        recipeTitle,
+                        recipeId,
+                    ),
+                )
+                // Outside the three week window so not shown
+                cy.createMealPlan(
+                    createInternalRecipeMealPlan(
+                        formatIsoDate(addDays(mondayOfWeek, 25)),
+                        MealTime.DINNER,
+                        recipeTitle,
+                        recipeId,
+                    ),
+                )
+                // A different recipe so not shown
+                cy.createMealPlan(
+                    createInternalRecipeMealPlan(
+                        formatIsoDate(addDays(mondayOfWeek, 1)),
+                        MealTime.DINNER,
+                        otherRecipeTitle,
+                        otherRecipeId,
+                    ),
+                )
+
+                cy.visit(`/recipes/${recipeId}`)
+
+                cy.contains('button', /monday/i).should('have.attr', 'data-status', 'subtle')
+                cy.contains('button', /tuesday/i).should('have.attr', 'data-status', 'default')
+                cy.contains('button', /wednesday/i).should(
+                    'have.attr',
+                    'data-status',
+                    'highlighted',
+                )
+                cy.contains('button', /thursday/i).should('have.attr', 'data-status', 'default')
+                cy.contains('button', /friday/i).should('have.attr', 'data-status', 'default')
+
+                // Clicking a planned day offers to delete it rather than add a new one
+                cy.contains('button', /wednesday/i).click()
+                cy.contains(/delete meal plan\?/i).should('be.visible')
+            })
         })
     })
 
