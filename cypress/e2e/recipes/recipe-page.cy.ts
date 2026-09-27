@@ -1,7 +1,9 @@
 import type { GetMealPlansResponse } from '@awjh/home-automation-v2-api-models'
 import { Course, MealTime, SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { buildBookRecipe } from './recipeBuilders/buildRecipe'
-import getStartOfWeek from '../mealPlans/utils/getStartOfWeek'
+import addDays from '../mealPlans/utils/addDays'
+import formatIsoDate from '../mealPlans/utils/formatIsoDate'
+import getMondayOfWeek from '../mealPlans/utils/getMondayOfWeek'
 
 describe('recipe page', () => {
     beforeEach(() => {
@@ -52,10 +54,7 @@ describe('recipe page', () => {
     it('adds the recipe to meal planner from the recipe page', () => {
         const recipeTitle = `Cypress Recipe Add ${Date.now()}`
 
-        const startOfWeek = new Date()
-        startOfWeek.setDate(startOfWeek.getDate() - ((startOfWeek.getDay() + 6) % 7)) // Monday of the current week
-        const nextWeekStart = new Date(startOfWeek)
-        nextWeekStart.setDate(nextWeekStart.getDate() + 7)
+        const nextMondayDateString = formatIsoDate(addDays(getMondayOfWeek(), 7))
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
             cy.visit(`/recipes/${recipeId}`)
@@ -107,9 +106,7 @@ describe('recipe page', () => {
                     expect(recipeMealPlans[0].course).to.equal(Course.MAIN)
                     // The recipe page treats the clicked weekday as a template and opens
                     // the modal for the matching weekday in the following week.
-                    expect(recipeMealPlans[0].date).to.equal(
-                        nextWeekStart.toISOString().split('T')[0],
-                    )
+                    expect(recipeMealPlans[0].date).to.equal(nextMondayDateString)
                 })
             })
         })
@@ -117,13 +114,10 @@ describe('recipe page', () => {
 
     it('adds the recipe to meal planner from the recipe page and sets it as leftovers', () => {
         const recipeTitle = `Cypress Recipe Add with leftovers ${Date.now()}`
-        const startOfWeek = getStartOfWeek()
-        const tuesdayDate = new Date(startOfWeek)
-        tuesdayDate.setDate(tuesdayDate.getDate() + 10) // meal planner buttons use next week for meal dates
-        const tuesdayDateString = tuesdayDate.toISOString().split('T')[0]
-        const wednesdayDate = new Date(startOfWeek)
-        wednesdayDate.setDate(wednesdayDate.getDate() + 11)
-        const wednesdayDateString = wednesdayDate.toISOString().split('T')[0]
+        // The weekday buttons create meal plans for that weekday in the following week
+        const mondayOfWeek = getMondayOfWeek()
+        const tuesdayDateString = formatIsoDate(addDays(mondayOfWeek, 8))
+        const wednesdayDateString = formatIsoDate(addDays(mondayOfWeek, 9))
 
         cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
             cy.visit(`/recipes/${recipeId}`)
