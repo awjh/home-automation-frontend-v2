@@ -43,6 +43,11 @@ export default defineConfig({
         CYPRESS_USER: process.env.CYPRESS_USER,
         CYPRESS_USER_PASSWORD: process.env.CYPRESS_USER_PASSWORD,
     },
+    // Retry individual failing tests in `cypress run` (CI) rather than re-running the whole suite
+    retries: {
+        runMode: 2,
+        openMode: 0,
+    },
     video: false,
     viewportWidth: 1280,
     viewportHeight: 900,
