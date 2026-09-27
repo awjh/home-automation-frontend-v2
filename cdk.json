@@ -1,0 +1,18 @@
+{
+    "app": "TS_NODE_PROJECT=tsconfig.cdk.json npx ts-node -r tsconfig-paths/register --prefer-ts-exts bin/main.ts",
+    "context": {
+        "aws-cdk:enableDiffNoFail": "true",
+        "stackProps": {
+            "prod": {
+                "tags": {
+                    "env": "prod",
+                    "version": "1"
+                },
+                "env": {
+                    "account": "558946902552",
+                    "region": "eu-west-1"
+                }
+            }
+        }
+    }
+}

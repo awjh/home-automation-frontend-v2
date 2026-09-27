@@ -28,7 +28,8 @@
             "@hooks/*": ["./src/hooks/*"],
             "@defs/*": ["./src/defs/*"],
             "@utils/*": ["./src/utils/*"],
-            "@test/*": ["./test/*"]
+            "@test/*": ["./test/*"],
+            "@cdk/*": ["./cdk/*"]
         }
     },
     "include": [
@@ -39,5 +40,5 @@
         ".next/dev/types/**/*.ts",
         "**/*.mts"
     ],
-    "exclude": ["node_modules", ".storybook"]
+    "exclude": ["node_modules", ".storybook", "cdk.out", ".open-next"]
 }

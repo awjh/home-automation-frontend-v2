@@ -4,7 +4,7 @@ import useColorMode from '@hooks/useColorMode'
 import { useRef, useState } from 'react'
 import { Controller, useWatch, type Control, type UseFormSetValue } from 'react-hook-form'
 import { LuCheck, LuTrash2, LuX } from 'react-icons/lu'
-import { IngredientsFormValues } from './IngredientsSectionForm'
+import { IngredientsFormValues } from '../IngredientsSectionForm/IngredientsSectionForm'
 
 interface IngredientsSectionTitleProps {
     control: Control<IngredientsFormValues>

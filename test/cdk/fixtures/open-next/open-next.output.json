@@ -1,0 +1,36 @@
+{
+    "edgeFunctions": {},
+    "origins": {
+        "s3": {
+            "type": "s3",
+            "originPath": "_assets",
+            "copy": [
+                {
+                    "from": ".open-next/assets",
+                    "to": "_assets",
+                    "cached": true,
+                    "versionedSubDir": "_next"
+                },
+                { "from": ".open-next/cache", "to": "_cache", "cached": false }
+            ]
+        },
+        "imageOptimizer": {
+            "type": "function",
+            "handler": "index.handler",
+            "bundle": ".open-next/image-optimization-function"
+        },
+        "default": {
+            "type": "function",
+            "handler": "index.handler",
+            "bundle": ".open-next/server-functions/default"
+        }
+    },
+    "behaviors": [
+        { "pattern": "_next/image*", "origin": "imageOptimizer" },
+        { "pattern": "_next/data/*", "origin": "default" },
+        { "pattern": "*", "origin": "default" },
+        { "pattern": "BUILD_ID", "origin": "s3" },
+        { "pattern": "_next/*", "origin": "s3" },
+        { "pattern": "favicon.ico", "origin": "s3" }
+    ]
+}

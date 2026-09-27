@@ -1,4 +1,5 @@
 import {
+    DeleteMealPlanResponse,
     GetExtractedExternalRecipeBasicsResponse,
     GetRecipesResponse,
     PostMealPlanResponse,
@@ -32,9 +33,7 @@ type OnEditMealSubmit = (
     mealPlan: MealPlan,
     values: AddMealPlanFormValues,
 ) => Promise<PutMealPlanResponse>
-type OnDeleteMealSubmit = (
-    mealPlan: MealPlan,
-) => Promise<Pick<MealPlan, 'date' | 'mealTime' | 'course'>>
+type OnDeleteMealSubmit = (mealPlan: MealPlan) => Promise<DeleteMealPlanResponse>
 
 interface MealPlanPopupsStoryArgs {
     initialMeals: MealPlan[]
@@ -65,6 +64,7 @@ const defaultStoryArgs: MealPlanPopupsStoryArgs = {
         date: mealPlan.date,
         mealTime: mealPlan.mealTime,
         course: mealPlan.course,
+        relatedMealPlans: [],
     }),
 }
 
@@ -109,9 +109,7 @@ function MealPlanPopupsHarness({
         )
     }
 
-    const onDeleteMealSuccess = (
-        deletedMealPlan: Pick<MealPlan, 'date' | 'mealTime' | 'course'>,
-    ) => {
+    const onDeleteMealSuccess = (deletedMealPlan: DeleteMealPlanResponse) => {
         setMeals((currentMeals) =>
             currentMeals.filter(
                 (mealPlan) =>
@@ -183,6 +181,7 @@ const meta = {
             date: mealPlan.date,
             mealTime: mealPlan.mealTime,
             course: mealPlan.course,
+            relatedMealPlans: [],
         })),
     },
 } satisfies Meta<typeof MealPlanPopupsHarness>

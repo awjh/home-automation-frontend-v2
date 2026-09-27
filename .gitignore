@@ -43,6 +43,6 @@ next-env.d.ts
 *storybook.log
 storybook-static
 
-# lost-pixel — only commit the baseline folder, not current/difference
-.lostpixel/current
-.lostpixel/difference
+# opennext / cdk
+/.open-next/
+/cdk.out/

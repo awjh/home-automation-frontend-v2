@@ -66,6 +66,28 @@ In practice, auth works like this:
 
 This project follows atomic design. Templates are used for full page view and then referenced via the page itself. This means we can do storybook testing without needing to use the real methods for things like validating login etc, we can just mock all that to ensure the page works and renders neatly. You should have no storybook file in the pages folder. These can be tested via E2E testing instead.
 
+## Deployment
+
+The app is deployed to AWS (production only) at https://home-automation-v2.andrewhurt.co.uk using [OpenNext](https://opennext.js.org/aws) and CDK.
+
+`yarn build:open-next` runs `next build` and converts the output into Lambda bundles and static assets in `.open-next/` (see [open-next.config.ts](open-next.config.ts)). The CDK app in [bin/main.ts](bin/main.ts) then reads `.open-next/open-next.output.json` and deploys, via [cdk/constructs/NextjsSite.ts](cdk/constructs/NextjsSite.ts):
+
+- an S3 bucket holding static assets (`_assets/`) and prerendered pages (`_cache/`)
+- a server Lambda (Next.js server, including [src/proxy.ts](src/proxy.ts)) and an image optimisation Lambda, each behind a function URL
+- a CloudFront distribution on the custom domain, routing `_next/*` and `public/` files to S3 and everything else to the server Lambda
+
+The certificate is an ACM certificate in **us-east-1** (a CloudFront requirement) created outside CDK; its ARN lives in [cdk/constants/CertificateArns.ts](cdk/constants/CertificateArns.ts). DNS is managed at names.co.uk.
+
+Pushes to `main` run [.github/workflows/deploy.yml](.github/workflows/deploy.yml): typecheck, lint, CDK tests, Storybook interaction tests and Cypress E2E (against the dev backend), then deploy to prod. Pull requests run the same checks without deploying.
+
+To deploy manually (the shell env must hold the **prod** values, as they override `.env` during the build):
+
+```bash
+NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=... API_KEY=... STYTCH_PROJECT_ID=... STYTCH_SECRET=... yarn deploy:prod
+```
+
+CDK tests run with `yarn test:cdk`.
+
 ## Storybook
 
 ```bash
@@ -85,46 +107,6 @@ yarn test-storybook
 ```
 
 Results are also shown live in the **Tests** panel inside Storybook.
-
-### Visual Regression Tests (Lost Pixel)
-
-Visual/snapshot tests are run locally using [Lost Pixel OSS](https://github.com/lost-pixel/lost-pixel). Baseline screenshots are stored in `.lostpixel/baseline/` and committed to git. On each run, Lost Pixel screenshots every story and diffs them against the baseline, failing if anything has changed unexpectedly.
-
-```bash
-# Build Storybook first, then run visual regression
-yarn build-storybook && yarn lost-pixel
-```
-
-To accept intentional visual changes and update the baselines:
-
-```bash
-yarn lost-pixel:update
-```
-
-To run or update against a specific component only, use the `LOST_PIXEL_FILTER` env var with any substring of the story ID (e.g. `atoms-button--default`):
-
-```bash
-LOST_PIXEL_FILTER=calendar yarn lost-pixel
-LOST_PIXEL_FILTER=calendar yarn lost-pixel:update
-```
-
-#### Reviewing failures
-
-When a test fails, three folders are populated for comparison:
-
-| Folder                   | Contents                                         |
-| ------------------------ | ------------------------------------------------ |
-| `.lostpixel/baseline/`   | Committed reference screenshots                  |
-| `.lostpixel/current/`    | Screenshots from the latest run                  |
-| `.lostpixel/difference/` | Red-highlighted diff images showing what changed |
-
-Open the difference folder in Finder to quickly review failures:
-
-```bash
-open .lostpixel/difference/
-```
-
-Only `.lostpixel/baseline/` is committed to git. The `current/` and `difference/` folders are gitignored as they are regenerated on each run.
 
 ### End-to-End Tests (Cypress)
 

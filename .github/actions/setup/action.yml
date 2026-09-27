@@ -1,0 +1,20 @@
+name: Setup
+description: Install Node.js and dependencies, authenticating to GitHub Packages for @awjh packages
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: '24'
+        cache: yarn
+        cache-dependency-path: yarn.lock
+
+    - name: Authenticate to GitHub Packages
+      shell: bash
+      run: echo "//npm.pkg.github.com/:_authToken=${{ github.token }}" >> ~/.npmrc
+
+    - name: Install dependencies
+      shell: bash
+      run: yarn install --frozen-lockfile
