@@ -1,10 +1,11 @@
 import { HStack, StackSeparator, Text, VStack } from '@chakra-ui/react'
 import useColorMode from '@hooks/useColorMode'
+import { ReactNode } from 'react'
 
 export interface DescriptionTableProps {
     data: {
         key: string
-        value: string | number
+        value: ReactNode
     }[]
 }
 
@@ -28,7 +29,7 @@ export default function DescriptionTable({ data }: DescriptionTableProps) {
                 <VStack
                     fontSize={{ base: 'sm', md: 'sm', lg: 'md' }}
                     fontFamily={'lekton'}
-                    key={`description-table-${key}-${value}`}
+                    key={`description-table-${key}`}
                     gap={1}
                 >
                     <Text textTransform={'capitalize'}>{key}</Text>

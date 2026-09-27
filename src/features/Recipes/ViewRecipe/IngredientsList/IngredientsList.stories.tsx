@@ -45,15 +45,19 @@ export const FractionalQuantities: Story = {
         ],
     },
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement)
+        const quantities = within(canvasElement)
+            .getAllByTestId('quantity')
+            .map((quantity) => quantity.textContent)
 
-        await expect(canvas.getByText('½ tbsp')).toBeInTheDocument()
-        await expect(canvas.getByText('⅓ tsp')).toBeInTheDocument()
-        await expect(canvas.getByText('1⅔ cups')).toBeInTheDocument()
-        await expect(canvas.getByText('2¼ cups')).toBeInTheDocument()
-        await expect(canvas.getByText('⅛ tsp')).toBeInTheDocument()
-        // Not close enough to a fraction so left as decimals
-        await expect(canvas.getByText('0.3 tbsp')).toBeInTheDocument()
-        await expect(canvas.getByText('1.2 tbsp')).toBeInTheDocument()
+        await expect(quantities).toEqual([
+            '1/2 tbsp',
+            '1/3 tsp',
+            '12/3 cups',
+            '21/4 cups',
+            '1/8 tsp',
+            // Not close enough to a fraction so left as decimals
+            '0.3 tbsp',
+            '1.2 tbsp',
+        ])
     },
 }

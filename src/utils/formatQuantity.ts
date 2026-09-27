@@ -1,14 +1,24 @@
+export interface QuantityParts {
+    whole?: string
+    fraction?: { numerator: number; denominator: number }
+}
+
 const fractions = [
-    { value: 1 / 8, symbol: '⅛', terminating: true },
-    { value: 1 / 4, symbol: '¼', terminating: true },
-    { value: 1 / 3, symbol: '⅓', terminating: false },
-    { value: 3 / 8, symbol: '⅜', terminating: true },
-    { value: 1 / 2, symbol: '½', terminating: true },
-    { value: 5 / 8, symbol: '⅝', terminating: true },
-    { value: 2 / 3, symbol: '⅔', terminating: false },
-    { value: 3 / 4, symbol: '¾', terminating: true },
-    { value: 7 / 8, symbol: '⅞', terminating: true },
-]
+    { numerator: 1, denominator: 8 },
+    { numerator: 1, denominator: 4 },
+    { numerator: 1, denominator: 3 },
+    { numerator: 3, denominator: 8 },
+    { numerator: 1, denominator: 2 },
+    { numerator: 5, denominator: 8 },
+    { numerator: 2, denominator: 3 },
+    { numerator: 3, denominator: 4 },
+    { numerator: 7, denominator: 8 },
+].map((fraction) => ({
+    ...fraction,
+    value: fraction.numerator / fraction.denominator,
+    // Only thirds recur, everything else has an exact decimal
+    terminating: fraction.denominator !== 3,
+}))
 
 function matchesFraction(decimals: string, fraction: (typeof fractions)[number]) {
     const remainder = Number(`0.${decimals}`)
@@ -32,19 +42,22 @@ function matchesFraction(decimals: string, fraction: (typeof fractions)[number])
     )
 }
 
-// Renders quantities like 1.5 as 1½ and 0.333 as ⅓, leaving anything else as a plain number
-export default function formatQuantity(quantity: number): string {
+// Splits quantities like 1.5 into 1 and 1/2 and 0.333 into 1/3, leaving anything else whole
+export default function formatQuantity(quantity: number): QuantityParts {
     const [whole, decimals] = `${quantity}`.split('.')
 
     if (!decimals) {
-        return whole
+        return { whole }
     }
 
     const fraction = fractions.find((candidate) => matchesFraction(decimals, candidate))
 
     if (!fraction) {
-        return `${quantity}`
+        return { whole: `${quantity}` }
     }
 
-    return whole === '0' ? fraction.symbol : `${whole}${fraction.symbol}`
+    return {
+        whole: whole === '0' ? undefined : whole,
+        fraction: { numerator: fraction.numerator, denominator: fraction.denominator },
+    }
 }
