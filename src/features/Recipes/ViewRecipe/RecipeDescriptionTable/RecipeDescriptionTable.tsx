@@ -1,6 +1,7 @@
 import DescriptionTable, { DescriptionTableProps } from '@atoms/DescriptionTable/DescriptionTable'
 import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
 import formatDuration from '@utils/formatDuration'
+import formatQuantity from '@utils/formatQuantity'
 import joinValues from '@utils/joinValues'
 
 export interface RecipeDescriptionTableProps {
@@ -19,7 +20,7 @@ export default function RecipeDescriptionTable(props: RecipeDescriptionTableProp
     } else {
         descriptionTableData.push({
             key: 'Produces',
-            value: joinValues(produces.quantity, produces.measure),
+            value: joinValues(formatQuantity(produces.quantity), produces.measure),
         })
     }
 

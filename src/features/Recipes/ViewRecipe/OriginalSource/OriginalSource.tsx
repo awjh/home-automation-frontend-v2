@@ -8,6 +8,9 @@ export interface OriginalSourceProps {
     source: RecipeOriginalSource
 }
 
+// Recipes migrated from the old system point back at pages that no longer exist
+const LEGACY_RECIPE_URL_PREFIX = 'https://home-automation.andrewhurt.co.uk/recipes/legacy-recipes'
+
 function getSourceLabel(url: string) {
     try {
         return new URL(url).hostname.replace(/^www\./, '')
@@ -21,6 +24,10 @@ export default function OriginalSource({ source }: OriginalSourceProps) {
 
     switch (source.type) {
         case SourceType.ONLINE:
+            if (source.url.startsWith(LEGACY_RECIPE_URL_PREFIX)) {
+                return null
+            }
+
             return (
                 <Link
                     href={source.url}

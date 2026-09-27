@@ -1,6 +1,7 @@
 import DottedValuePair from '@atoms/DottedValuePair/DottedValuePair'
 import { Ingredient } from '@awjh/home-automation-v2-api-models/recipes'
 import { Flex } from '@chakra-ui/react'
+import formatQuantity from '@utils/formatQuantity'
 import joinValues from '@utils/joinValues'
 
 export interface IngredientsListProps {
@@ -24,7 +25,7 @@ export default function IngredientsList({ ingredients, small }: IngredientsListP
                     left={uppercaseFirstCharacter(
                         joinValues(ingredient.item, ingredient.preparation, ','),
                     )}
-                    right={joinValues(ingredient.quantity, ingredient.measure)}
+                    right={joinValues(formatQuantity(ingredient.quantity), ingredient.measure)}
                 />
             ))}
         </Flex>

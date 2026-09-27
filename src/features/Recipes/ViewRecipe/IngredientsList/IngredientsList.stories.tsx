@@ -1,5 +1,6 @@
 import { Box } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, within } from 'storybook/test'
 import IngredientsList from './IngredientsList'
 
 const meta: Meta<typeof IngredientsList> = {
@@ -30,3 +31,29 @@ export default meta
 type Story = StoryObj<typeof IngredientsList>
 
 export const Default: Story = {}
+
+export const FractionalQuantities: Story = {
+    args: {
+        ingredients: [
+            { item: 'Butter', quantity: 0.5, measure: 'tbsp' },
+            { item: 'Chilli flakes', quantity: 0.33, measure: 'tsp' },
+            { item: 'Milk', quantity: 1.666, measure: 'cups' },
+            { item: 'Flour', quantity: 2.25, measure: 'cups' },
+            { item: 'Salt', quantity: 0.125, measure: 'tsp' },
+            { item: 'Lemon juice', quantity: 0.3, measure: 'tbsp' },
+            { item: 'Olive oil', quantity: 1.2, measure: 'tbsp' },
+        ],
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement)
+
+        await expect(canvas.getByText('½ tbsp')).toBeInTheDocument()
+        await expect(canvas.getByText('⅓ tsp')).toBeInTheDocument()
+        await expect(canvas.getByText('1⅔ cups')).toBeInTheDocument()
+        await expect(canvas.getByText('2¼ cups')).toBeInTheDocument()
+        await expect(canvas.getByText('⅛ tsp')).toBeInTheDocument()
+        // Not close enough to a fraction so left as decimals
+        await expect(canvas.getByText('0.3 tbsp')).toBeInTheDocument()
+        await expect(canvas.getByText('1.2 tbsp')).toBeInTheDocument()
+    },
+}

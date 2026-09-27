@@ -1,5 +1,7 @@
 import { Box } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect } from 'storybook/test'
+import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import OriginalSource from './OriginalSource'
 import BookRecipe from '@test/mockData/recipes/BookRecipe'
 import MagazineRecipe from '@test/mockData/recipes/MagazineRecipe'
@@ -38,5 +40,17 @@ export const Magazine: Story = {
 export const Online: Story = {
     args: {
         source: OnlineRecipe.originalSource,
+    },
+}
+
+export const LegacyOnline: Story = {
+    args: {
+        source: {
+            type: SourceType.ONLINE,
+            url: 'https://home-automation.andrewhurt.co.uk/recipes/legacy-recipes/chicken-pie',
+        },
+    },
+    play: async ({ canvasElement }) => {
+        await expect(canvasElement.querySelector('a')).toBeNull()
     },
 }
