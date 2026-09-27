@@ -105,7 +105,7 @@ export const LoadsNextPage: Story = {
         loadNextRecipesPage: fn(async () => lastPage),
     },
     play: async ({ args, canvas, userEvent }) => {
-        expect(canvas.getByRole('heading', { name: 'Search Results (15)' })).toBeInTheDocument()
+        expect(canvas.getByRole('heading', { name: 'Search Results (15+)' })).toBeInTheDocument()
 
         await userEvent.click(canvas.getByRole('button', { name: /^load more$/i }))
 

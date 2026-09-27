@@ -7,7 +7,7 @@ export interface TabbedContentProps {
         string,
         | React.ReactNode
         | {
-              counter: number
+              counter: number | string
               content: React.ReactNode
           }
     >

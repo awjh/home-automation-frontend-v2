@@ -51,6 +51,8 @@ export default function SearchRecipes({
     }
 
     const { recipes } = loadedPages
+    // A full last page means there may be more to load, so the count is a lower bound
+    const resultCount = `${recipes.length}${loadedPages.hasNextPage ? '+' : ''}`
 
     const onLoadNextPage = async () => {
         const searchFirstPage = loadedPages.firstPage
@@ -172,7 +174,7 @@ export default function SearchRecipes({
                         key={mobileTabsResetKey}
                         childrenByTab={{
                             Filters: filtersContent,
-                            Results: { content: resultsContent, counter: recipes.length },
+                            Results: { content: resultsContent, counter: resultCount },
                         }}
                         initialActiveTab={'Results'}
                     />
@@ -183,7 +185,7 @@ export default function SearchRecipes({
                     alignItems={'flex-start'}
                 >
                     <Heading as="h2" size="xl" textAlign="left" mt={4} color={keyColors.primary}>
-                        Search Results ({recipes.length})
+                        Search Results ({resultCount})
                     </Heading>
                     {resultsContent}
                 </VStack>

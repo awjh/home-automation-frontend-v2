@@ -44,11 +44,14 @@ function showResults(viewport: Viewport) {
     }
 }
 
+// Only the last loaded page can be short, so a multiple of the page size means a "+" is shown
 function assertResultCount(viewport: Viewport, count: number) {
+    const label = count > 0 && count % PAGE_SIZE === 0 ? `${count}+` : `${count}`
+
     if (viewport.name === 'desktop') {
-        cy.contains('h2:visible', `Search Results (${count})`).should('exist')
+        cy.contains('h2:visible', `Search Results (${label})`).should('exist')
     } else {
-        cy.contains('button:visible', `Results (${count})`).should('exist')
+        cy.contains('button:visible', `Results (${label})`).should('exist')
     }
 }
 

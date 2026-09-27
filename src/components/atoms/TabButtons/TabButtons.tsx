@@ -2,7 +2,7 @@ import Button from '@atoms/Button/Button'
 import { Box, HStack } from '@chakra-ui/react'
 
 export interface TabButtonsProps {
-    tabs: (string | { name: string; counter: number })[]
+    tabs: (string | { name: string; counter: number | string })[]
     activeTab: string
     onTabChange: (tab: string) => void
 }
