@@ -1,4 +1,10 @@
-import MusicRecord, { Colour, Genre } from '@defs/MusicRecord'
+import {
+    Colour,
+    Genre,
+    MusicRecord,
+    RecordFormat,
+    ReleaseType,
+} from '@awjh/home-automation-v2-api-models/records'
 
 const MockRecord: MusicRecord = {
     id: '3f1c2b8e-5d4a-4c6b-9e7f-1a2b3c4d5e6f',
@@ -7,8 +13,8 @@ const MockRecord: MusicRecord = {
     image: '/recipe.jpg',
     year: 1977,
     catNo: 'K 56344',
-    format: 'Vinyl',
-    type: 'Album',
+    format: RecordFormat.TWELVE_INCH,
+    type: ReleaseType.ALBUM,
     labels: ['Warner Bros. Records'],
     sides: [
         {
@@ -34,8 +40,8 @@ const MockRecord: MusicRecord = {
         },
     ],
     tags: {
-        genres: ['rock' as Genre],
-        colours: ['black' as Colour],
+        genres: [Genre.ROCK],
+        colours: [Colour.BLACK],
     },
 }
 

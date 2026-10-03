@@ -1,5 +1,5 @@
 import { Text } from '@chakra-ui/react'
-import MusicRecord from '@defs/MusicRecord'
+import { MusicRecord } from '@awjh/home-automation-v2-api-models/records'
 import useColorMode from '@hooks/useColorMode'
 
 export type RecordDetailsProps = Pick<MusicRecord, 'labels' | 'catNo' | 'year'>

@@ -1,5 +1,5 @@
 import DottedValuePair from '@atoms/DottedValuePair/DottedValuePair'
-import { Song } from '@defs/MusicRecord'
+import { Song } from '@awjh/home-automation-v2-api-models/records'
 import { Flex } from '@chakra-ui/react'
 import formatTrackDuration from '@utils/formatTrackDuration'
 

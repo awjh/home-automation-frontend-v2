@@ -1,7 +1,7 @@
 'use client'
 
 import { VStack } from '@chakra-ui/react'
-import MusicRecord from '@defs/MusicRecord'
+import { MusicRecord } from '@awjh/home-automation-v2-api-models/records'
 import NavBar from '@features/NavBar/NavBar'
 import ViewRecord from '@features/Records/ViewRecord/ViewRecord'
 

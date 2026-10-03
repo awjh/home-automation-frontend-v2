@@ -138,10 +138,10 @@
     "@ast-grep/napi-win32-ia32-msvc" "0.40.5"
     "@ast-grep/napi-win32-x64-msvc" "0.40.5"
 
-"@awjh/home-automation-v2-api-models@^1.0.20":
-  version "1.0.20"
-  resolved "https://npm.pkg.github.com/download/@awjh/home-automation-v2-api-models/1.0.20/7f1ad4b5ccd6f55ee5c903b08ae9b69d8e8812b2#7f1ad4b5ccd6f55ee5c903b08ae9b69d8e8812b2"
-  integrity sha512-c8N/ip6Y6xeUisW6K8oacFCAdFgIPsicwTGSzDauAOgcbvdbEI4+8WpM2qjcr6iTNMLsP3PrWqmXwl2wWWZ6WA==
+"@awjh/home-automation-v2-api-models@^1.0.22":
+  version "1.0.22"
+  resolved "https://npm.pkg.github.com/download/@awjh/home-automation-v2-api-models/1.0.22/88024dfa10a3b0502e171e72ba09fe6261b5f030#88024dfa10a3b0502e171e72ba09fe6261b5f030"
+  integrity sha512-LhPEXXWGkeRXJGCbznXsyAYCrcH++4MyCHJZUklVNrjf2Xf/jgxY9Dd/3Fl3FHYIDfAG8Y6Gx/3QAfY3qIKYmA==
 
 "@aws-cdk/asset-awscli-v1@2.2.292":
   version "2.2.292"

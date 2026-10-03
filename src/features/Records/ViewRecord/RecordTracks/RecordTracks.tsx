@@ -1,5 +1,5 @@
 import { Heading, VStack } from '@chakra-ui/react'
-import MusicRecord from '@defs/MusicRecord'
+import { MusicRecord } from '@awjh/home-automation-v2-api-models/records'
 import useColorMode from '@hooks/useColorMode'
 import TrackList from '../TrackList/TrackList'
 

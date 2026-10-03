@@ -1,6 +1,6 @@
 import ImageWithFallback from '@atoms/ImageWithFallback/ImageWithFallback'
 import { Flex, Stack, Text, VStack } from '@chakra-ui/react'
-import MusicRecord from '@defs/MusicRecord'
+import { MusicRecord } from '@awjh/home-automation-v2-api-models/records'
 import useColorMode from '@hooks/useColorMode'
 import RecordSummary from './RecordSummary/RecordSummary'
 import RecordTracks from './RecordTracks/RecordTracks'

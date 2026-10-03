@@ -1,6 +1,6 @@
 import Tag from '@atoms/Tag/Tag'
 import { Heading, HStack, VStack } from '@chakra-ui/react'
-import MusicRecord from '@defs/MusicRecord'
+import { MusicRecord } from '@awjh/home-automation-v2-api-models/records'
 import useColorMode from '@hooks/useColorMode'
 import formatAuthors from '@utils/formatAuthors'
 import RecordDetails from '../RecordDetails/RecordDetails'
