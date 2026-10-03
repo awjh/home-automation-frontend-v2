@@ -1,121 +1,70 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import type { SearchDefs } from '@awjh/home-automation-v2-api-models'
-import {
-    Cuisine,
-    RecipeTags,
-    MealType,
-    Meat,
-    Dietary,
-    Occasion,
-    Equipment,
-} from '@awjh/home-automation-v2-api-models/recipes'
+import { Genre } from '@awjh/home-automation-v2-api-models/records'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
-import { expect, fn, waitFor, type Mock } from 'storybook/test'
-import SearchRecipes from './SearchRecipes'
-import BookRecipe from '@test/mockData/recipes/BookRecipe'
-import OnlineRecipe from '@test/mockData/recipes/OnlineRecipe'
-import MagazineRecipe from '@test/mockData/recipes/MagazineRecipe'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import MockRecordSearchResult from '@test/mockData/records/MockRecordSearchResult'
+import {
+    MockRecordSearchFilters,
+    MockRecordSearchTags,
+} from '@test/mockData/records/MockRecordSearchOptions'
+import { expect, fn, type Mock, waitFor } from 'storybook/test'
+import SearchRecords from './SearchRecords'
 
-const tags: RecipeTags = {
-    cuisine: Object.values(Cuisine),
-    mealType: Object.values(MealType),
-    meat: Object.values(Meat),
-    dietary: Object.values(Dietary),
-    occasion: Object.values(Occasion),
-    equipment: Object.values(Equipment),
-}
-
-const filters: Required<SearchDefs.RecipeFilters> = {
-    calories: {
-        min: 0,
-        max: 5000,
-    },
-    duration: {
-        prepDuration: {
-            min: 0,
-            max: 720, // 12 hours
-        },
-        cookingDuration: {
-            min: 0,
-            max: 720, // 12 hours
-        },
-        standingTime: {
-            min: 0,
-            max: 2880, // 48 hours
-        },
-        totalTime: {
-            min: 0,
-            max: 4320, // 72 hours
-        },
-    } satisfies Required<SearchDefs.DurationQuery>,
-    serves: {
-        min: 1,
-        max: 100,
-    },
-}
-
-const recipeList = [
-    { ...BookRecipe, image: '/recipe.jpg' },
-    { ...OnlineRecipe, image: '/recipe.jpg' },
-    MagazineRecipe,
-    {
-        ...BookRecipe,
-        id: 'recipe-4',
-        title: 'Lemon Chicken Tray Bake',
-        authors: ['Alex Green'],
-    },
+const recordList = [
+    MockRecordSearchResult,
+    { ...MockRecordSearchResult, id: 'record-2', title: 'Tusk', image: undefined },
+    { ...MockRecordSearchResult, id: 'record-3', title: 'Mirage' },
 ]
 
-const meta: Meta<typeof SearchRecipes> = {
-    title: 'Features/Recipes/SearchRecipes',
-    component: SearchRecipes,
+const meta: Meta<typeof SearchRecords> = {
+    title: 'Features/Records/SearchRecords',
+    component: SearchRecords,
     parameters: {
         nextjs: {
             appDirectory: true,
         },
     },
     args: {
-        tags,
-        filters,
-        recipes: recipeList,
-        loadNextRecipesPage: fn(),
+        tags: MockRecordSearchTags,
+        filters: MockRecordSearchFilters,
+        records: recordList,
+        loadNextRecordsPage: fn(),
     },
 }
 
 export default meta
-type Story = StoryObj<typeof SearchRecipes>
+type Story = StoryObj<typeof SearchRecords>
 
 export const Default: Story = {}
 
 const fullFirstPage = Array.from({ length: 15 }, (_, index) => ({
-    ...BookRecipe,
-    id: `recipe-page-1-${index}`,
-    title: `First Page Recipe ${index + 1}`,
+    ...MockRecordSearchResult,
+    id: `record-page-1-${index}`,
+    title: `First Page Record ${index + 1}`,
 }))
 
 const lastPage = Array.from({ length: 3 }, (_, index) => ({
-    ...OnlineRecipe,
-    id: `recipe-page-2-${index}`,
-    title: `Last Page Recipe ${index + 1}`,
+    ...MockRecordSearchResult,
+    id: `record-page-2-${index}`,
+    title: `Last Page Record ${index + 1}`,
 }))
 
 export const LoadsNextPage: Story = {
     args: {
-        recipes: fullFirstPage,
-        loadNextRecipesPage: fn(async () => lastPage),
+        records: fullFirstPage,
+        loadNextRecordsPage: fn(async () => lastPage),
     },
     play: async ({ args, canvas, userEvent }) => {
         expect(canvas.getByRole('heading', { name: 'Search Results (15+)' })).toBeInTheDocument()
 
         await userEvent.click(canvas.getByRole('button', { name: /^load more$/i }))
 
-        expect(args.loadNextRecipesPage).toHaveBeenCalledWith('recipe-page-1-14')
+        expect(args.loadNextRecordsPage).toHaveBeenCalledWith('record-page-1-14')
         await waitFor(() =>
             expect(
                 canvas.getByRole('heading', { name: 'Search Results (18)' }),
             ).toBeInTheDocument(),
         )
-        expect(canvas.getByRole('heading', { name: /^Last Page Recipe 3 - / })).toBeInTheDocument()
+        expect(canvas.getByRole('heading', { name: /^Last Page Record 3 - / })).toBeInTheDocument()
         // A short page means there is nothing left to load
         expect(canvas.queryByRole('button', { name: /^load more$/i })).not.toBeInTheDocument()
     },
@@ -123,6 +72,7 @@ export const LoadsNextPage: Story = {
 
 export const HidesLoadMoreWhenFirstPageIsNotFull: Story = {
     play: async ({ canvas }) => {
+        expect(canvas.getByRole('heading', { name: 'Search Results (3)' })).toBeInTheDocument()
         expect(canvas.queryByRole('button', { name: /^load more$/i })).not.toBeInTheDocument()
     },
 }
@@ -131,12 +81,8 @@ export const TogglesFiltersAndAppliesThem: Story = {
     play: async ({ canvas, userEvent }) => {
         const router = getRouter()
 
-        await userEvent.click(canvas.getByRole('button', { name: 'toggle-recipe-filters' }))
-
-        const selectedCuisine = tags.cuisine[0]
-        await userEvent.click(
-            canvas.getByRole('button', { name: new RegExp(`^${selectedCuisine}$`, 'i') }),
-        )
+        await userEvent.click(canvas.getByRole('button', { name: 'toggle-record-filters' }))
+        await userEvent.click(canvas.getByRole('button', { name: /^rock$/i }))
         await userEvent.click(canvas.getByRole('button', { name: /apply filters/i }))
 
         await waitFor(() => expect(router.push).toHaveBeenCalled())
@@ -144,43 +90,31 @@ export const TogglesFiltersAndAppliesThem: Story = {
         const pushedUrl = (router.push as unknown as Mock).mock.calls.at(-1)?.[0] as string
         const resolvedUrl = new URL(pushedUrl, 'http://localhost')
 
-        expect(resolvedUrl.searchParams.get('tags')).toBe(
-            JSON.stringify({
-                cuisine: [selectedCuisine],
-                mealType: [],
-                meat: [],
-                dietary: [],
-                occasion: [],
-                equipment: [],
-            }),
-        )
-        expect(canvas.getByRole('button', { name: 'close-recipe-filters' })).toBeInTheDocument()
+        expect(resolvedUrl.searchParams.get('tags')).toBe(JSON.stringify({ genres: [Genre.ROCK] }))
+        expect(canvas.getByRole('button', { name: 'close-record-filters' })).toBeInTheDocument()
     },
 }
 
 export const TogglesFiltersAndHidesWithArrow: Story = {
     play: async ({ canvas, userEvent }) => {
-        await userEvent.click(canvas.getByRole('button', { name: 'toggle-recipe-filters' }))
+        await userEvent.click(canvas.getByRole('button', { name: 'toggle-record-filters' }))
 
         expect(canvas.getByRole('button', { name: /apply filters/i })).toBeInTheDocument()
 
-        await userEvent.click(canvas.getByRole('button', { name: 'close-recipe-filters' }))
+        await userEvent.click(canvas.getByRole('button', { name: 'close-record-filters' }))
 
         expect(canvas.queryByRole('button', { name: /apply filters/i })).not.toBeInTheDocument()
-        expect(canvas.getByRole('button', { name: 'toggle-recipe-filters' })).toBeInTheDocument()
+        expect(canvas.getByRole('button', { name: 'toggle-record-filters' })).toBeInTheDocument()
     },
 }
 
 export const TogglesFiltersAndHidesWithCancel: Story = {
     play: async ({ canvas, userEvent }) => {
-        await userEvent.click(canvas.getByRole('button', { name: 'toggle-recipe-filters' }))
-
-        expect(canvas.getByRole('button', { name: /apply filters/i })).toBeInTheDocument()
-
+        await userEvent.click(canvas.getByRole('button', { name: 'toggle-record-filters' }))
         await userEvent.click(canvas.getByRole('button', { name: /^cancel$/i }))
 
         expect(canvas.queryByRole('button', { name: /apply filters/i })).not.toBeInTheDocument()
-        expect(canvas.getByRole('button', { name: 'toggle-recipe-filters' })).toBeInTheDocument()
+        expect(canvas.getByRole('button', { name: 'toggle-record-filters' })).toBeInTheDocument()
     },
 }
 
@@ -188,7 +122,7 @@ export const SearchesUsingKeywords: Story = {
     play: async ({ canvas, userEvent }) => {
         const router = getRouter()
 
-        await userEvent.type(canvas.getByRole('textbox', { name: /search keywords/i }), 'chicken')
+        await userEvent.type(canvas.getByRole('textbox', { name: /search keywords/i }), 'rumours')
         await userEvent.click(canvas.getByRole('button', { name: /^search$/i }))
 
         await waitFor(() => expect(router.push).toHaveBeenCalled())
@@ -196,7 +130,7 @@ export const SearchesUsingKeywords: Story = {
         const pushedUrl = (router.push as unknown as Mock).mock.calls.at(-1)?.[0] as string
         const resolvedUrl = new URL(pushedUrl, 'http://localhost')
 
-        expect(resolvedUrl.searchParams.get('keywords')).toBe('chicken')
+        expect(resolvedUrl.searchParams.get('keywords')).toBe('rumours')
     },
 }
 
@@ -233,9 +167,6 @@ export const CancellingFiltersOnSmallScreensReturnsToResultsTab: Story = {
     ...mobileViewport,
     play: async ({ canvas, canvasElement, userEvent }) => {
         await userEvent.click(canvas.getByRole('button', { name: /^filters$/i }))
-
-        expect(canvasElement.querySelector('[data-active-tab="Filters"]')).toBeInTheDocument()
-
         await userEvent.click(canvas.getByRole('button', { name: /^cancel$/i }))
 
         await waitFor(() => {

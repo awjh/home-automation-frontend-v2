@@ -20,7 +20,7 @@ function parseKeywordsFromSearchParams(searchParams: URLSearchParams): string {
     return keywordValues.join(' ')
 }
 
-export default function SearchRecipeKeywords() {
+export default function SearchKeywords() {
     const { keyColors } = useColorMode()
     const router = useRouter()
     const pathname = usePathname()

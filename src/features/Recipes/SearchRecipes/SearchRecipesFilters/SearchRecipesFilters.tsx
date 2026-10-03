@@ -12,6 +12,7 @@ import SlidingFilters from '../../../../components/molecules/SlidingFilters/Slid
 export interface SearchRecipesFiltersProps {
     tags: RecipeTags
     filters: SearchDefs.RecipeFilters
+    onApply: () => void
     onCancel: () => void
 }
 
@@ -30,6 +31,7 @@ function parseJsonParam<T>(value: string | null, fallback: T): T {
 export default function SearchRecipesFilters({
     tags,
     filters,
+    onApply,
     onCancel,
 }: SearchRecipesFiltersProps) {
     const { keyColors } = useColorMode()
@@ -71,16 +73,16 @@ export default function SearchRecipesFilters({
         event.preventDefault()
 
         const nextSearchParams = new URLSearchParams(searchParams.toString())
-        nextSearchParams.delete('tags')
-
-        nextSearchParams.append('tags', JSON.stringify(selectedTags))
-        nextSearchParams.append('filters', JSON.stringify(methods.getValues()))
+        // Replaces any earlier tags and filters, rather than adding a second copy of each
+        nextSearchParams.set('tags', JSON.stringify(selectedTags))
+        nextSearchParams.set('filters', JSON.stringify(methods.getValues()))
 
         const queryString = nextSearchParams.toString()
         const nextPath = queryString ? `${pathname}?${queryString}` : pathname
 
         router.push(nextPath)
         router.refresh()
+        onApply()
     }
 
     return (

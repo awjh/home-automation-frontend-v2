@@ -62,6 +62,7 @@ const meta: Meta<typeof SearchRecipesFilters> = {
     args: {
         tags: tags,
         filters,
+        onApply: fn(),
         onCancel: fn(),
     },
 }
@@ -279,6 +280,34 @@ export const SubmitTags: Story = {
             }),
         )
         expect(resolvedUrl.searchParams.get('filters')).toBe(JSON.stringify(filters))
+    },
+}
+
+export const ReplacesExistingTagsAndFilters: Story = {
+    parameters: {
+        nextjs: {
+            appDirectory: true,
+            navigation: {
+                query: [
+                    ['tags', JSON.stringify({ cuisine: [tags.cuisine[0]] })],
+                    ['filters', JSON.stringify(filters)],
+                ],
+            },
+        },
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        const router = getRouter()
+
+        await userEvent.click(canvas.getByRole('button', { name: /apply filters/i }))
+
+        await waitFor(() => expect(router.push).toHaveBeenCalled())
+        expect(args.onApply).toHaveBeenCalled()
+
+        const pushedUrl = (router.push as unknown as Mock).mock.calls.at(-1)?.[0] as string
+        const resolvedUrl = new URL(pushedUrl, 'http://localhost')
+
+        expect(resolvedUrl.searchParams.getAll('tags')).toHaveLength(1)
+        expect(resolvedUrl.searchParams.getAll('filters')).toHaveLength(1)
     },
 }
 

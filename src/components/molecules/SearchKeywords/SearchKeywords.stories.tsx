@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
 import { expect, type Mock, waitFor } from 'storybook/test'
-import SearchRecipeKeywords from './SearchRecipeKeywords'
+import SearchKeywords from './SearchKeywords'
 
-const meta: Meta<typeof SearchRecipeKeywords> = {
-    title: 'Features/Recipes/SearchRecipes/SearchRecipeKeywords',
-    component: SearchRecipeKeywords,
+const meta: Meta<typeof SearchKeywords> = {
+    title: 'Molecules/SearchKeywords',
+    component: SearchKeywords,
     parameters: {
         nextjs: {
             appDirectory: true,
@@ -14,7 +14,7 @@ const meta: Meta<typeof SearchRecipeKeywords> = {
 }
 
 export default meta
-type Story = StoryObj<typeof SearchRecipeKeywords>
+type Story = StoryObj<typeof SearchKeywords>
 
 export const Default: Story = {
     play: async ({ canvas }) => {

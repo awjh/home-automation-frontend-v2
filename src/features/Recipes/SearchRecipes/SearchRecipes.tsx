@@ -6,17 +6,10 @@ import {
     SearchDefs,
 } from '@awjh/home-automation-v2-api-models'
 import { RecipeTags } from '@awjh/home-automation-v2-api-models/recipes'
-import { Box, Heading, HStack, IconButton, VStack } from '@chakra-ui/react'
 import RECIPE_SEARCH_PAGE_SIZE from '@constants/RecipeSearchPageSize'
-import useColorMode from '@hooks/useColorMode'
-import useToaster from '@hooks/useToaster'
-import { MouseEvent, useLayoutEffect, useRef, useState } from 'react'
-import { LuArrowLeft, LuFilter } from 'react-icons/lu'
-import SearchRecipeKeywords from './SearchRecipeKeywords/SearchRecipeKeywords'
+import PagedSearch from '@organisms/PagedSearch/PagedSearch'
 import SearchRecipeResults from './SearchRecipeResults/SearchRecipeResults'
 import SearchRecipesFilters from './SearchRecipesFilters/SearchRecipesFilters'
-import TabbedContent from '@molecules/TabbedContent/TabbedContent'
-import { saveSearchResultsSnapshot, takeSearchResultsSnapshot } from './searchResultsSnapshot'
 
 export interface SearchRecipesFiltersProps {
     tags: RecipeTags
@@ -30,207 +23,31 @@ export interface SearchRecipesFiltersProps {
 export default function SearchRecipes({
     tags,
     filters,
-    recipes: firstPageRecipes,
+    recipes,
     loadNextRecipesPage,
 }: SearchRecipesFiltersProps) {
-    const { keyColors } = useColorMode()
-    const toaster = useToaster()
-    const [loadedPages, setLoadedPages] = useState({
-        firstPage: firstPageRecipes,
-        recipes: firstPageRecipes,
-        hasNextPage: firstPageRecipes.length === RECIPE_SEARCH_PAGE_SIZE,
-    })
-    const [isLoadingNextPage, setIsLoadingNextPage] = useState(false)
-
-    // A new keyword or filter search re-renders the page with a new first page, so start over from it
-    if (loadedPages.firstPage !== firstPageRecipes) {
-        setLoadedPages({
-            firstPage: firstPageRecipes,
-            recipes: firstPageRecipes,
-            hasNextPage: firstPageRecipes.length === RECIPE_SEARCH_PAGE_SIZE,
-        })
-    }
-
-    const restoredScrollY = useRef<number | undefined>(undefined)
-
-    // Coming back from a recipe remounts the page with only the first page, so restore what was loaded
-    useLayoutEffect(() => {
-        const snapshot = takeSearchResultsSnapshot(window.location.search, firstPageRecipes)
-
-        if (snapshot) {
-            restoredScrollY.current = snapshot.scrollY
-            setLoadedPages({
-                firstPage: firstPageRecipes,
-                recipes: snapshot.recipes,
-                hasNextPage: snapshot.hasNextPage,
-            })
-        }
-        // Only on mount, later first pages come from a new search
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    // The browser restores the scroll before the extra pages render, so scroll back once they have
-    useLayoutEffect(() => {
-        if (restoredScrollY.current !== undefined) {
-            window.scrollTo(0, restoredScrollY.current)
-            restoredScrollY.current = undefined
-        }
-    }, [loadedPages])
-
-    const { recipes } = loadedPages
-
-    const onClickRecipeLink = (event: MouseEvent) => {
-        const isRecipeLink = (event.target as Element).closest('a[href^="/recipes/"]')
-
-        if (isRecipeLink && recipes.length > loadedPages.firstPage.length) {
-            saveSearchResultsSnapshot({
-                search: window.location.search,
-                recipes,
-                hasNextPage: loadedPages.hasNextPage,
-                scrollY: window.scrollY,
-            })
-        }
-    }
-    // A full last page means there may be more to load, so the count is a lower bound
-    const resultCount = `${recipes.length}${loadedPages.hasNextPage ? '+' : ''}`
-
-    const onLoadNextPage = async () => {
-        const searchFirstPage = loadedPages.firstPage
-        setIsLoadingNextPage(true)
-
-        try {
-            const nextPage = await loadNextRecipesPage(recipes[recipes.length - 1].id)
-
-            // Drop the page if the search changed while it was loading
-            setLoadedPages((current) =>
-                current.firstPage === searchFirstPage
-                    ? {
-                          ...current,
-                          recipes: [...current.recipes, ...nextPage],
-                          hasNextPage: nextPage.length === RECIPE_SEARCH_PAGE_SIZE,
-                      }
-                    : current,
-            )
-        } catch {
-            toaster.create({
-                title: 'Failed to load more recipes',
-                type: 'error',
-            })
-        } finally {
-            setIsLoadingNextPage(false)
-        }
-    }
-    const [displayFilters, setDisplayFilters] = useState(false)
-    // Remounts the mobile TabbedContent so it resets back to its initial (Results) tab.
-    const [mobileTabsResetKey, setMobileTabsResetKey] = useState(0)
-    const resetMobileTabToResults = () => setMobileTabsResetKey((key) => key + 1)
-
-    const resultsContent = (
-        <SearchRecipeResults
-            recipes={recipes}
-            onLoadNextPage={loadedPages.hasNextPage ? onLoadNextPage : undefined}
-            isLoadingNextPage={isLoadingNextPage}
-        />
-    )
-
-    const filtersContent = (
-        <SearchRecipesFilters
-            tags={tags}
-            filters={filters}
-            onCancel={() => {
-                setDisplayFilters(false)
-                resetMobileTabToResults()
-            }}
-        />
-    )
-
     return (
-        <HStack
-            w={'full'}
-            alignItems={'flex-start'}
-            justifyContent={'flex-start'}
-            p={{ base: 0, md: 4 }}
-            gap={{ base: 6, md: 4 }}
-            onClickCapture={onClickRecipeLink}
-        >
-            {displayFilters && (
-                <Box
-                    maxW="400px"
-                    pr={4}
-                    borderRightWidth={2}
-                    borderRightColor={keyColors.primary}
-                    position="relative"
-                    display={{ base: 'none', md: 'flex' }}
-                >
-                    {filtersContent}
-                    <IconButton
-                        aria-label={'close-recipe-filters'}
-                        color={keyColors.primary}
-                        _hover={{
-                            bg: keyColors.buttonHoverBg,
-                            color: keyColors.secondary,
-                        }}
-                        background={keyColors.secondary}
-                        borderColor={keyColors.primary}
-                        onClick={() => setDisplayFilters(false)}
-                        border={0}
-                        borderRadius={0}
-                        position="absolute"
-                        top="0"
-                        right={4}
-                    >
-                        <LuArrowLeft />
-                    </IconButton>
-                </Box>
+        <PagedSearch
+            itemName={'recipe'}
+            resultHrefPrefix={'/recipes/'}
+            pageSize={RECIPE_SEARCH_PAGE_SIZE}
+            firstPage={recipes}
+            loadNextPage={loadNextRecipesPage}
+            renderResults={({ results, onLoadNextPage, isLoadingNextPage }) => (
+                <SearchRecipeResults
+                    recipes={results}
+                    onLoadNextPage={onLoadNextPage}
+                    isLoadingNextPage={isLoadingNextPage}
+                />
             )}
-            <VStack flex={1} alignItems="flex-start">
-                <HStack w={'full'}>
-                    <IconButton
-                        display={{ base: 'none', md: displayFilters ? 'none' : 'inline-flex' }}
-                        aria-label={'toggle-recipe-filters'}
-                        color={keyColors.primary}
-                        _hover={{
-                            bg: keyColors.buttonHoverBg,
-                            color: keyColors.secondary,
-                        }}
-                        background={keyColors.secondary}
-                        borderWidth={2}
-                        borderColor={keyColors.primary}
-                        borderRadius={0}
-                        onClick={() => setDisplayFilters(!displayFilters)}
-                    >
-                        <LuFilter />
-                    </IconButton>
-                    <Box flex={1}>
-                        <SearchRecipeKeywords />
-                    </Box>
-                </HStack>
-                <Box
-                    display={{ base: 'block', md: 'none' }}
-                    w={'full'}
-                    borderTopWidth={'2px'}
-                    borderColor={keyColors.primary}
-                >
-                    <TabbedContent
-                        key={mobileTabsResetKey}
-                        childrenByTab={{
-                            Filters: filtersContent,
-                            Results: { content: resultsContent, counter: resultCount },
-                        }}
-                        initialActiveTab={'Results'}
-                    />
-                </Box>
-                <VStack
-                    display={{ base: 'none', md: 'block' }}
-                    w={'full'}
-                    alignItems={'flex-start'}
-                >
-                    <Heading as="h2" size="xl" textAlign="left" mt={4} color={keyColors.primary}>
-                        Search Results ({resultCount})
-                    </Heading>
-                    {resultsContent}
-                </VStack>
-            </VStack>
-        </HStack>
+            renderFilters={({ onApply, onCancel }) => (
+                <SearchRecipesFilters
+                    tags={tags}
+                    filters={filters}
+                    onApply={onApply}
+                    onCancel={onCancel}
+                />
+            )}
+        />
     )
 }
