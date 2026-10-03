@@ -2,7 +2,7 @@ const BackendApi = {
     openapi: '3.0.1',
     info: {
         title: 'home-automation-api-v2-dev',
-        version: '2026-10-01T06:50:04Z',
+        version: '2026-10-03T14:13:22Z',
     },
     servers: [
         {
@@ -81,6 +81,7 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/get-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/GetItem',
                     httpMethod: 'POST',
@@ -111,7 +112,7 @@ const BackendApi = {
                             },
                             responseTemplates: {
                                 'application/json':
-                                    '\n        \n\n        \n            #set($dynamoResponse = $input.path(\'$.Item\'))\n    \n            #if($dynamoResponse.isEmpty())\n                #set($context.responseOverride.status = 404)\n                {"message":"Recipe not found for given id","reason":"not_found"}\n            #else\n                {\n        \n#set($dynamoResponse_has_image = $dynamoResponse.containsKey(\'image\'))\n\n        \n            "id": "$dynamoResponse.id.S"\n            ,\n        \n            "title": "$dynamoResponse.title.S"\n            ,\n        \n            "originalSource": \n                \n                \n                \n                \n                #set($dynamoResponse_originalSource_M_has_type = $dynamoResponse.originalSource.M.containsKey(\'type\'))\n                #if($dynamoResponse_originalSource_M_has_type && $dynamoResponse.originalSource.M.type.S == "book")\n                    {\n        \n#set($dynamoResponse.originalSource.M_has_series = $dynamoResponse.originalSource.M.containsKey(\'series\'))\n\n        \n            "type": "$dynamoResponse.originalSource.M.type.S"\n            ,\n        \n            "title": "$dynamoResponse.originalSource.M.title.S"\n            ,\n        \n            "page": $dynamoResponse.originalSource.M.page.N\n            #if($dynamoResponse.originalSource.M_has_series),#end\n        \n                #if($dynamoResponse.originalSource.M_has_series)\n                    "series": "$dynamoResponse.originalSource.M.series.S"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_originalSource_M_has_type = $dynamoResponse.originalSource.M.containsKey(\'type\'))\n                #if($dynamoResponse_originalSource_M_has_type && $dynamoResponse.originalSource.M.type.S == "online")\n                    {\n        \n\n        \n            "type": "$dynamoResponse.originalSource.M.type.S"\n            ,\n        \n            "url": "$dynamoResponse.originalSource.M.url.S"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_originalSource_M_has_type = $dynamoResponse.originalSource.M.containsKey(\'type\'))\n                #if($dynamoResponse_originalSource_M_has_type && $dynamoResponse.originalSource.M.type.S == "magazine")\n                    {\n        \n\n        \n            "type": "$dynamoResponse.originalSource.M.type.S"\n            ,\n        \n            "title": "$dynamoResponse.originalSource.M.title.S"\n            ,\n        \n            "issue": "$dynamoResponse.originalSource.M.issue.S"\n            ,\n        \n            "page": $dynamoResponse.originalSource.M.page.N\n            \n        \n    }\n                #end\n            \n            ,\n        \n                #if($dynamoResponse_has_image)\n                    "image": "$dynamoResponse.image.S"\n                    ,\n                #end\n            \n            "authors": [\n            #foreach($dynamoResponse_authors_item in $dynamoResponse.authors.L)\n                "$dynamoResponse_authors_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "calories": $dynamoResponse.calories.N\n            ,\n        \n            "duration": {\n        \n\n        \n            "prepDuration": $dynamoResponse.duration.M.prepDuration.N\n            ,\n        \n            "cookingDuration": $dynamoResponse.duration.M.cookingDuration.N\n            ,\n        \n            "standingTime": $dynamoResponse.duration.M.standingTime.N\n            \n        \n    }\n            ,\n        \n            "ingredients": [\n            #foreach($dynamoResponse_ingredients_item in $dynamoResponse.ingredients.L)\n                {\n        \n#set($dynamoResponse_ingredients_item.M_has_section = $dynamoResponse_ingredients_item.M.containsKey(\'section\'))\n\n        \n                #if($dynamoResponse_ingredients_item.M_has_section)\n                    "section": "$dynamoResponse_ingredients_item.M.section.S"\n                    ,\n                #end\n            \n            "ingredients": [\n            #foreach($dynamoResponse_ingredients_item_M_ingredients_item in $dynamoResponse_ingredients_item.M.ingredients.L)\n                {\n        \n#set($dynamoResponse_ingredients_item_M_ingredients_item.M_has_measure = $dynamoResponse_ingredients_item_M_ingredients_item.M.containsKey(\'measure\'))\n#set($dynamoResponse_ingredients_item_M_ingredients_item.M_has_preparation = $dynamoResponse_ingredients_item_M_ingredients_item.M.containsKey(\'preparation\'))\n#set($dynamoResponse_ingredients_item_M_ingredients_item.M_has_internalRecipe = $dynamoResponse_ingredients_item_M_ingredients_item.M.containsKey(\'internalRecipe\'))\n\n        \n            "quantity": $dynamoResponse_ingredients_item_M_ingredients_item.M.quantity.N\n            ,\n        \n                #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_measure)\n                    "measure": "$dynamoResponse_ingredients_item_M_ingredients_item.M.measure.S"\n                    ,\n                #end\n            \n            "item": "$dynamoResponse_ingredients_item_M_ingredients_item.M.item.S"\n            #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_preparation || $dynamoResponse_ingredients_item_M_ingredients_item.M_has_internalRecipe),#end\n        \n                #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_preparation)\n                    "preparation": "$dynamoResponse_ingredients_item_M_ingredients_item.M.preparation.S"\n                    #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_internalRecipe),#end\n                #end\n            \n                #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_internalRecipe)\n                    "internalRecipe": {\n        \n\n        \n            "recipeId": "$dynamoResponse_ingredients_item_M_ingredients_item.M.internalRecipe.M.recipeId.S"\n            \n        \n    }\n                    \n                #end\n            \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "method": [\n            #foreach($dynamoResponse_method_item in $dynamoResponse.method.L)\n                {\n        \n\n        \n            "text": "$dynamoResponse_method_item.M.text.S"\n            ,\n        \n            "ingredients": [\n            #foreach($dynamoResponse_method_item_M_ingredients_item in $dynamoResponse_method_item.M.ingredients.L)\n                {\n        \n#set($dynamoResponse_method_item_M_ingredients_item.M_has_measure = $dynamoResponse_method_item_M_ingredients_item.M.containsKey(\'measure\'))\n#set($dynamoResponse_method_item_M_ingredients_item.M_has_preparation = $dynamoResponse_method_item_M_ingredients_item.M.containsKey(\'preparation\'))\n#set($dynamoResponse_method_item_M_ingredients_item.M_has_internalRecipe = $dynamoResponse_method_item_M_ingredients_item.M.containsKey(\'internalRecipe\'))\n\n        \n            "quantity": $dynamoResponse_method_item_M_ingredients_item.M.quantity.N\n            ,\n        \n                #if($dynamoResponse_method_item_M_ingredients_item.M_has_measure)\n                    "measure": "$dynamoResponse_method_item_M_ingredients_item.M.measure.S"\n                    ,\n                #end\n            \n            "item": "$dynamoResponse_method_item_M_ingredients_item.M.item.S"\n            #if($dynamoResponse_method_item_M_ingredients_item.M_has_preparation || $dynamoResponse_method_item_M_ingredients_item.M_has_internalRecipe),#end\n        \n                #if($dynamoResponse_method_item_M_ingredients_item.M_has_preparation)\n                    "preparation": "$dynamoResponse_method_item_M_ingredients_item.M.preparation.S"\n                    #if($dynamoResponse_method_item_M_ingredients_item.M_has_internalRecipe),#end\n                #end\n            \n                #if($dynamoResponse_method_item_M_ingredients_item.M_has_internalRecipe)\n                    "internalRecipe": {\n        \n\n        \n            "recipeId": "$dynamoResponse_method_item_M_ingredients_item.M.internalRecipe.M.recipeId.S"\n            \n        \n    }\n                    \n                #end\n            \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "produces": \n                \n                \n                \n                #set($dynamoResponse_produces_M_has_quantity = $dynamoResponse.produces.M.containsKey(\'quantity\'))\n                #if($dynamoResponse_produces_M_has_quantity)\n                    {\n        \n#set($dynamoResponse.produces.M_has_measure = $dynamoResponse.produces.M.containsKey(\'measure\'))\n\n        \n            "quantity": $dynamoResponse.produces.M.quantity.N\n            #if($dynamoResponse.produces.M_has_measure),#end\n        \n                #if($dynamoResponse.produces.M_has_measure)\n                    "measure": "$dynamoResponse.produces.M.measure.S"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_produces_M_has_serves = $dynamoResponse.produces.M.containsKey(\'serves\'))\n                #if($dynamoResponse_produces_M_has_serves)\n                    {\n        \n\n        \n            "serves": $dynamoResponse.produces.M.serves.N\n            \n        \n    }\n                #end\n            \n            ,\n        \n            "tags": {\n        \n\n        \n            "cuisine": [\n            #foreach($dynamoResponse_tags_M_cuisine_item in $dynamoResponse.tags.M.cuisine.L)\n                "$dynamoResponse_tags_M_cuisine_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "mealType": [\n            #foreach($dynamoResponse_tags_M_mealType_item in $dynamoResponse.tags.M.mealType.L)\n                "$dynamoResponse_tags_M_mealType_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "meat": [\n            #foreach($dynamoResponse_tags_M_meat_item in $dynamoResponse.tags.M.meat.L)\n                "$dynamoResponse_tags_M_meat_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "dietary": [\n            #foreach($dynamoResponse_tags_M_dietary_item in $dynamoResponse.tags.M.dietary.L)\n                "$dynamoResponse_tags_M_dietary_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "occasion": [\n            #foreach($dynamoResponse_tags_M_occasion_item in $dynamoResponse.tags.M.occasion.L)\n                "$dynamoResponse_tags_M_occasion_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "equipment": [\n            #foreach($dynamoResponse_tags_M_equipment_item in $dynamoResponse.tags.M.equipment.L)\n                "$dynamoResponse_tags_M_equipment_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n            \n        \n    }\n            #end\n        \n    ',
+                                    '\n        \n\n        \n            #set($dynamoResponse = $input.path(\'$.Item\'))\n    \n            #if($dynamoResponse.isEmpty())\n                #set($context.responseOverride.status = 404)\n                {"message":"Recipe not found for given id","reason":"not_found"}\n            #else\n                {\n        \n#set($dynamoResponse_has_image = $dynamoResponse.containsKey(\'image\'))\n\n        \n            "id": "$util.escapeJavaScript($dynamoResponse.id.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "originalSource": \n                \n                \n                \n                \n                #set($dynamoResponse_originalSource_M_has_type = $dynamoResponse.originalSource.M.containsKey(\'type\'))\n                #if($dynamoResponse_originalSource_M_has_type && $dynamoResponse.originalSource.M.type.S == "book")\n                    {\n        \n#set($dynamoResponse.originalSource.M_has_series = $dynamoResponse.originalSource.M.containsKey(\'series\'))\n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.originalSource.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.originalSource.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "page": $dynamoResponse.originalSource.M.page.N\n            #if($dynamoResponse.originalSource.M_has_series),#end\n        \n                #if($dynamoResponse.originalSource.M_has_series)\n                    "series": "$util.escapeJavaScript($dynamoResponse.originalSource.M.series.S).replace("\\\'", "\'")"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_originalSource_M_has_type = $dynamoResponse.originalSource.M.containsKey(\'type\'))\n                #if($dynamoResponse_originalSource_M_has_type && $dynamoResponse.originalSource.M.type.S == "online")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.originalSource.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "url": "$util.escapeJavaScript($dynamoResponse.originalSource.M.url.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_originalSource_M_has_type = $dynamoResponse.originalSource.M.containsKey(\'type\'))\n                #if($dynamoResponse_originalSource_M_has_type && $dynamoResponse.originalSource.M.type.S == "magazine")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.originalSource.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.originalSource.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "issue": "$util.escapeJavaScript($dynamoResponse.originalSource.M.issue.S).replace("\\\'", "\'")"\n            ,\n        \n            "page": $dynamoResponse.originalSource.M.page.N\n            \n        \n    }\n                #end\n            \n            ,\n        \n                #if($dynamoResponse_has_image)\n                    "image": "$util.escapeJavaScript($dynamoResponse.image.S).replace("\\\'", "\'")"\n                    ,\n                #end\n            \n            "authors": [\n            #foreach($dynamoResponse_authors_item in $dynamoResponse.authors.L)\n                "$util.escapeJavaScript($dynamoResponse_authors_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "calories": $dynamoResponse.calories.N\n            ,\n        \n            "duration": {\n        \n\n        \n            "prepDuration": $dynamoResponse.duration.M.prepDuration.N\n            ,\n        \n            "cookingDuration": $dynamoResponse.duration.M.cookingDuration.N\n            ,\n        \n            "standingTime": $dynamoResponse.duration.M.standingTime.N\n            \n        \n    }\n            ,\n        \n            "ingredients": [\n            #foreach($dynamoResponse_ingredients_item in $dynamoResponse.ingredients.L)\n                {\n        \n#set($dynamoResponse_ingredients_item.M_has_section = $dynamoResponse_ingredients_item.M.containsKey(\'section\'))\n\n        \n                #if($dynamoResponse_ingredients_item.M_has_section)\n                    "section": "$util.escapeJavaScript($dynamoResponse_ingredients_item.M.section.S).replace("\\\'", "\'")"\n                    ,\n                #end\n            \n            "ingredients": [\n            #foreach($dynamoResponse_ingredients_item_M_ingredients_item in $dynamoResponse_ingredients_item.M.ingredients.L)\n                {\n        \n#set($dynamoResponse_ingredients_item_M_ingredients_item.M_has_measure = $dynamoResponse_ingredients_item_M_ingredients_item.M.containsKey(\'measure\'))\n#set($dynamoResponse_ingredients_item_M_ingredients_item.M_has_preparation = $dynamoResponse_ingredients_item_M_ingredients_item.M.containsKey(\'preparation\'))\n#set($dynamoResponse_ingredients_item_M_ingredients_item.M_has_internalRecipe = $dynamoResponse_ingredients_item_M_ingredients_item.M.containsKey(\'internalRecipe\'))\n\n        \n            "quantity": $dynamoResponse_ingredients_item_M_ingredients_item.M.quantity.N\n            ,\n        \n                #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_measure)\n                    "measure": "$util.escapeJavaScript($dynamoResponse_ingredients_item_M_ingredients_item.M.measure.S).replace("\\\'", "\'")"\n                    ,\n                #end\n            \n            "item": "$util.escapeJavaScript($dynamoResponse_ingredients_item_M_ingredients_item.M.item.S).replace("\\\'", "\'")"\n            #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_preparation || $dynamoResponse_ingredients_item_M_ingredients_item.M_has_internalRecipe),#end\n        \n                #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_preparation)\n                    "preparation": "$util.escapeJavaScript($dynamoResponse_ingredients_item_M_ingredients_item.M.preparation.S).replace("\\\'", "\'")"\n                    #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_internalRecipe),#end\n                #end\n            \n                #if($dynamoResponse_ingredients_item_M_ingredients_item.M_has_internalRecipe)\n                    "internalRecipe": {\n        \n\n        \n            "recipeId": "$util.escapeJavaScript($dynamoResponse_ingredients_item_M_ingredients_item.M.internalRecipe.M.recipeId.S).replace("\\\'", "\'")"\n            \n        \n    }\n                    \n                #end\n            \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "method": [\n            #foreach($dynamoResponse_method_item in $dynamoResponse.method.L)\n                {\n        \n\n        \n            "text": "$util.escapeJavaScript($dynamoResponse_method_item.M.text.S).replace("\\\'", "\'")"\n            ,\n        \n            "ingredients": [\n            #foreach($dynamoResponse_method_item_M_ingredients_item in $dynamoResponse_method_item.M.ingredients.L)\n                {\n        \n#set($dynamoResponse_method_item_M_ingredients_item.M_has_measure = $dynamoResponse_method_item_M_ingredients_item.M.containsKey(\'measure\'))\n#set($dynamoResponse_method_item_M_ingredients_item.M_has_preparation = $dynamoResponse_method_item_M_ingredients_item.M.containsKey(\'preparation\'))\n#set($dynamoResponse_method_item_M_ingredients_item.M_has_internalRecipe = $dynamoResponse_method_item_M_ingredients_item.M.containsKey(\'internalRecipe\'))\n\n        \n            "quantity": $dynamoResponse_method_item_M_ingredients_item.M.quantity.N\n            ,\n        \n                #if($dynamoResponse_method_item_M_ingredients_item.M_has_measure)\n                    "measure": "$util.escapeJavaScript($dynamoResponse_method_item_M_ingredients_item.M.measure.S).replace("\\\'", "\'")"\n                    ,\n                #end\n            \n            "item": "$util.escapeJavaScript($dynamoResponse_method_item_M_ingredients_item.M.item.S).replace("\\\'", "\'")"\n            #if($dynamoResponse_method_item_M_ingredients_item.M_has_preparation || $dynamoResponse_method_item_M_ingredients_item.M_has_internalRecipe),#end\n        \n                #if($dynamoResponse_method_item_M_ingredients_item.M_has_preparation)\n                    "preparation": "$util.escapeJavaScript($dynamoResponse_method_item_M_ingredients_item.M.preparation.S).replace("\\\'", "\'")"\n                    #if($dynamoResponse_method_item_M_ingredients_item.M_has_internalRecipe),#end\n                #end\n            \n                #if($dynamoResponse_method_item_M_ingredients_item.M_has_internalRecipe)\n                    "internalRecipe": {\n        \n\n        \n            "recipeId": "$util.escapeJavaScript($dynamoResponse_method_item_M_ingredients_item.M.internalRecipe.M.recipeId.S).replace("\\\'", "\'")"\n            \n        \n    }\n                    \n                #end\n            \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "produces": \n                \n                \n                \n                #set($dynamoResponse_produces_M_has_quantity = $dynamoResponse.produces.M.containsKey(\'quantity\'))\n                #if($dynamoResponse_produces_M_has_quantity)\n                    {\n        \n#set($dynamoResponse.produces.M_has_measure = $dynamoResponse.produces.M.containsKey(\'measure\'))\n\n        \n            "quantity": $dynamoResponse.produces.M.quantity.N\n            #if($dynamoResponse.produces.M_has_measure),#end\n        \n                #if($dynamoResponse.produces.M_has_measure)\n                    "measure": "$util.escapeJavaScript($dynamoResponse.produces.M.measure.S).replace("\\\'", "\'")"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_produces_M_has_serves = $dynamoResponse.produces.M.containsKey(\'serves\'))\n                #if($dynamoResponse_produces_M_has_serves)\n                    {\n        \n\n        \n            "serves": $dynamoResponse.produces.M.serves.N\n            \n        \n    }\n                #end\n            \n            ,\n        \n            "tags": {\n        \n\n        \n            "cuisine": [\n            #foreach($dynamoResponse_tags_M_cuisine_item in $dynamoResponse.tags.M.cuisine.L)\n                "$util.escapeJavaScript($dynamoResponse_tags_M_cuisine_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "mealType": [\n            #foreach($dynamoResponse_tags_M_mealType_item in $dynamoResponse.tags.M.mealType.L)\n                "$util.escapeJavaScript($dynamoResponse_tags_M_mealType_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "meat": [\n            #foreach($dynamoResponse_tags_M_meat_item in $dynamoResponse.tags.M.meat.L)\n                "$util.escapeJavaScript($dynamoResponse_tags_M_meat_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "dietary": [\n            #foreach($dynamoResponse_tags_M_dietary_item in $dynamoResponse.tags.M.dietary.L)\n                "$util.escapeJavaScript($dynamoResponse_tags_M_dietary_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "occasion": [\n            #foreach($dynamoResponse_tags_M_occasion_item in $dynamoResponse.tags.M.occasion.L)\n                "$util.escapeJavaScript($dynamoResponse_tags_M_occasion_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "equipment": [\n            #foreach($dynamoResponse_tags_M_equipment_item in $dynamoResponse.tags.M.equipment.L)\n                "$util.escapeJavaScript($dynamoResponse_tags_M_equipment_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n            \n        \n    }\n            #end\n        \n    ',
                             },
                         },
                     },
@@ -120,7 +121,6 @@ const BackendApi = {
                             '{"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECIPE~$context.authorizer.userId"},"sk":{"S":"$input.params(\'id\')"}}}',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             put: {
@@ -204,6 +204,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-recipe-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/put-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -240,10 +241,9 @@ const BackendApi = {
                     },
                     requestTemplates: {
                         'application/json':
-                            '\n    \n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $input.params(\'id\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECIPE~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$data.id" }\n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            \n                \n                \n                \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "book")\n                    "originalSource": { "M": {\n        \n#set($data_originalSource_has_series = $data.originalSource.containsKey(\'series\'))\n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "title": { "S": "$data.originalSource.title" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            #if($data_originalSource_has_series),#end\n        \n                #if($data_originalSource_has_series)\n                    "series": { "S": "$data.originalSource.series" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "online")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "url": { "S": "$data.originalSource.url" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "magazine")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "title": { "S": "$data.originalSource.title" }\n            ,\n        \n            "issue": { "S": "$data.originalSource.issue" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$data.image" }\n                    ,\n                #end\n            \n            "authors": { "L": [\n        #foreach($data_authors_item in $data.authors)\n            {"S": "$data_authors_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "calories": { "N": "$data.calories" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item in $data.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_has_section = $data_ingredients_item.containsKey(\'section\'))\n        \n                #if($data_ingredients_item_has_section)\n                    "section": { "S": "$data_ingredients_item.section" }\n                    ,\n                #end\n            \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item_ingredients_item in $data_ingredients_item.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_ingredients_item_has_measure = $data_ingredients_item_ingredients_item.containsKey(\'measure\'))\n#set($data_ingredients_item_ingredients_item_has_preparation = $data_ingredients_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_ingredients_item_ingredients_item_has_internalRecipe = $data_ingredients_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_ingredients_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_ingredients_item_ingredients_item_has_measure)\n                    "measure": { "S": "$data_ingredients_item_ingredients_item.measure" }\n                    ,\n                #end\n            \n            "item": { "S": "$data_ingredients_item_ingredients_item.item" }\n            #if($data_ingredients_item_ingredients_item_has_preparation || $data_ingredients_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_ingredients_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$data_ingredients_item_ingredients_item.preparation" }\n                    #if($data_ingredients_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_ingredients_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$data_ingredients_item_ingredients_item.internalRecipe.recipeId" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "method": { "L": [\n        #foreach($data_method_item in $data.method)\n            {"M": {\n        \n        \n            "text": { "S": "$data_method_item.text" }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_method_item_ingredients_item in $data_method_item.ingredients)\n            {"M": {\n        \n#set($data_method_item_ingredients_item_has_measure = $data_method_item_ingredients_item.containsKey(\'measure\'))\n#set($data_method_item_ingredients_item_has_preparation = $data_method_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_method_item_ingredients_item_has_internalRecipe = $data_method_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_method_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_method_item_ingredients_item_has_measure)\n                    "measure": { "S": "$data_method_item_ingredients_item.measure" }\n                    ,\n                #end\n            \n            "item": { "S": "$data_method_item_ingredients_item.item" }\n            #if($data_method_item_ingredients_item_has_preparation || $data_method_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_method_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$data_method_item_ingredients_item.preparation" }\n                    #if($data_method_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_method_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$data_method_item_ingredients_item.internalRecipe.recipeId" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            \n                \n                \n                \n                #set($data_produces_M_has_quantity = $data.produces.containsKey(\'quantity\'))\n                #if($data_produces_M_has_quantity)\n                    "produces": { "M": {\n        \n#set($data_produces_has_measure = $data.produces.containsKey(\'measure\'))\n        \n            "quantity": { "N": "$data.produces.quantity" }\n            #if($data_produces_has_measure),#end\n        \n                #if($data_produces_has_measure)\n                    "measure": { "S": "$data.produces.measure" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_produces_M_has_serves = $data.produces.containsKey(\'serves\'))\n                #if($data_produces_M_has_serves)\n                    "produces": { "M": {\n        \n        \n            "serves": { "N": "$data.produces.serves" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "tags": { "M": {\n        \n        \n            "cuisine": { "L": [\n        #foreach($data_tags_cuisine_item in $data.tags.cuisine)\n            {"S": "$data_tags_cuisine_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "mealType": { "L": [\n        #foreach($data_tags_mealType_item in $data.tags.mealType)\n            {"S": "$data_tags_mealType_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "meat": { "L": [\n        #foreach($data_tags_meat_item in $data.tags.meat)\n            {"S": "$data_tags_meat_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "dietary": { "L": [\n        #foreach($data_tags_dietary_item in $data.tags.dietary)\n            {"S": "$data_tags_dietary_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "occasion": { "L": [\n        #foreach($data_tags_occasion_item in $data.tags.occasion)\n            {"S": "$data_tags_occasion_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "equipment": { "L": [\n        #foreach($data_tags_equipment_item in $data.tags.equipment)\n            {"S": "$data_tags_equipment_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
+                            '\n    \n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $input.params(\'id\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECIPE~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$util.escapeJavaScript($data.id).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "book")\n                    "originalSource": { "M": {\n        \n#set($data_originalSource_has_series = $data.originalSource.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.originalSource.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            #if($data_originalSource_has_series),#end\n        \n                #if($data_originalSource_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.originalSource.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "online")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.originalSource.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "magazine")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.originalSource.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.originalSource.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$util.escapeJavaScript($data.image).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "authors": { "L": [\n        #foreach($data_authors_item in $data.authors)\n            {"S": "$util.escapeJavaScript($data_authors_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "calories": { "N": "$data.calories" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item in $data.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_has_section = $data_ingredients_item.containsKey(\'section\'))\n        \n                #if($data_ingredients_item_has_section)\n                    "section": { "S": "$util.escapeJavaScript($data_ingredients_item.section).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item_ingredients_item in $data_ingredients_item.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_ingredients_item_has_measure = $data_ingredients_item_ingredients_item.containsKey(\'measure\'))\n#set($data_ingredients_item_ingredients_item_has_preparation = $data_ingredients_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_ingredients_item_ingredients_item_has_internalRecipe = $data_ingredients_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_ingredients_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_ingredients_item_ingredients_item_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.measure).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "item": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.item).replace("\\\'", "\'")" }\n            #if($data_ingredients_item_ingredients_item_has_preparation || $data_ingredients_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_ingredients_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.preparation).replace("\\\'", "\'")" }\n                    #if($data_ingredients_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_ingredients_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.internalRecipe.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "method": { "L": [\n        #foreach($data_method_item in $data.method)\n            {"M": {\n        \n        \n            "text": { "S": "$util.escapeJavaScript($data_method_item.text).replace("\\\'", "\'")" }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_method_item_ingredients_item in $data_method_item.ingredients)\n            {"M": {\n        \n#set($data_method_item_ingredients_item_has_measure = $data_method_item_ingredients_item.containsKey(\'measure\'))\n#set($data_method_item_ingredients_item_has_preparation = $data_method_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_method_item_ingredients_item_has_internalRecipe = $data_method_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_method_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_method_item_ingredients_item_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.measure).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "item": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.item).replace("\\\'", "\'")" }\n            #if($data_method_item_ingredients_item_has_preparation || $data_method_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_method_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.preparation).replace("\\\'", "\'")" }\n                    #if($data_method_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_method_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.internalRecipe.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            \n                \n                \n                \n                #set($data_produces_M_has_quantity = $data.produces.containsKey(\'quantity\'))\n                #if($data_produces_M_has_quantity)\n                    "produces": { "M": {\n        \n#set($data_produces_has_measure = $data.produces.containsKey(\'measure\'))\n        \n            "quantity": { "N": "$data.produces.quantity" }\n            #if($data_produces_has_measure),#end\n        \n                #if($data_produces_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data.produces.measure).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_produces_M_has_serves = $data.produces.containsKey(\'serves\'))\n                #if($data_produces_M_has_serves)\n                    "produces": { "M": {\n        \n        \n            "serves": { "N": "$data.produces.serves" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "tags": { "M": {\n        \n        \n            "cuisine": { "L": [\n        #foreach($data_tags_cuisine_item in $data.tags.cuisine)\n            {"S": "$util.escapeJavaScript($data_tags_cuisine_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "mealType": { "L": [\n        #foreach($data_tags_mealType_item in $data.tags.mealType)\n            {"S": "$util.escapeJavaScript($data_tags_mealType_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "meat": { "L": [\n        #foreach($data_tags_meat_item in $data.tags.meat)\n            {"S": "$util.escapeJavaScript($data_tags_meat_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "dietary": { "L": [\n        #foreach($data_tags_dietary_item in $data.tags.dietary)\n            {"S": "$util.escapeJavaScript($data_tags_dietary_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "occasion": { "L": [\n        #foreach($data_tags_occasion_item in $data.tags.occasion)\n            {"S": "$util.escapeJavaScript($data_tags_occasion_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "equipment": { "L": [\n        #foreach($data_tags_equipment_item in $data.tags.equipment)\n            {"S": "$util.escapeJavaScript($data_tags_equipment_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             delete: {
@@ -316,6 +316,7 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/delete-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/DeleteItem',
@@ -356,7 +357,6 @@ const BackendApi = {
                             '\n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n\n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            {"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECIPE~$context.authorizer.userId"},"sk":{"S":"$id"}},"ConditionExpression":"attribute_exists(pk) AND attribute_exists(sk)"}\n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -399,6 +399,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -417,7 +418,59 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                },
+            },
+        },
+        '/records/external': {
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
                     type: 'mock',
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -519,6 +572,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-meal-plan-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/put-meal-plan-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
@@ -556,10 +610,9 @@ const BackendApi = {
                     },
                     requestTemplates: {
                         'application/json':
-                            '\n    \n    #set($date = $input.params(\'date\'))\n    #set($mealTime = $input.params(\'mealTime\'))\n    #set($course = $input.params(\'course\'))\n\n    #set($context.requestOverride.path.date = $date)\n    #set($context.requestOverride.path.mealTime = $mealTime)\n    #set($context.requestOverride.path.course = $course)\n\n        #if(!$date.matches(\'^\\d{4}-\\d{2}-\\d{2}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid date format. Expected \'YYYY-MM-DD\'. Got \'$date\'.","reason":"bad_request"}\n        #elseif($mealTime != \'breakfast\' && $mealTime != \'lunch\' && $mealTime != \'dinner\')\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid meal time.","reason":"bad_request"}\n        #elseif($course != \'starter\' && $course != \'main\' && $course != \'dessert\' && $course != \'side\')\n            #set($context.responseOverride.status = 400)\n\n            {"message":"Invalid course.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.date = $input.params(\'date\'))\n#set($data.mealTime = $input.params(\'mealTime\'))\n#set($data.course = $input.params(\'course\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$data.author" }\n            ,\n        \n            "course": { "S": "$data.course" }\n            ,\n        \n            "date": { "S": "$data.date" }\n            ,\n        \n            "mealTime": { "S": "$data.mealTime" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "title": { "S": "$data.source.title" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$data.source.series" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "url": { "S": "$data.source.url" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "title": { "S": "$data.source.title" }\n            ,\n        \n            "issue": { "S": "$data.source.issue" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "recipeId": { "S": "$data.source.recipeId" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "fromDate": { "S": "$data.source.fromDate" }\n            ,\n        \n            "fromMealTime": { "S": "$data.source.fromMealTime" }\n            ,\n        \n            "fromCourse": { "S": "$data.source.fromCourse" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
+                            '\n    \n    #set($date = $input.params(\'date\'))\n    #set($mealTime = $input.params(\'mealTime\'))\n    #set($course = $input.params(\'course\'))\n\n    #set($context.requestOverride.path.date = $date)\n    #set($context.requestOverride.path.mealTime = $mealTime)\n    #set($context.requestOverride.path.course = $course)\n\n        #if(!$date.matches(\'^\\d{4}-\\d{2}-\\d{2}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid date format. Expected \'YYYY-MM-DD\'. Got \'$date\'.","reason":"bad_request"}\n        #elseif($mealTime != \'breakfast\' && $mealTime != \'lunch\' && $mealTime != \'dinner\')\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid meal time.","reason":"bad_request"}\n        #elseif($course != \'starter\' && $course != \'main\' && $course != \'dessert\' && $course != \'side\')\n            #set($context.responseOverride.status = 400)\n\n            {"message":"Invalid course.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.date = $input.params(\'date\'))\n#set($data.mealTime = $input.params(\'mealTime\'))\n#set($data.course = $input.params(\'course\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$util.escapeJavaScript($data.author).replace("\\\'", "\'")" }\n            ,\n        \n            "course": { "S": "$util.escapeJavaScript($data.course).replace("\\\'", "\'")" }\n            ,\n        \n            "date": { "S": "$util.escapeJavaScript($data.date).replace("\\\'", "\'")" }\n            ,\n        \n            "mealTime": { "S": "$util.escapeJavaScript($data.mealTime).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.source.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.source.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.source.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "recipeId": { "S": "$util.escapeJavaScript($data.source.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "fromDate": { "S": "$util.escapeJavaScript($data.source.fromDate).replace("\\\'", "\'")" }\n            ,\n        \n            "fromMealTime": { "S": "$util.escapeJavaScript($data.source.fromMealTime).replace("\\\'", "\'")" }\n            ,\n        \n            "fromCourse": { "S": "$util.escapeJavaScript($data.source.fromCourse).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             delete: {
@@ -658,11 +711,11 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:delete-meal-plan-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -721,6 +774,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -739,7 +793,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -842,11 +895,11 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-image-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -897,6 +950,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -915,7 +969,160 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                },
+            },
+        },
+        '/records/external/search': {
+            get: {
+                operationId: 'GetExternalRecords',
+                parameters: [
+                    {
+                        name: 'catNo',
+                        in: 'query',
+                        description:
+                            'The catalogue number printed on the record, e.g. K 56344. Spacing does not need to match.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "string",\n  "minLength": 1,\n  "description": "The catalogue number printed on the record, e.g. K 56344. Spacing does not need to match."\n}',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '503': {
+                        description: '503 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetExternalRecordsSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        description: '401 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator':
+                    'get-external-records-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-external-records-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
                     type: 'mock',
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -960,6 +1167,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -978,7 +1186,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1092,11 +1299,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-recipes-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-recipes-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             post: {
@@ -1170,6 +1377,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-recipe-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/post-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -1206,10 +1414,9 @@ const BackendApi = {
                     },
                     requestTemplates: {
                         'application/json':
-                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n        #set($context.requestOverride.path.id = $id)\n\n        \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $id)\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECIPE~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$data.id" }\n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            \n                \n                \n                \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "book")\n                    "originalSource": { "M": {\n        \n#set($data_originalSource_has_series = $data.originalSource.containsKey(\'series\'))\n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "title": { "S": "$data.originalSource.title" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            #if($data_originalSource_has_series),#end\n        \n                #if($data_originalSource_has_series)\n                    "series": { "S": "$data.originalSource.series" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "online")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "url": { "S": "$data.originalSource.url" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "magazine")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$data.originalSource.type" }\n            ,\n        \n            "title": { "S": "$data.originalSource.title" }\n            ,\n        \n            "issue": { "S": "$data.originalSource.issue" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$data.image" }\n                    ,\n                #end\n            \n            "authors": { "L": [\n        #foreach($data_authors_item in $data.authors)\n            {"S": "$data_authors_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "calories": { "N": "$data.calories" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item in $data.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_has_section = $data_ingredients_item.containsKey(\'section\'))\n        \n                #if($data_ingredients_item_has_section)\n                    "section": { "S": "$data_ingredients_item.section" }\n                    ,\n                #end\n            \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item_ingredients_item in $data_ingredients_item.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_ingredients_item_has_measure = $data_ingredients_item_ingredients_item.containsKey(\'measure\'))\n#set($data_ingredients_item_ingredients_item_has_preparation = $data_ingredients_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_ingredients_item_ingredients_item_has_internalRecipe = $data_ingredients_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_ingredients_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_ingredients_item_ingredients_item_has_measure)\n                    "measure": { "S": "$data_ingredients_item_ingredients_item.measure" }\n                    ,\n                #end\n            \n            "item": { "S": "$data_ingredients_item_ingredients_item.item" }\n            #if($data_ingredients_item_ingredients_item_has_preparation || $data_ingredients_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_ingredients_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$data_ingredients_item_ingredients_item.preparation" }\n                    #if($data_ingredients_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_ingredients_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$data_ingredients_item_ingredients_item.internalRecipe.recipeId" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "method": { "L": [\n        #foreach($data_method_item in $data.method)\n            {"M": {\n        \n        \n            "text": { "S": "$data_method_item.text" }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_method_item_ingredients_item in $data_method_item.ingredients)\n            {"M": {\n        \n#set($data_method_item_ingredients_item_has_measure = $data_method_item_ingredients_item.containsKey(\'measure\'))\n#set($data_method_item_ingredients_item_has_preparation = $data_method_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_method_item_ingredients_item_has_internalRecipe = $data_method_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_method_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_method_item_ingredients_item_has_measure)\n                    "measure": { "S": "$data_method_item_ingredients_item.measure" }\n                    ,\n                #end\n            \n            "item": { "S": "$data_method_item_ingredients_item.item" }\n            #if($data_method_item_ingredients_item_has_preparation || $data_method_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_method_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$data_method_item_ingredients_item.preparation" }\n                    #if($data_method_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_method_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$data_method_item_ingredients_item.internalRecipe.recipeId" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            \n                \n                \n                \n                #set($data_produces_M_has_quantity = $data.produces.containsKey(\'quantity\'))\n                #if($data_produces_M_has_quantity)\n                    "produces": { "M": {\n        \n#set($data_produces_has_measure = $data.produces.containsKey(\'measure\'))\n        \n            "quantity": { "N": "$data.produces.quantity" }\n            #if($data_produces_has_measure),#end\n        \n                #if($data_produces_has_measure)\n                    "measure": { "S": "$data.produces.measure" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_produces_M_has_serves = $data.produces.containsKey(\'serves\'))\n                #if($data_produces_M_has_serves)\n                    "produces": { "M": {\n        \n        \n            "serves": { "N": "$data.produces.serves" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "tags": { "M": {\n        \n        \n            "cuisine": { "L": [\n        #foreach($data_tags_cuisine_item in $data.tags.cuisine)\n            {"S": "$data_tags_cuisine_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "mealType": { "L": [\n        #foreach($data_tags_mealType_item in $data.tags.mealType)\n            {"S": "$data_tags_mealType_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "meat": { "L": [\n        #foreach($data_tags_meat_item in $data.tags.meat)\n            {"S": "$data_tags_meat_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "dietary": { "L": [\n        #foreach($data_tags_dietary_item in $data.tags.dietary)\n            {"S": "$data_tags_dietary_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "occasion": { "L": [\n        #foreach($data_tags_occasion_item in $data.tags.occasion)\n            {"S": "$data_tags_occasion_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "equipment": { "L": [\n        #foreach($data_tags_equipment_item in $data.tags.equipment)\n            {"S": "$data_tags_equipment_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n        #set($context.requestOverride.path.id = $id)\n\n        \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $id)\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECIPE~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$util.escapeJavaScript($data.id).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "book")\n                    "originalSource": { "M": {\n        \n#set($data_originalSource_has_series = $data.originalSource.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.originalSource.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            #if($data_originalSource_has_series),#end\n        \n                #if($data_originalSource_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.originalSource.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "online")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.originalSource.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "magazine")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.originalSource.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.originalSource.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$util.escapeJavaScript($data.image).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "authors": { "L": [\n        #foreach($data_authors_item in $data.authors)\n            {"S": "$util.escapeJavaScript($data_authors_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "calories": { "N": "$data.calories" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item in $data.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_has_section = $data_ingredients_item.containsKey(\'section\'))\n        \n                #if($data_ingredients_item_has_section)\n                    "section": { "S": "$util.escapeJavaScript($data_ingredients_item.section).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item_ingredients_item in $data_ingredients_item.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_ingredients_item_has_measure = $data_ingredients_item_ingredients_item.containsKey(\'measure\'))\n#set($data_ingredients_item_ingredients_item_has_preparation = $data_ingredients_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_ingredients_item_ingredients_item_has_internalRecipe = $data_ingredients_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_ingredients_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_ingredients_item_ingredients_item_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.measure).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "item": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.item).replace("\\\'", "\'")" }\n            #if($data_ingredients_item_ingredients_item_has_preparation || $data_ingredients_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_ingredients_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.preparation).replace("\\\'", "\'")" }\n                    #if($data_ingredients_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_ingredients_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.internalRecipe.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "method": { "L": [\n        #foreach($data_method_item in $data.method)\n            {"M": {\n        \n        \n            "text": { "S": "$util.escapeJavaScript($data_method_item.text).replace("\\\'", "\'")" }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_method_item_ingredients_item in $data_method_item.ingredients)\n            {"M": {\n        \n#set($data_method_item_ingredients_item_has_measure = $data_method_item_ingredients_item.containsKey(\'measure\'))\n#set($data_method_item_ingredients_item_has_preparation = $data_method_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_method_item_ingredients_item_has_internalRecipe = $data_method_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_method_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_method_item_ingredients_item_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.measure).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "item": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.item).replace("\\\'", "\'")" }\n            #if($data_method_item_ingredients_item_has_preparation || $data_method_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_method_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.preparation).replace("\\\'", "\'")" }\n                    #if($data_method_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_method_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.internalRecipe.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            \n                \n                \n                \n                #set($data_produces_M_has_quantity = $data.produces.containsKey(\'quantity\'))\n                #if($data_produces_M_has_quantity)\n                    "produces": { "M": {\n        \n#set($data_produces_has_measure = $data.produces.containsKey(\'measure\'))\n        \n            "quantity": { "N": "$data.produces.quantity" }\n            #if($data_produces_has_measure),#end\n        \n                #if($data_produces_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data.produces.measure).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_produces_M_has_serves = $data.produces.containsKey(\'serves\'))\n                #if($data_produces_M_has_serves)\n                    "produces": { "M": {\n        \n        \n            "serves": { "N": "$data.produces.serves" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "tags": { "M": {\n        \n        \n            "cuisine": { "L": [\n        #foreach($data_tags_cuisine_item in $data.tags.cuisine)\n            {"S": "$util.escapeJavaScript($data_tags_cuisine_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "mealType": { "L": [\n        #foreach($data_tags_mealType_item in $data.tags.mealType)\n            {"S": "$util.escapeJavaScript($data_tags_mealType_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "meat": { "L": [\n        #foreach($data_tags_meat_item in $data.tags.meat)\n            {"S": "$util.escapeJavaScript($data_tags_meat_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "dietary": { "L": [\n        #foreach($data_tags_dietary_item in $data.tags.dietary)\n            {"S": "$util.escapeJavaScript($data_tags_dietary_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "occasion": { "L": [\n        #foreach($data_tags_occasion_item in $data.tags.occasion)\n            {"S": "$util.escapeJavaScript($data_tags_occasion_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "equipment": { "L": [\n        #foreach($data_tags_equipment_item in $data.tags.equipment)\n            {"S": "$util.escapeJavaScript($data_tags_equipment_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -1242,6 +1449,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1260,7 +1468,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1282,6 +1489,15 @@ const BackendApi = {
                         in: 'query',
                         description:
                             'ID of the last record in the previous page of results. Omit to get the first page. Up to 15 records are returned per request; fewer than 15 means there are no more results.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "description": "ID of the last record in the previous page of results. Omit to get the first page. Up to 15 records are returned per request; fewer than 15 means there are no more results.",\n  "type": "string",\n  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"\n}',
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                    {
+                        name: 'filters',
+                        in: 'query',
+                        description:
+                            'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "formats": {\n      "description": "Records matching any of these formats are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "12\\"",\n          "10\\"",\n          "7\\""\n        ]\n      }\n    },\n    "types": {\n      "description": "Records matching any of these release types are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "album",\n          "ep",\n          "single"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
                         schema: {
                             type: 'string',
                         },
@@ -1334,8 +1550,8 @@ const BackendApi = {
                             },
                         },
                     },
-                    '500': {
-                        description: '500 response',
+                    '401': {
+                        description: '401 response',
                         content: {
                             'application/json': {
                                 schema: {
@@ -1344,8 +1560,8 @@ const BackendApi = {
                             },
                         },
                     },
-                    '401': {
-                        description: '401 response',
+                    '500': {
+                        description: '500 response',
                         content: {
                             'application/json': {
                                 schema: {
@@ -1365,11 +1581,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-records-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-records-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             post: {
@@ -1443,6 +1659,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-record-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/post-record-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -1479,10 +1696,9 @@ const BackendApi = {
                     },
                     requestTemplates: {
                         'application/json':
-                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n        #set($context.requestOverride.path.id = $id)\n\n        \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $id)\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECORD~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$data.id" }\n            ,\n        \n            "catNo": { "S": "$data.catNo" }\n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            "artists": { "L": [\n        #foreach($data_artists_item in $data.artists)\n            {"S": "$data_artists_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$data.image" }\n                    ,\n                #end\n            \n            "year": { "N": "$data.year" }\n            ,\n        \n            "labels": { "L": [\n        #foreach($data_labels_item in $data.labels)\n            {"S": "$data_labels_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "type": { "S": "$data.type" }\n            ,\n        \n            "format": { "S": "$data.format" }\n            ,\n        \n            "sides": { "L": [\n        #foreach($data_sides_item in $data.sides)\n            {"M": {\n        \n        \n            "name": { "S": "$data_sides_item.name" }\n            ,\n        \n            "songs": { "L": [\n        #foreach($data_sides_item_songs_item in $data_sides_item.songs)\n            {"M": {\n        \n        \n            "title": { "S": "$data_sides_item_songs_item.title" }\n            ,\n        \n            "duration": { "N": "$data_sides_item_songs_item.duration" }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "tags": { "M": {\n        \n        \n            "genres": { "L": [\n        #foreach($data_tags_genres_item in $data.tags.genres)\n            {"S": "$data_tags_genres_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "colours": { "L": [\n        #foreach($data_tags_colours_item in $data.tags.colours)\n            {"S": "$data_tags_colours_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n        #set($context.requestOverride.path.id = $id)\n\n        \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $id)\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECORD~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$util.escapeJavaScript($data.id).replace("\\\'", "\'")" }\n            ,\n        \n            "catNo": { "S": "$util.escapeJavaScript($data.catNo).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "artists": { "L": [\n        #foreach($data_artists_item in $data.artists)\n            {"S": "$util.escapeJavaScript($data_artists_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$util.escapeJavaScript($data.image).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "year": { "N": "$data.year" }\n            ,\n        \n            "labels": { "L": [\n        #foreach($data_labels_item in $data.labels)\n            {"S": "$util.escapeJavaScript($data_labels_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "type": { "S": "$util.escapeJavaScript($data.type).replace("\\\'", "\'")" }\n            ,\n        \n            "format": { "S": "$util.escapeJavaScript($data.format).replace("\\\'", "\'")" }\n            ,\n        \n            "sides": { "L": [\n        #foreach($data_sides_item in $data.sides)\n            {"M": {\n        \n        \n            "name": { "S": "$util.escapeJavaScript($data_sides_item.name).replace("\\\'", "\'")" }\n            ,\n        \n            "songs": { "L": [\n        #foreach($data_sides_item_songs_item in $data_sides_item.songs)\n            {"M": {\n        \n        \n            "title": { "S": "$util.escapeJavaScript($data_sides_item_songs_item.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "N": "$data_sides_item_songs_item.duration" }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "tags": { "M": {\n        \n        \n            "genres": { "L": [\n        #foreach($data_tags_genres_item in $data.tags.genres)\n            {"S": "$util.escapeJavaScript($data_tags_genres_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "colours": { "L": [\n        #foreach($data_tags_colours_item in $data.tags.colours)\n            {"S": "$util.escapeJavaScript($data_tags_colours_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -1515,6 +1731,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1533,7 +1750,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1629,11 +1845,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-images-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-images-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -1676,6 +1892,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1694,7 +1911,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -1729,6 +1945,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1747,7 +1964,176 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                },
+            },
+        },
+        '/records/external/{musicBrainzId}': {
+            get: {
+                operationId: 'GetExternalRecord',
+                parameters: [
+                    {
+                        name: 'musicBrainzId',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '503': {
+                        description: '503 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '404': {
+                        description: '404 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetExternalRecordSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        description: '401 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-external-record-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                },
+            },
+            options: {
+                parameters: [
+                    {
+                        name: 'musicBrainzId',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
                     type: 'mock',
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -1835,6 +2221,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-meal-plans-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/get-meal-plans-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/Query',
@@ -1866,7 +2253,7 @@ const BackendApi = {
                             },
                             responseTemplates: {
                                 'application/json':
-                                    '\n        \n\n        \n        #set($items = $input.path(\'$.Items\'))\n        [\n            #foreach($dynamoResponse in $items)\n                {\n        \n\n        \n            "author": "$dynamoResponse.author.S"\n            ,\n        \n            "course": "$dynamoResponse.course.S"\n            ,\n        \n            "date": "$dynamoResponse.date.S"\n            ,\n        \n            "mealTime": "$dynamoResponse.mealTime.S"\n            ,\n        \n            "source": \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "book")\n                    {\n        \n#set($dynamoResponse.source.M_has_series = $dynamoResponse.source.M.containsKey(\'series\'))\n\n        \n            "type": "$dynamoResponse.source.M.type.S"\n            ,\n        \n            "title": "$dynamoResponse.source.M.title.S"\n            ,\n        \n            "page": $dynamoResponse.source.M.page.N\n            #if($dynamoResponse.source.M_has_series),#end\n        \n                #if($dynamoResponse.source.M_has_series)\n                    "series": "$dynamoResponse.source.M.series.S"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "online")\n                    {\n        \n\n        \n            "type": "$dynamoResponse.source.M.type.S"\n            ,\n        \n            "url": "$dynamoResponse.source.M.url.S"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "magazine")\n                    {\n        \n\n        \n            "type": "$dynamoResponse.source.M.type.S"\n            ,\n        \n            "title": "$dynamoResponse.source.M.title.S"\n            ,\n        \n            "issue": "$dynamoResponse.source.M.issue.S"\n            ,\n        \n            "page": $dynamoResponse.source.M.page.N\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "internal")\n                    {\n        \n\n        \n            "type": "$dynamoResponse.source.M.type.S"\n            ,\n        \n            "recipeId": "$dynamoResponse.source.M.recipeId.S"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "leftovers")\n                    {\n        \n\n        \n            "type": "$dynamoResponse.source.M.type.S"\n            ,\n        \n            "fromDate": "$dynamoResponse.source.M.fromDate.S"\n            ,\n        \n            "fromMealTime": "$dynamoResponse.source.M.fromMealTime.S"\n            ,\n        \n            "fromCourse": "$dynamoResponse.source.M.fromCourse.S"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "freezer")\n                    {\n        \n\n        \n            "type": "$dynamoResponse.source.M.type.S"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "ready_prepared")\n                    {\n        \n\n        \n            "type": "$dynamoResponse.source.M.type.S"\n            \n        \n    }\n                #end\n            \n            ,\n        \n            "title": "$dynamoResponse.title.S"\n            ,\n        \n            "duration": {\n        \n\n        \n            "prepDuration": $dynamoResponse.duration.M.prepDuration.N\n            ,\n        \n            "cookingDuration": $dynamoResponse.duration.M.cookingDuration.N\n            ,\n        \n            "standingTime": $dynamoResponse.duration.M.standingTime.N\n            \n        \n    }\n            \n        \n    }\n\n                #if($foreach.hasNext)\n                    ,\n                #end\n            #end\n        ]\n    \n    ',
+                                    '\n        \n\n        \n        #set($items = $input.path(\'$.Items\'))\n        [\n            #foreach($dynamoResponse in $items)\n                {\n        \n\n        \n            "author": "$util.escapeJavaScript($dynamoResponse.author.S).replace("\\\'", "\'")"\n            ,\n        \n            "course": "$util.escapeJavaScript($dynamoResponse.course.S).replace("\\\'", "\'")"\n            ,\n        \n            "date": "$util.escapeJavaScript($dynamoResponse.date.S).replace("\\\'", "\'")"\n            ,\n        \n            "mealTime": "$util.escapeJavaScript($dynamoResponse.mealTime.S).replace("\\\'", "\'")"\n            ,\n        \n            "source": \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "book")\n                    {\n        \n#set($dynamoResponse.source.M_has_series = $dynamoResponse.source.M.containsKey(\'series\'))\n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.source.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "page": $dynamoResponse.source.M.page.N\n            #if($dynamoResponse.source.M_has_series),#end\n        \n                #if($dynamoResponse.source.M_has_series)\n                    "series": "$util.escapeJavaScript($dynamoResponse.source.M.series.S).replace("\\\'", "\'")"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "online")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "url": "$util.escapeJavaScript($dynamoResponse.source.M.url.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "magazine")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.source.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "issue": "$util.escapeJavaScript($dynamoResponse.source.M.issue.S).replace("\\\'", "\'")"\n            ,\n        \n            "page": $dynamoResponse.source.M.page.N\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "internal")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "recipeId": "$util.escapeJavaScript($dynamoResponse.source.M.recipeId.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "leftovers")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromDate": "$util.escapeJavaScript($dynamoResponse.source.M.fromDate.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromMealTime": "$util.escapeJavaScript($dynamoResponse.source.M.fromMealTime.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromCourse": "$util.escapeJavaScript($dynamoResponse.source.M.fromCourse.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "freezer")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "ready_prepared")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "duration": {\n        \n\n        \n            "prepDuration": $dynamoResponse.duration.M.prepDuration.N\n            ,\n        \n            "cookingDuration": $dynamoResponse.duration.M.cookingDuration.N\n            ,\n        \n            "standingTime": $dynamoResponse.duration.M.standingTime.N\n            \n        \n    }\n            \n        \n    }\n\n                #if($foreach.hasNext)\n                    ,\n                #end\n            #end\n        ]\n    \n    ',
                             },
                         },
                     },
@@ -1875,7 +2262,6 @@ const BackendApi = {
                             '{"TableName":"home-automation-read-store-v2-dev","ConsistentRead":true,"KeyConditionExpression":"#pk = :pk AND #sk BETWEEN :startSk AND :endSk","ExpressionAttributeNames":{"#pk":"pk","#sk":"sk"},"ExpressionAttributeValues":{":pk":{"S":"MEAL_PLAN~$context.authorizer.userId"},":startSk":{"S":"$input.params(\'startDate\')~breakfast~dessert"},":endSk":{"S":"$input.params(\'endDate\')~lunch~starter"}}}',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             post: {
@@ -1949,6 +2335,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-meal-plan-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/post-meal-plan-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
@@ -1986,10 +2373,9 @@ const BackendApi = {
                     },
                     requestTemplates: {
                         'application/json':
-                            '\n        #set($context.requestOverride.path.body = $input.body)\n        #set($body = $input.path(\'$\'))\n\n        \n        #set($data = $input.path(\'$\'))\n\n        \n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$data.author" }\n            ,\n        \n            "course": { "S": "$data.course" }\n            ,\n        \n            "date": { "S": "$data.date" }\n            ,\n        \n            "mealTime": { "S": "$data.mealTime" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "title": { "S": "$data.source.title" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$data.source.series" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "url": { "S": "$data.source.url" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "title": { "S": "$data.source.title" }\n            ,\n        \n            "issue": { "S": "$data.source.issue" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "recipeId": { "S": "$data.source.recipeId" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            ,\n        \n            "fromDate": { "S": "$data.source.fromDate" }\n            ,\n        \n            "fromMealTime": { "S": "$data.source.fromMealTime" }\n            ,\n        \n            "fromCourse": { "S": "$data.source.fromCourse" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$data.source.type" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
+                            '\n        #set($context.requestOverride.path.body = $input.body)\n        #set($body = $input.path(\'$\'))\n\n        \n        #set($data = $input.path(\'$\'))\n\n        \n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$util.escapeJavaScript($data.author).replace("\\\'", "\'")" }\n            ,\n        \n            "course": { "S": "$util.escapeJavaScript($data.course).replace("\\\'", "\'")" }\n            ,\n        \n            "date": { "S": "$util.escapeJavaScript($data.date).replace("\\\'", "\'")" }\n            ,\n        \n            "mealTime": { "S": "$util.escapeJavaScript($data.mealTime).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.source.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.source.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.source.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "recipeId": { "S": "$util.escapeJavaScript($data.source.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "fromDate": { "S": "$util.escapeJavaScript($data.source.fromDate).replace("\\\'", "\'")" }\n            ,\n        \n            "fromMealTime": { "S": "$util.escapeJavaScript($data.source.fromMealTime).replace("\\\'", "\'")" }\n            ,\n        \n            "fromCourse": { "S": "$util.escapeJavaScript($data.source.fromCourse).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -2022,6 +2408,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2040,7 +2427,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2093,6 +2479,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2111,7 +2498,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2198,11 +2584,11 @@ const BackendApi = {
                 'x-amazon-apigateway-request-validator':
                     'post-calculate-calories-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:post-calculate-calories-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -2235,6 +2621,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2253,7 +2640,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2288,6 +2674,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2306,7 +2693,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2392,11 +2778,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-image-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:post-image-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -2429,6 +2815,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2447,7 +2834,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2482,6 +2868,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2500,7 +2887,115 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                },
+            },
+        },
+        '/records/search-filters': {
+            get: {
+                operationId: 'GetRecordSearchFilters',
+                responses: {
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetRecordSearchFiltersSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
                     type: 'mock',
+                    responses: {
+                        default: {
+                            statusCode: '200',
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n        #set($headers = $input.params().get(\'header\'))\n        #set($origin = $headers.origin)\n        \n        #if(!$origin || $origin == "")\n            #set($origin = $headers.Origin)\n        #end\n        \n        #if($origin == "http://localhost:3000")\n            #set($context.responseOverride.header.Access-Control-Allow-Origin = "$origin")\n        #end\n    \n\n        {"tags":{"genres":["pop","hip hop","electronic","r and b","indie","rock","jazz","classical","folk","acoustic","country","metal","blues","punk","ska","prog rock"],"colours":["red","pink","orange","yellow","purple","green","blue","brown","white","grey","black","clear","picture","gold"]},"filters":{"formats":["12\\"","10\\"","7\\""],"types":["album","ep","single"]}}\n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{"statusCode": 200}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    type: 'mock',
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -2535,6 +3030,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2553,7 +3049,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2629,6 +3124,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-playback-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/put-events-playback-paused-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
@@ -2666,7 +3162,6 @@ const BackendApi = {
                             '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"MusicStreaming","DetailType":"PlaybackPaused","Detail":"{\\"metadata\\":{\\"source\\":\\"MusicStreaming\\",\\"eventType\\":\\"PlaybackPaused\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
                     },
                     passthroughBehavior: 'never',
-                    type: 'aws',
                 },
             },
             post: {
@@ -2740,6 +3235,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-playback-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/put-events-playback-started-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
@@ -2777,7 +3273,6 @@ const BackendApi = {
                             '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"MusicStreaming","DetailType":"PlaybackStarted","Detail":"{\\"metadata\\":{\\"source\\":\\"MusicStreaming\\",\\"eventType\\":\\"PlaybackStarted\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
                     },
                     passthroughBehavior: 'never',
-                    type: 'aws',
                 },
             },
             options: {
@@ -2810,6 +3305,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2828,7 +3324,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -2903,6 +3398,7 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/get-record-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/GetItem',
                     httpMethod: 'POST',
@@ -2933,7 +3429,7 @@ const BackendApi = {
                             },
                             responseTemplates: {
                                 'application/json':
-                                    '\n        \n\n        \n            #set($dynamoResponse = $input.path(\'$.Item\'))\n    \n            #if($dynamoResponse.isEmpty())\n                #set($context.responseOverride.status = 404)\n                {"message":"Record not found for given id","reason":"not_found"}\n            #else\n                {\n        \n#set($dynamoResponse_has_image = $dynamoResponse.containsKey(\'image\'))\n\n        \n            "id": "$dynamoResponse.id.S"\n            ,\n        \n            "catNo": "$dynamoResponse.catNo.S"\n            ,\n        \n            "title": "$dynamoResponse.title.S"\n            ,\n        \n            "artists": [\n            #foreach($dynamoResponse_artists_item in $dynamoResponse.artists.L)\n                "$dynamoResponse_artists_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n                #if($dynamoResponse_has_image)\n                    "image": "$dynamoResponse.image.S"\n                    ,\n                #end\n            \n            "year": $dynamoResponse.year.N\n            ,\n        \n            "labels": [\n            #foreach($dynamoResponse_labels_item in $dynamoResponse.labels.L)\n                "$dynamoResponse_labels_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "type": "$dynamoResponse.type.S"\n            ,\n        \n            "format": "$dynamoResponse.format.S"\n            ,\n        \n            "sides": [\n            #foreach($dynamoResponse_sides_item in $dynamoResponse.sides.L)\n                {\n        \n\n        \n            "name": "$dynamoResponse_sides_item.M.name.S"\n            ,\n        \n            "songs": [\n            #foreach($dynamoResponse_sides_item_M_songs_item in $dynamoResponse_sides_item.M.songs.L)\n                {\n        \n\n        \n            "title": "$dynamoResponse_sides_item_M_songs_item.M.title.S"\n            ,\n        \n            "duration": $dynamoResponse_sides_item_M_songs_item.M.duration.N\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "tags": {\n        \n\n        \n            "genres": [\n            #foreach($dynamoResponse_tags_M_genres_item in $dynamoResponse.tags.M.genres.L)\n                "$dynamoResponse_tags_M_genres_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "colours": [\n            #foreach($dynamoResponse_tags_M_colours_item in $dynamoResponse.tags.M.colours.L)\n                "$dynamoResponse_tags_M_colours_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n            \n        \n    }\n            #end\n        \n    ',
+                                    '\n        \n\n        \n            #set($dynamoResponse = $input.path(\'$.Item\'))\n    \n            #if($dynamoResponse.isEmpty())\n                #set($context.responseOverride.status = 404)\n                {"message":"Record not found for given id","reason":"not_found"}\n            #else\n                {\n        \n#set($dynamoResponse_has_image = $dynamoResponse.containsKey(\'image\'))\n\n        \n            "id": "$util.escapeJavaScript($dynamoResponse.id.S).replace("\\\'", "\'")"\n            ,\n        \n            "catNo": "$util.escapeJavaScript($dynamoResponse.catNo.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "artists": [\n            #foreach($dynamoResponse_artists_item in $dynamoResponse.artists.L)\n                "$util.escapeJavaScript($dynamoResponse_artists_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n                #if($dynamoResponse_has_image)\n                    "image": "$util.escapeJavaScript($dynamoResponse.image.S).replace("\\\'", "\'")"\n                    ,\n                #end\n            \n            "year": $dynamoResponse.year.N\n            ,\n        \n            "labels": [\n            #foreach($dynamoResponse_labels_item in $dynamoResponse.labels.L)\n                "$util.escapeJavaScript($dynamoResponse_labels_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "format": "$util.escapeJavaScript($dynamoResponse.format.S).replace("\\\'", "\'")"\n            ,\n        \n            "sides": [\n            #foreach($dynamoResponse_sides_item in $dynamoResponse.sides.L)\n                {\n        \n\n        \n            "name": "$util.escapeJavaScript($dynamoResponse_sides_item.M.name.S).replace("\\\'", "\'")"\n            ,\n        \n            "songs": [\n            #foreach($dynamoResponse_sides_item_M_songs_item in $dynamoResponse_sides_item.M.songs.L)\n                {\n        \n\n        \n            "title": "$util.escapeJavaScript($dynamoResponse_sides_item_M_songs_item.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "duration": $dynamoResponse_sides_item_M_songs_item.M.duration.N\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "tags": {\n        \n\n        \n            "genres": [\n            #foreach($dynamoResponse_tags_M_genres_item in $dynamoResponse.tags.M.genres.L)\n                "$util.escapeJavaScript($dynamoResponse_tags_M_genres_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "colours": [\n            #foreach($dynamoResponse_tags_M_colours_item in $dynamoResponse.tags.M.colours.L)\n                "$util.escapeJavaScript($dynamoResponse_tags_M_colours_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n            \n        \n    }\n            #end\n        \n    ',
                             },
                         },
                     },
@@ -2942,7 +3438,6 @@ const BackendApi = {
                             '{"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECORD~$context.authorizer.userId"},"sk":{"S":"$input.params(\'id\')"}}}',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             put: {
@@ -3026,6 +3521,7 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-record-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/put-record-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -3062,10 +3558,9 @@ const BackendApi = {
                     },
                     requestTemplates: {
                         'application/json':
-                            '\n    \n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $input.params(\'id\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECORD~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$data.id" }\n            ,\n        \n            "catNo": { "S": "$data.catNo" }\n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            "artists": { "L": [\n        #foreach($data_artists_item in $data.artists)\n            {"S": "$data_artists_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$data.image" }\n                    ,\n                #end\n            \n            "year": { "N": "$data.year" }\n            ,\n        \n            "labels": { "L": [\n        #foreach($data_labels_item in $data.labels)\n            {"S": "$data_labels_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "type": { "S": "$data.type" }\n            ,\n        \n            "format": { "S": "$data.format" }\n            ,\n        \n            "sides": { "L": [\n        #foreach($data_sides_item in $data.sides)\n            {"M": {\n        \n        \n            "name": { "S": "$data_sides_item.name" }\n            ,\n        \n            "songs": { "L": [\n        #foreach($data_sides_item_songs_item in $data_sides_item.songs)\n            {"M": {\n        \n        \n            "title": { "S": "$data_sides_item_songs_item.title" }\n            ,\n        \n            "duration": { "N": "$data_sides_item_songs_item.duration" }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "tags": { "M": {\n        \n        \n            "genres": { "L": [\n        #foreach($data_tags_genres_item in $data.tags.genres)\n            {"S": "$data_tags_genres_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "colours": { "L": [\n        #foreach($data_tags_colours_item in $data.tags.colours)\n            {"S": "$data_tags_colours_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
+                            '\n    \n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $input.params(\'id\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECORD~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$util.escapeJavaScript($data.id).replace("\\\'", "\'")" }\n            ,\n        \n            "catNo": { "S": "$util.escapeJavaScript($data.catNo).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "artists": { "L": [\n        #foreach($data_artists_item in $data.artists)\n            {"S": "$util.escapeJavaScript($data_artists_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$util.escapeJavaScript($data.image).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "year": { "N": "$data.year" }\n            ,\n        \n            "labels": { "L": [\n        #foreach($data_labels_item in $data.labels)\n            {"S": "$util.escapeJavaScript($data_labels_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "type": { "S": "$util.escapeJavaScript($data.type).replace("\\\'", "\'")" }\n            ,\n        \n            "format": { "S": "$util.escapeJavaScript($data.format).replace("\\\'", "\'")" }\n            ,\n        \n            "sides": { "L": [\n        #foreach($data_sides_item in $data.sides)\n            {"M": {\n        \n        \n            "name": { "S": "$util.escapeJavaScript($data_sides_item.name).replace("\\\'", "\'")" }\n            ,\n        \n            "songs": { "L": [\n        #foreach($data_sides_item_songs_item in $data_sides_item.songs)\n            {"M": {\n        \n        \n            "title": { "S": "$util.escapeJavaScript($data_sides_item_songs_item.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "N": "$data_sides_item_songs_item.duration" }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "tags": { "M": {\n        \n        \n            "genres": { "L": [\n        #foreach($data_tags_genres_item in $data.tags.genres)\n            {"S": "$util.escapeJavaScript($data_tags_genres_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "colours": { "L": [\n        #foreach($data_tags_colours_item in $data.tags.colours)\n            {"S": "$util.escapeJavaScript($data_tags_colours_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'aws',
                 },
             },
             options: {
@@ -3108,6 +3603,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -3126,7 +3622,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -3171,6 +3666,7 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '200',
@@ -3184,7 +3680,6 @@ const BackendApi = {
                         'application/json': '{"statusCode": 200}',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
             options: {
@@ -3217,6 +3712,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -3235,7 +3731,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -3324,11 +3819,11 @@ const BackendApi = {
                 'x-amazon-apigateway-request-validator':
                     'get-extracted-external-recipe-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-extracted-external-recipe-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -3361,6 +3856,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -3379,7 +3875,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -3456,6 +3951,7 @@ const BackendApi = {
                 'x-amazon-apigateway-request-validator':
                     'get-extracted-external-recipe-basics-request-validator-dev',
                 'x-amazon-apigateway-integration': {
+                    type: 'http',
                     uri: 'https://api.spoonacular.com/recipes/extract',
                     httpMethod: 'GET',
                     responses: {
@@ -3495,7 +3991,6 @@ const BackendApi = {
                             "'3992c4c9a5544a89820805fbad0dc85e'",
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'http',
                 },
             },
             options: {
@@ -3528,6 +4023,7 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
+                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -3546,7 +4042,6 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                    type: 'mock',
                 },
             },
         },
@@ -4196,8 +4691,8 @@ const BackendApi = {
                         },
                         format: {
                             type: 'string',
-                            description:
-                                'The physical format of the release, e.g. "Vinyl", "CD" or "Cassette"',
+                            description: 'The physical size of the record: 12", 10" or 7"',
+                            enum: ['12"', '10"', '7"'],
                         },
                         id: {
                             pattern:
@@ -4209,7 +4704,8 @@ const BackendApi = {
                         },
                         type: {
                             type: 'string',
-                            description: 'The type of release, e.g. "Album", "Single" or "EP"',
+                            description: 'The type of release: album, ep or single',
+                            enum: ['album', 'ep', 'single'],
                         },
                         labels: {
                             type: 'array',
@@ -4308,6 +4804,92 @@ const BackendApi = {
                     },
                 },
                 additionalProperties: false,
+            },
+            GetRecordSearchFiltersSuccessResponse: {
+                title: 'GetRecordSearchFiltersSuccessResponse',
+                required: ['filters', 'tags'],
+                type: 'object',
+                properties: {
+                    filters: {
+                        type: 'object',
+                        properties: {
+                            types: {
+                                type: 'array',
+                                description:
+                                    'Records matching any of these release types are returned',
+                                items: {
+                                    type: 'string',
+                                    enum: ['album', 'ep', 'single'],
+                                },
+                            },
+                            formats: {
+                                type: 'array',
+                                description: 'Records matching any of these formats are returned',
+                                items: {
+                                    type: 'string',
+                                    enum: ['12"', '10"', '7"'],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                    tags: {
+                        required: ['colours', 'genres'],
+                        type: 'object',
+                        properties: {
+                            genres: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'pop',
+                                        'hip hop',
+                                        'electronic',
+                                        'r and b',
+                                        'indie',
+                                        'rock',
+                                        'jazz',
+                                        'classical',
+                                        'folk',
+                                        'acoustic',
+                                        'country',
+                                        'metal',
+                                        'blues',
+                                        'punk',
+                                        'ska',
+                                        'prog rock',
+                                    ],
+                                },
+                            },
+                            colours: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'red',
+                                        'pink',
+                                        'orange',
+                                        'yellow',
+                                        'purple',
+                                        'green',
+                                        'blue',
+                                        'brown',
+                                        'white',
+                                        'grey',
+                                        'black',
+                                        'clear',
+                                        'picture',
+                                        'gold',
+                                    ],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                },
+                additionalProperties: false,
+                description:
+                    'The criteria that can be used to filter records when searching for them. This ensures an upto date list of things like tags',
             },
             PostPlaybackSuccessResponse: {
                 title: 'PostPlaybackSuccessResponse',
@@ -4782,8 +5364,8 @@ const BackendApi = {
                     },
                     format: {
                         type: 'string',
-                        description:
-                            'The physical format of the release, e.g. "Vinyl", "CD" or "Cassette"',
+                        description: 'The physical size of the record: 12", 10" or 7"',
+                        enum: ['12"', '10"', '7"'],
                     },
                     sides: {
                         type: 'array',
@@ -4823,7 +5405,8 @@ const BackendApi = {
                     },
                     type: {
                         type: 'string',
-                        description: 'The type of release, e.g. "Album", "Single" or "EP"',
+                        description: 'The type of release: album, ep or single',
+                        enum: ['album', 'ep', 'single'],
                     },
                     labels: {
                         type: 'array',
@@ -5385,8 +5968,8 @@ const BackendApi = {
                     },
                     format: {
                         type: 'string',
-                        description:
-                            'The physical format of the release, e.g. "Vinyl", "CD" or "Cassette"',
+                        description: 'The physical size of the record: 12", 10" or 7"',
+                        enum: ['12"', '10"', '7"'],
                     },
                     sides: {
                         type: 'array',
@@ -5431,7 +6014,8 @@ const BackendApi = {
                     },
                     type: {
                         type: 'string',
-                        description: 'The type of release, e.g. "Album", "Single" or "EP"',
+                        description: 'The type of release: album, ep or single',
+                        enum: ['album', 'ep', 'single'],
                     },
                     labels: {
                         type: 'array',
@@ -5536,6 +6120,165 @@ const BackendApi = {
                     },
                 },
                 additionalProperties: false,
+            },
+            GetExternalRecordSuccessResponse: {
+                title: 'GetExternalRecordSuccessResponse',
+                required: ['artists', 'catNo', 'labels', 'musicBrainzId', 'sides', 'tags', 'title'],
+                type: 'object',
+                properties: {
+                    country: {
+                        type: 'string',
+                        description:
+                            'Where this pressing was released, usually an ISO 3166-1 code like GB',
+                    },
+                    releaseDate: {
+                        type: 'string',
+                        description:
+                            'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
+                    },
+                    year: {
+                        maximum: 9007199254740991,
+                        minimum: -9007199254740991,
+                        type: 'integer',
+                    },
+                    musicBrainzId: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+                        type: 'string',
+                        description: 'The MusicBrainz release ID, used to get the full release',
+                    },
+                    format: {
+                        type: 'string',
+                        description: 'The physical size of the record: 12", 10" or 7"',
+                        enum: ['12"', '10"', '7"'],
+                    },
+                    title: {
+                        type: 'string',
+                    },
+                    type: {
+                        type: 'string',
+                        description: 'The type of release: album, ep or single',
+                        enum: ['album', 'ep', 'single'],
+                    },
+                    labels: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    tags: {
+                        required: ['colours', 'genres'],
+                        type: 'object',
+                        properties: {
+                            genres: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'pop',
+                                        'hip hop',
+                                        'electronic',
+                                        'r and b',
+                                        'indie',
+                                        'rock',
+                                        'jazz',
+                                        'classical',
+                                        'folk',
+                                        'acoustic',
+                                        'country',
+                                        'metal',
+                                        'blues',
+                                        'punk',
+                                        'ska',
+                                        'prog rock',
+                                    ],
+                                },
+                            },
+                            colours: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'red',
+                                        'pink',
+                                        'orange',
+                                        'yellow',
+                                        'purple',
+                                        'green',
+                                        'blue',
+                                        'brown',
+                                        'white',
+                                        'grey',
+                                        'black',
+                                        'clear',
+                                        'picture',
+                                        'gold',
+                                    ],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                    originalImageUrl: {
+                        type: 'string',
+                        description:
+                            'Cover art from the Cover Art Archive, only present when the release has some',
+                    },
+                    artists: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    catNo: {
+                        type: 'string',
+                        description: 'The catalogue number assigned to the release by its label',
+                    },
+                    disambiguation: {
+                        type: 'string',
+                        description:
+                            'Notes that tell pressings apart, e.g. "red vinyl" or "textured sleeve"',
+                    },
+                    sides: {
+                        type: 'array',
+                        items: {
+                            required: ['name', 'songs'],
+                            type: 'object',
+                            properties: {
+                                songs: {
+                                    type: 'array',
+                                    items: {
+                                        required: ['duration', 'title'],
+                                        type: 'object',
+                                        properties: {
+                                            duration: {
+                                                maximum: 9007199254740991,
+                                                minimum: 0,
+                                                type: 'integer',
+                                                description: 'In seconds the length of the song',
+                                            },
+                                            title: {
+                                                type: 'string',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                name: {
+                                    type: 'string',
+                                    description: 'The name of the side, e.g. "A" or "B"',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    barcode: {
+                        type: 'string',
+                    },
+                },
+                additionalProperties: false,
+                description:
+                    'A MusicBrainz release in the shape of a record, to fill out a new record. Fields MusicBrainz does not know are left out.',
             },
             PostMealPlanBodyModel: {
                 title: 'PostMealPlanBodyModel',
@@ -6136,6 +6879,7 @@ const BackendApi = {
                             'internal_server_error',
                             'multiple_items_found',
                             'unauthorized',
+                            'service_unavailable',
                         ],
                     },
                     message: {
@@ -6674,6 +7418,121 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
+            GetExternalRecordsSuccessResponse: {
+                title: 'GetExternalRecordsSuccessResponse',
+                type: 'array',
+                description:
+                    'Vinyl releases on MusicBrainz matching the catalogue number, best match first. Pick one and get its full details by musicBrainzId.',
+                items: {
+                    required: [
+                        'artists',
+                        'catNo',
+                        'colours',
+                        'labels',
+                        'musicBrainzId',
+                        'thumbnailUrl',
+                        'title',
+                        'trackCount',
+                    ],
+                    type: 'object',
+                    properties: {
+                        country: {
+                            type: 'string',
+                            description:
+                                'Where this pressing was released, usually an ISO 3166-1 code like GB',
+                        },
+                        releaseDate: {
+                            type: 'string',
+                            description:
+                                'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
+                        },
+                        year: {
+                            maximum: 9007199254740991,
+                            minimum: -9007199254740991,
+                            type: 'integer',
+                        },
+                        musicBrainzId: {
+                            pattern:
+                                '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+                            type: 'string',
+                            description: 'The MusicBrainz release ID, used to get the full release',
+                        },
+                        format: {
+                            type: 'string',
+                            description: 'The physical size of the record: 12", 10" or 7"',
+                            enum: ['12"', '10"', '7"'],
+                        },
+                        title: {
+                            type: 'string',
+                        },
+                        type: {
+                            type: 'string',
+                            description: 'The type of release: album, ep or single',
+                            enum: ['album', 'ep', 'single'],
+                        },
+                        labels: {
+                            type: 'array',
+                            items: {
+                                type: 'string',
+                            },
+                        },
+                        trackCount: {
+                            maximum: 9007199254740991,
+                            minimum: 0,
+                            type: 'integer',
+                        },
+                        artists: {
+                            type: 'array',
+                            items: {
+                                type: 'string',
+                            },
+                        },
+                        catNo: {
+                            type: 'string',
+                            description:
+                                'The catalogue number assigned to the release by its label',
+                        },
+                        disambiguation: {
+                            type: 'string',
+                            description:
+                                'Notes that tell pressings apart, e.g. "red vinyl" or "textured sleeve"',
+                        },
+                        barcode: {
+                            type: 'string',
+                        },
+                        colours: {
+                            type: 'array',
+                            description:
+                                'Colours worked out from the release notes, empty when none are mentioned',
+                            items: {
+                                type: 'string',
+                                enum: [
+                                    'red',
+                                    'pink',
+                                    'orange',
+                                    'yellow',
+                                    'purple',
+                                    'green',
+                                    'blue',
+                                    'brown',
+                                    'white',
+                                    'grey',
+                                    'black',
+                                    'clear',
+                                    'picture',
+                                    'gold',
+                                ],
+                            },
+                        },
+                        thumbnailUrl: {
+                            type: 'string',
+                            description:
+                                'Small cover art from the Cover Art Archive. Not every release has cover art, so this can 404.',
+                        },
+                    },
+                    additionalProperties: false,
+                },
+            },
             DeleteRecipeSuccessResponse: {
                 title: 'DeleteRecipeSuccessResponse',
                 required: ['id'],
@@ -6724,8 +7583,8 @@ const BackendApi = {
                     },
                     format: {
                         type: 'string',
-                        description:
-                            'The physical format of the release, e.g. "Vinyl", "CD" or "Cassette"',
+                        description: 'The physical size of the record: 12", 10" or 7"',
+                        enum: ['12"', '10"', '7"'],
                     },
                     sides: {
                         type: 'array',
@@ -6765,7 +7624,8 @@ const BackendApi = {
                     },
                     type: {
                         type: 'string',
-                        description: 'The type of release, e.g. "Album", "Single" or "EP"',
+                        description: 'The type of release: album, ep or single',
+                        enum: ['album', 'ep', 'single'],
                     },
                     labels: {
                         type: 'array',
@@ -6837,11 +7697,11 @@ const BackendApi = {
                 in: 'header',
                 'x-amazon-apigateway-authtype': 'custom',
                 'x-amazon-apigateway-authorizer': {
+                    type: 'request',
                     authorizerUri:
                         'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:home-automation-api-v2-machine-authorizer-lambda-dev/invocations',
                     authorizerResultTtlInSeconds: 0,
                     identitySource: 'method.request.header.Authorization',
-                    type: 'request',
                 },
             },
             api_key: {
@@ -6855,19 +7715,31 @@ const BackendApi = {
                 in: 'header',
                 'x-amazon-apigateway-authtype': 'custom',
                 'x-amazon-apigateway-authorizer': {
+                    type: 'request',
                     authorizerUri:
                         'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:home-automation-api-v2-basic-user-authorizer-lambda-dev/invocations',
                     authorizerResultTtlInSeconds: 0,
                     identitySource: 'method.request.header.Authorization',
-                    type: 'request',
                 },
             },
         },
     },
     'x-amazon-apigateway-documentation': {
-        version: '3ro6mr',
-        createdDate: '2026-10-01T06:50:31Z',
+        version: 'o1egz1',
+        createdDate: '2026-10-03T14:13:24Z',
         documentationParts: [
+            {
+                location: {
+                    type: 'QUERY_PARAMETER',
+                    path: '/records/external/search',
+                    method: 'GET',
+                    name: 'catNo',
+                },
+                properties: {
+                    description:
+                        'The catalogue number printed on the record, e.g. K 56344. Spacing does not need to match.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "string",\n  "minLength": 1,\n  "description": "The catalogue number printed on the record, e.g. K 56344. Spacing does not need to match."\n}',
+                },
+            },
             {
                 location: {
                     type: 'QUERY_PARAMETER',
@@ -6902,6 +7774,18 @@ const BackendApi = {
                 properties: {
                     description:
                         'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "calories": {\n      "type": "object",\n      "properties": {\n        "min": {\n          "type": "number"\n        },\n        "max": {\n          "type": "number"\n        }\n      },\n      "required": [\n        "min",\n        "max"\n      ],\n      "additionalProperties": false\n    },\n    "duration": {\n      "type": "object",\n      "properties": {\n        "prepDuration": {\n          "type": "object",\n          "properties": {\n            "min": {\n              "type": "number"\n            },\n            "max": {\n              "type": "number"\n            }\n          },\n          "required": [\n            "min",\n            "max"\n          ],\n          "additionalProperties": false\n        },\n        "cookingDuration": {\n          "type": "object",\n          "properties": {\n            "min": {\n              "type": "number"\n            },\n            "max": {\n              "type": "number"\n            }\n          },\n          "required": [\n            "min",\n            "max"\n          ],\n          "additionalProperties": false\n        },\n        "standingTime": {\n          "type": "object",\n          "properties": {\n            "min": {\n              "type": "number"\n            },\n            "max": {\n              "type": "number"\n            }\n          },\n          "required": [\n            "min",\n            "max"\n          ],\n          "additionalProperties": false\n        },\n        "totalTime": {\n          "type": "object",\n          "properties": {\n            "min": {\n              "type": "number"\n            },\n            "max": {\n              "type": "number"\n            }\n          },\n          "required": [\n            "min",\n            "max"\n          ],\n          "additionalProperties": false\n        }\n      },\n      "additionalProperties": false\n    },\n    "serves": {\n      "type": "object",\n      "properties": {\n        "min": {\n          "type": "number"\n        },\n        "max": {\n          "type": "number"\n        }\n      },\n      "required": [\n        "min",\n        "max"\n      ],\n      "additionalProperties": false\n    }\n  },\n  "additionalProperties": false\n}',
+                },
+            },
+            {
+                location: {
+                    type: 'QUERY_PARAMETER',
+                    path: '/records',
+                    method: 'GET',
+                    name: 'filters',
+                },
+                properties: {
+                    description:
+                        'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "formats": {\n      "description": "Records matching any of these formats are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "12\\"",\n          "10\\"",\n          "7\\""\n        ]\n      }\n    },\n    "types": {\n      "description": "Records matching any of these release types are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "album",\n          "ep",\n          "single"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
                 },
             },
             {
@@ -7053,6 +7937,10 @@ const BackendApi = {
             validateRequestBody: true,
         },
         'get-extracted-external-recipe-basics-request-validator-dev': {
+            validateRequestParameters: true,
+            validateRequestBody: false,
+        },
+        'get-external-records-request-validator-dev': {
             validateRequestParameters: true,
             validateRequestBody: false,
         },

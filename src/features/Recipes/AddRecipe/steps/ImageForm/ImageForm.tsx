@@ -23,6 +23,7 @@ export type ImageFormValues = {
 }
 
 export interface ImageFormProps {
+    title?: string
     initialValues?: ImageFormValues
     onSubmitStep: (values: ImageFormValues) => void
 }
@@ -86,7 +87,7 @@ const ImageForm = forwardRef<{ submit: () => Promise<boolean> }, ImageFormProps>
                             fontWeight={'bold'}
                             alignSelf={'start'}
                         >
-                            Recipe Image
+                            {props.title ?? 'Recipe Image'}
                         </Fieldset.Legend>
                         <Fieldset.Content>
                             <VStack gap={4} alignItems={'stretch'}>

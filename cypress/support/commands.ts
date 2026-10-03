@@ -3,11 +3,14 @@
 import { jwtDecode } from 'jwt-decode'
 import type {
     GetMealPlansResponse,
+    GetRecordResponse,
     GetRecipesQueryParameters,
     GetRecipesResponse,
     PostMealPlanBody,
     PostRecipeBody,
     PostRecipeResponse,
+    PostRecordBody,
+    PostRecordResponse,
 } from '@awjh/home-automation-v2-api-models'
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 
@@ -55,6 +58,8 @@ declare global {
             clearAllMealPlans(): Chainable<void>
             createMealPlan(mealPlan: PostMealPlanBody): Chainable<void>
             createRecipe(recipe: PostRecipeBody): Chainable<PostRecipeResponse['id']>
+            createRecord(record: PostRecordBody): Chainable<PostRecordResponse['id']>
+            getRecord(recordId: string): Chainable<GetRecordResponse>
             deleteRecipe(recipeId: string): Chainable<void>
             deleteAllRecipes(): Chainable<void>
             getByTestId(testId: string): Chainable<JQuery<HTMLElement>>
@@ -214,6 +219,38 @@ Cypress.Commands.add('createRecipe', (recipe: PostRecipeBody) => {
                     body: recipe,
                 })
                 .its('body.id')
+        })
+    })
+})
+
+Cypress.Commands.add('createRecord', (record: PostRecordBody) => {
+    return getRequiredEnv('API_BASE_URL').then((apiBaseUrl) => {
+        return getAuthHeaders().then((headers) => {
+            return cy
+                .request<PostRecordResponse>({
+                    method: 'POST',
+                    url: `${apiBaseUrl}/records`,
+                    headers: {
+                        ...headers,
+                        'Content-Type': 'application/json',
+                    },
+                    body: record,
+                })
+                .its('body.id')
+        })
+    })
+})
+
+Cypress.Commands.add('getRecord', (recordId: string) => {
+    return getRequiredEnv('API_BASE_URL').then((apiBaseUrl) => {
+        return getAuthHeaders().then((headers) => {
+            return cy
+                .request<GetRecordResponse>({
+                    method: 'GET',
+                    url: `${apiBaseUrl}/records/${encodeURIComponent(recordId)}`,
+                    headers,
+                })
+                .its('body')
         })
     })
 })
