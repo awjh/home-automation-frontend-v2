@@ -146,8 +146,6 @@ export default async function getEndpoint<E extends Endpoint, M extends Method<E
         })
 
         const fullUrl = `${url}${resolvedEndpoint}${buildQueryString(queryParams as Record<string, string | string[]> | undefined)}`
-        console.log(`Full URL: ${fullUrl}`)
-        console.log(`Query params: ${JSON.stringify(queryParams)}`)
 
         const res = await fetch(fullUrl, {
             method: method.toString().toUpperCase(),
