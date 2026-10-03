@@ -10,12 +10,13 @@ import { Box, Heading, HStack, IconButton, VStack } from '@chakra-ui/react'
 import RECIPE_SEARCH_PAGE_SIZE from '@constants/RecipeSearchPageSize'
 import useColorMode from '@hooks/useColorMode'
 import useToaster from '@hooks/useToaster'
-import { useState } from 'react'
+import { MouseEvent, useLayoutEffect, useRef, useState } from 'react'
 import { LuArrowLeft, LuFilter } from 'react-icons/lu'
 import SearchRecipeKeywords from './SearchRecipeKeywords/SearchRecipeKeywords'
 import SearchRecipeResults from './SearchRecipeResults/SearchRecipeResults'
 import SearchRecipesFilters from './SearchRecipesFilters/SearchRecipesFilters'
 import TabbedContent from '@molecules/TabbedContent/TabbedContent'
+import { saveSearchResultsSnapshot, takeSearchResultsSnapshot } from './searchResultsSnapshot'
 
 export interface SearchRecipesFiltersProps {
     tags: RecipeTags
@@ -50,7 +51,46 @@ export default function SearchRecipes({
         })
     }
 
+    const restoredScrollY = useRef<number | undefined>(undefined)
+
+    // Coming back from a recipe remounts the page with only the first page, so restore what was loaded
+    useLayoutEffect(() => {
+        const snapshot = takeSearchResultsSnapshot(window.location.search, firstPageRecipes)
+
+        if (snapshot) {
+            restoredScrollY.current = snapshot.scrollY
+            setLoadedPages({
+                firstPage: firstPageRecipes,
+                recipes: snapshot.recipes,
+                hasNextPage: snapshot.hasNextPage,
+            })
+        }
+        // Only on mount, later first pages come from a new search
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    // The browser restores the scroll before the extra pages render, so scroll back once they have
+    useLayoutEffect(() => {
+        if (restoredScrollY.current !== undefined) {
+            window.scrollTo(0, restoredScrollY.current)
+            restoredScrollY.current = undefined
+        }
+    }, [loadedPages])
+
     const { recipes } = loadedPages
+
+    const onClickRecipeLink = (event: MouseEvent) => {
+        const isRecipeLink = (event.target as Element).closest('a[href^="/recipes/"]')
+
+        if (isRecipeLink && recipes.length > loadedPages.firstPage.length) {
+            saveSearchResultsSnapshot({
+                search: window.location.search,
+                recipes,
+                hasNextPage: loadedPages.hasNextPage,
+                scrollY: window.scrollY,
+            })
+        }
+    }
     // A full last page means there may be more to load, so the count is a lower bound
     const resultCount = `${recipes.length}${loadedPages.hasNextPage ? '+' : ''}`
 
@@ -111,6 +151,7 @@ export default function SearchRecipes({
             justifyContent={'flex-start'}
             p={{ base: 0, md: 4 }}
             gap={{ base: 6, md: 4 }}
+            onClickCapture={onClickRecipeLink}
         >
             {displayFilters && (
                 <Box

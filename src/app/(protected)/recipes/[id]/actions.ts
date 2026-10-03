@@ -2,7 +2,6 @@
 
 import {
     DeleteMealPlanResponse,
-    GetImageResponse,
     GetMealPlansResponse,
     GetRecipeResponse,
     PostMealPlanBody,
@@ -14,8 +13,8 @@ import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlan
 import createMealPlanFromFormValues from '@features/MealPlanner/AddMealPlan/utils/createMealPlanFromFormValues'
 import { RecipeMealPlanDate } from '@features/Recipes/ViewRecipe/RecipeMealPlans/RecipeMealPlans'
 import { formatDate } from '@utils/formatDate'
-import isDirectImageUrl from '@utils/isDirectImageUrl'
 import getEndpoint from '../../shared/getEndpoint'
+import getImageUrl from '../../shared/getImageUrl'
 
 const RECIPE_FETCH_MAX_ATTEMPTS = 6
 const RECIPE_FETCH_RETRY_DELAY_MS = 350
@@ -57,32 +56,7 @@ export async function getRecipe(id: string): Promise<GetRecipeResponse> {
 }
 
 export async function getRecipeImageUrl(imageId: string | undefined): Promise<string | undefined> {
-    if (!imageId) {
-        return undefined
-    }
-
-    if (isDirectImageUrl(imageId)) {
-        return imageId
-    }
-
-    const callApiEndpoint = await getEndpoint({
-        endpoint: `/images/{service}/{filekey}`,
-        method: 'get',
-    })
-
-    try {
-        const { url } = await callApiEndpoint<GetImageResponse>({
-            pathParams: {
-                service: 'recipe',
-                filekey: imageId,
-            },
-        })
-
-        return url
-    } catch (error) {
-        console.error('Error fetching image URL:', error)
-        return undefined
-    }
+    return getImageUrl('recipe', imageId)
 }
 
 export async function getRecipeMealPlanDates(recipeId: string): Promise<RecipeMealPlanDate[]> {

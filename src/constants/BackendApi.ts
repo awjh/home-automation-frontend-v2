@@ -2,7 +2,7 @@ const BackendApi = {
     openapi: '3.0.1',
     info: {
         title: 'home-automation-api-v2-dev',
-        version: '2026-09-26T11:48:46Z',
+        version: '2026-10-01T06:50:04Z',
     },
     servers: [
         {
@@ -1264,6 +1264,279 @@ const BackendApi = {
                 },
             },
         },
+        '/records': {
+            get: {
+                operationId: 'GetRecords',
+                parameters: [
+                    {
+                        name: 'keywords',
+                        in: 'query',
+                        description:
+                            'Matched against record titles, artists and song titles\n\nRepeat the query parameter to pass multiple values, for example ?keywords=quick&keywords=easy.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "description": "Matched against record titles, artists and song titles",\n  "type": "array",\n  "items": {\n    "type": "string"\n  }\n}',
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                    {
+                        name: 'previousRecordId',
+                        in: 'query',
+                        description:
+                            'ID of the last record in the previous page of results. Omit to get the first page. Up to 15 records are returned per request; fewer than 15 means there are no more results.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "description": "ID of the last record in the previous page of results. Omit to get the first page. Up to 15 records are returned per request; fewer than 15 means there are no more results.",\n  "type": "string",\n  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"\n}',
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                    {
+                        name: 'tags',
+                        in: 'query',
+                        description:
+                            'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "genres": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "pop",\n          "hip hop",\n          "electronic",\n          "r and b",\n          "indie",\n          "rock",\n          "jazz",\n          "classical",\n          "folk",\n          "acoustic",\n          "country",\n          "metal",\n          "blues",\n          "punk",\n          "ska",\n          "prog rock"\n        ]\n      }\n    },\n    "colours": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "red",\n          "pink",\n          "orange",\n          "yellow",\n          "purple",\n          "green",\n          "blue",\n          "brown",\n          "white",\n          "grey",\n          "black",\n          "clear",\n          "picture",\n          "gold"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetRecordsSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        description: '401 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'get-records-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-records-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
+                },
+            },
+            post: {
+                operationId: 'PostRecord',
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PostRecordBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PostRecordSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'post-record-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials: 'arn:aws:iam::558946902552:role/post-record-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
+                    httpMethod: 'POST',
+                    responses: {
+                        '400': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put item in DynamoDB to create Record","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put item in DynamoDB to create Record","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'POST,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n        \n        #set($id = $context.requestOverride.path.id)\n        \n        {"id":"$id"}\n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n        #set($context.requestOverride.path.id = $id)\n\n        \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $id)\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECORD~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$data.id" }\n            ,\n        \n            "catNo": { "S": "$data.catNo" }\n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            "artists": { "L": [\n        #foreach($data_artists_item in $data.artists)\n            {"S": "$data_artists_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$data.image" }\n                    ,\n                #end\n            \n            "year": { "N": "$data.year" }\n            ,\n        \n            "labels": { "L": [\n        #foreach($data_labels_item in $data.labels)\n            {"S": "$data_labels_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "type": { "S": "$data.type" }\n            ,\n        \n            "format": { "S": "$data.format" }\n            ,\n        \n            "sides": { "L": [\n        #foreach($data_sides_item in $data.sides)\n            {"M": {\n        \n        \n            "name": { "S": "$data_sides_item.name" }\n            ,\n        \n            "songs": { "L": [\n        #foreach($data_sides_item_songs_item in $data_sides_item.songs)\n            {"M": {\n        \n        \n            "title": { "S": "$data_sides_item_songs_item.title" }\n            ,\n        \n            "duration": { "N": "$data_sides_item_songs_item.duration" }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "tags": { "M": {\n        \n        \n            "genres": { "L": [\n        #foreach($data_tags_genres_item in $data.tags.genres)\n            {"S": "$data_tags_genres_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "colours": { "L": [\n        #foreach($data_tags_colours_item in $data.tags.colours)\n            {"S": "$data_tags_colours_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'aws',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
         '/images/{service}': {
             get: {
                 operationId: 'GetImages',
@@ -2178,8 +2451,634 @@ const BackendApi = {
                 },
             },
         },
+        '/music-streaming': {
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
         '/recipes/calories': {
             options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/music-streaming/playback': {
+            put: {
+                operationId: 'PutPlayback',
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PutPlaybackBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PutPlaybackSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-machine-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'put-playback-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/put-events-playback-paused-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
+                    httpMethod: 'POST',
+                    responses: {
+                        '(4|5)\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put PlaybackPaused event on the shared event bus","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'PUT,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        #set($failedEntryCount = $input.path(\'$.FailedEntryCount\'))\n\n        #if("$failedEntryCount" != "0")\n            #set($context.responseOverride.status = 500)\n            {"message":"Failed to put PlaybackPaused event on the shared event bus","reason":"internal_server_error"}\n        #else\n            {"eventId":"$context.authorizer.uniqueRequestId"}\n        #end\n    ',
+                            },
+                        },
+                    },
+                    requestParameters: {
+                        'integration.request.header.X-Amz-Target': "'AWSEvents.PutEvents'",
+                        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"MusicStreaming","DetailType":"PlaybackPaused","Detail":"{\\"metadata\\":{\\"source\\":\\"MusicStreaming\\",\\"eventType\\":\\"PlaybackPaused\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
+                    },
+                    passthroughBehavior: 'never',
+                    type: 'aws',
+                },
+            },
+            post: {
+                operationId: 'PostPlayback',
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PostPlaybackBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PostPlaybackSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-machine-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'post-playback-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/put-events-playback-started-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
+                    httpMethod: 'POST',
+                    responses: {
+                        '(4|5)\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put PlaybackStarted event on the shared event bus","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'POST,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        #set($failedEntryCount = $input.path(\'$.FailedEntryCount\'))\n\n        #if("$failedEntryCount" != "0")\n            #set($context.responseOverride.status = 500)\n            {"message":"Failed to put PlaybackStarted event on the shared event bus","reason":"internal_server_error"}\n        #else\n            {"eventId":"$context.authorizer.uniqueRequestId"}\n        #end\n    ',
+                            },
+                        },
+                    },
+                    requestParameters: {
+                        'integration.request.header.X-Amz-Target': "'AWSEvents.PutEvents'",
+                        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"MusicStreaming","DetailType":"PlaybackStarted","Detail":"{\\"metadata\\":{\\"source\\":\\"MusicStreaming\\",\\"eventType\\":\\"PlaybackStarted\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
+                    },
+                    passthroughBehavior: 'never',
+                    type: 'aws',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/records/{id}': {
+            get: {
+                operationId: 'GetRecord',
+                parameters: [
+                    {
+                        name: 'id',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetRecordSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    credentials: 'arn:aws:iam::558946902552:role/get-record-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/GetItem',
+                    httpMethod: 'POST',
+                    responses: {
+                        '400': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to getitem DynamoDB to retrieve Record","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to getitem DynamoDB to retrieve Record","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        \n            #set($dynamoResponse = $input.path(\'$.Item\'))\n    \n            #if($dynamoResponse.isEmpty())\n                #set($context.responseOverride.status = 404)\n                {"message":"Record not found for given id","reason":"not_found"}\n            #else\n                {\n        \n#set($dynamoResponse_has_image = $dynamoResponse.containsKey(\'image\'))\n\n        \n            "id": "$dynamoResponse.id.S"\n            ,\n        \n            "catNo": "$dynamoResponse.catNo.S"\n            ,\n        \n            "title": "$dynamoResponse.title.S"\n            ,\n        \n            "artists": [\n            #foreach($dynamoResponse_artists_item in $dynamoResponse.artists.L)\n                "$dynamoResponse_artists_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n                #if($dynamoResponse_has_image)\n                    "image": "$dynamoResponse.image.S"\n                    ,\n                #end\n            \n            "year": $dynamoResponse.year.N\n            ,\n        \n            "labels": [\n            #foreach($dynamoResponse_labels_item in $dynamoResponse.labels.L)\n                "$dynamoResponse_labels_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "type": "$dynamoResponse.type.S"\n            ,\n        \n            "format": "$dynamoResponse.format.S"\n            ,\n        \n            "sides": [\n            #foreach($dynamoResponse_sides_item in $dynamoResponse.sides.L)\n                {\n        \n\n        \n            "name": "$dynamoResponse_sides_item.M.name.S"\n            ,\n        \n            "songs": [\n            #foreach($dynamoResponse_sides_item_M_songs_item in $dynamoResponse_sides_item.M.songs.L)\n                {\n        \n\n        \n            "title": "$dynamoResponse_sides_item_M_songs_item.M.title.S"\n            ,\n        \n            "duration": $dynamoResponse_sides_item_M_songs_item.M.duration.N\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "tags": {\n        \n\n        \n            "genres": [\n            #foreach($dynamoResponse_tags_M_genres_item in $dynamoResponse.tags.M.genres.L)\n                "$dynamoResponse_tags_M_genres_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "colours": [\n            #foreach($dynamoResponse_tags_M_colours_item in $dynamoResponse.tags.M.colours.L)\n                "$dynamoResponse_tags_M_colours_item.S"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            \n        \n    }\n            \n        \n    }\n            #end\n        \n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '{"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECORD~$context.authorizer.userId"},"sk":{"S":"$input.params(\'id\')"}}}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'aws',
+                },
+            },
+            put: {
+                operationId: 'PutRecord',
+                parameters: [
+                    {
+                        name: 'id',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PutRecordBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PutRecordSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'put-record-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials: 'arn:aws:iam::558946902552:role/put-record-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
+                    httpMethod: 'POST',
+                    responses: {
+                        '400': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put item in DynamoDB to update Record","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put item in DynamoDB to update Record","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'POST,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n        \n        #set($id = $context.requestOverride.path.id)\n        \n        {"id":"$id"}\n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n    \n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $input.params(\'id\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECORD~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$data.id" }\n            ,\n        \n            "catNo": { "S": "$data.catNo" }\n            ,\n        \n            "title": { "S": "$data.title" }\n            ,\n        \n            "artists": { "L": [\n        #foreach($data_artists_item in $data.artists)\n            {"S": "$data_artists_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$data.image" }\n                    ,\n                #end\n            \n            "year": { "N": "$data.year" }\n            ,\n        \n            "labels": { "L": [\n        #foreach($data_labels_item in $data.labels)\n            {"S": "$data_labels_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "type": { "S": "$data.type" }\n            ,\n        \n            "format": { "S": "$data.format" }\n            ,\n        \n            "sides": { "L": [\n        #foreach($data_sides_item in $data.sides)\n            {"M": {\n        \n        \n            "name": { "S": "$data_sides_item.name" }\n            ,\n        \n            "songs": { "L": [\n        #foreach($data_sides_item_songs_item in $data_sides_item.songs)\n            {"M": {\n        \n        \n            "title": { "S": "$data_sides_item_songs_item.title" }\n            ,\n        \n            "duration": { "N": "$data_sides_item_songs_item.duration" }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "tags": { "M": {\n        \n        \n            "genres": { "L": [\n        #foreach($data_tags_genres_item in $data.tags.genres)\n            {"S": "$data_tags_genres_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "colours": { "L": [\n        #foreach($data_tags_colours_item in $data.tags.colours)\n            {"S": "$data_tags_colours_item"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'aws',
+                },
+            },
+            options: {
+                parameters: [
+                    {
+                        name: 'id',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
                 responses: {
                     '204': {
                         description: '204 response',
@@ -2674,6 +3573,28 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
+            PutPlaybackBodyModel: {
+                title: 'PutPlaybackBodyModel',
+                required: ['playbackId', 'playbackPausedTime'],
+                type: 'object',
+                properties: {
+                    playbackPausedTime: {
+                        pattern:
+                            '^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$',
+                        type: 'string',
+                        description:
+                            'ISO 8601 time the song was paused. Its progress when paused is this time minus the playbackStartTime of the started event with the same playbackId',
+                    },
+                    playbackId: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                        description:
+                            'Id of this playback of the song, generated by the caller. Send the same id when the song is paused',
+                    },
+                },
+                additionalProperties: false,
+            },
             GetRecipeSearchFiltersSuccessResponse: {
                 title: 'GetRecipeSearchFiltersSuccessResponse',
                 required: ['filters', 'tags'],
@@ -2884,45 +3805,16 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
-            PostCalculateCaloriesBodyModel: {
-                title: 'PostCalculateCaloriesBodyModel',
-                required: ['ingredients', 'serves'],
+            PutPlaybackSuccessResponse: {
+                title: 'PutPlaybackSuccessResponse',
+                required: ['eventId'],
                 type: 'object',
                 properties: {
-                    serves: {
-                        type: 'number',
-                        description: 'The number of servings the recipe makes',
-                    },
-                    ingredients: {
-                        type: 'array',
-                        description:
-                            'The list of ingredients in the recipe, flattened from all sections',
-                        items: {
-                            required: ['item', 'quantity'],
-                            type: 'object',
-                            properties: {
-                                item: {
-                                    type: 'string',
-                                },
-                                quantity: {
-                                    type: 'number',
-                                },
-                                measure: {
-                                    type: 'string',
-                                },
-                                internalRecipe: {
-                                    required: ['recipeId'],
-                                    type: 'object',
-                                    properties: {
-                                        recipeId: {
-                                            type: 'string',
-                                        },
-                                    },
-                                    additionalProperties: false,
-                                },
-                            },
-                            additionalProperties: false,
-                        },
+                    eventId: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                        description: 'id of the PlaybackPaused event put on the shared event bus',
                     },
                 },
                 additionalProperties: false,
@@ -3264,6 +4156,1345 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
+            GetRecordsSuccessResponse: {
+                title: 'GetRecordsSuccessResponse',
+                type: 'array',
+                items: {
+                    required: [
+                        'artists',
+                        'catNo',
+                        'format',
+                        'id',
+                        'labels',
+                        'tags',
+                        'title',
+                        'type',
+                        'year',
+                    ],
+                    type: 'object',
+                    properties: {
+                        image: {
+                            type: 'string',
+                            description:
+                                'The S3 key of the artwork associated with the record. This is just the file key, not the full path including userId and service prefix.',
+                        },
+                        artists: {
+                            type: 'array',
+                            items: {
+                                type: 'string',
+                            },
+                        },
+                        year: {
+                            maximum: 9007199254740991,
+                            minimum: -9007199254740991,
+                            type: 'integer',
+                        },
+                        catNo: {
+                            type: 'string',
+                            description:
+                                'The catalogue number assigned to the release by its label',
+                        },
+                        format: {
+                            type: 'string',
+                            description:
+                                'The physical format of the release, e.g. "Vinyl", "CD" or "Cassette"',
+                        },
+                        id: {
+                            pattern:
+                                '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                            type: 'string',
+                        },
+                        title: {
+                            type: 'string',
+                        },
+                        type: {
+                            type: 'string',
+                            description: 'The type of release, e.g. "Album", "Single" or "EP"',
+                        },
+                        labels: {
+                            type: 'array',
+                            items: {
+                                type: 'string',
+                            },
+                        },
+                        tags: {
+                            required: ['colours', 'genres'],
+                            type: 'object',
+                            properties: {
+                                genres: {
+                                    type: 'array',
+                                    items: {
+                                        type: 'string',
+                                        enum: [
+                                            'pop',
+                                            'hip hop',
+                                            'electronic',
+                                            'r and b',
+                                            'indie',
+                                            'rock',
+                                            'jazz',
+                                            'classical',
+                                            'folk',
+                                            'acoustic',
+                                            'country',
+                                            'metal',
+                                            'blues',
+                                            'punk',
+                                            'ska',
+                                            'prog rock',
+                                        ],
+                                    },
+                                },
+                                colours: {
+                                    type: 'array',
+                                    items: {
+                                        type: 'string',
+                                        enum: [
+                                            'red',
+                                            'pink',
+                                            'orange',
+                                            'yellow',
+                                            'purple',
+                                            'green',
+                                            'blue',
+                                            'brown',
+                                            'white',
+                                            'grey',
+                                            'black',
+                                            'clear',
+                                            'picture',
+                                            'gold',
+                                        ],
+                                    },
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    additionalProperties: false,
+                },
+            },
+            GetImageSuccessResponse: {
+                title: 'GetImageSuccessResponse',
+                required: ['expiresAt', 'url'],
+                type: 'object',
+                properties: {
+                    url: {
+                        type: 'string',
+                        description:
+                            'Pre-signed S3 URL that can be used directly to load the image.',
+                    },
+                    expiresAt: {
+                        pattern:
+                            '^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$',
+                        type: 'string',
+                        description: 'ISO timestamp after which the URL will no longer work.',
+                    },
+                },
+                additionalProperties: false,
+            },
+            PostImageBodyModel: {
+                title: 'PostImageBodyModel',
+                required: ['contentType', 'service'],
+                type: 'object',
+                properties: {
+                    service: {
+                        type: 'string',
+                        enum: ['recipe', 'record'],
+                    },
+                    contentType: {
+                        type: 'string',
+                        enum: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                    },
+                },
+                additionalProperties: false,
+            },
+            PostPlaybackSuccessResponse: {
+                title: 'PostPlaybackSuccessResponse',
+                required: ['eventId'],
+                type: 'object',
+                properties: {
+                    eventId: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                        description: 'id of the PlaybackStarted event put on the shared event bus',
+                    },
+                },
+                additionalProperties: false,
+            },
+            PostImageSuccessResponse: {
+                title: 'PostImageSuccessResponse',
+                required: ['fields', 'fileKey', 'fullKey', 'url'],
+                type: 'object',
+                properties: {
+                    fullKey: {
+                        type: 'string',
+                        description:
+                            'The full key of the image in S3, including the userId and service prefix.',
+                    },
+                    fileKey: {
+                        type: 'string',
+                        description:
+                            'The file key of the image in S3, excluding the userId and service prefix.',
+                    },
+                    fields: {
+                        type: 'object',
+                        additionalProperties: {
+                            type: 'string',
+                        },
+                    },
+                    url: {
+                        type: 'string',
+                    },
+                },
+                additionalProperties: false,
+            },
+            GetRecipeSuccessResponse: {
+                title: 'GetRecipeSuccessResponse',
+                required: [
+                    'authors',
+                    'calories',
+                    'duration',
+                    'id',
+                    'ingredients',
+                    'method',
+                    'originalSource',
+                    'produces',
+                    'tags',
+                    'title',
+                ],
+                type: 'object',
+                properties: {
+                    duration: {
+                        required: ['cookingDuration', 'prepDuration', 'standingTime'],
+                        type: 'object',
+                        properties: {
+                            prepDuration: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the active time spent preparing the recipe, e.g. chopping and mixing',
+                            },
+                            cookingDuration: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the time spent cooking the recipe, e.g. baking or simmering',
+                            },
+                            standingTime: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling',
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                    image: {
+                        type: 'string',
+                        description:
+                            'The S3 key of the image associated with the recipe. This is just the file key, not the full path including userId and service prefix.',
+                    },
+                    method: {
+                        type: 'array',
+                        items: {
+                            required: ['ingredients', 'text'],
+                            type: 'object',
+                            properties: {
+                                ingredients: {
+                                    type: 'array',
+                                    items: {
+                                        required: ['item', 'quantity'],
+                                        type: 'object',
+                                        properties: {
+                                            item: {
+                                                type: 'string',
+                                            },
+                                            quantity: {
+                                                type: 'number',
+                                            },
+                                            measure: {
+                                                type: 'string',
+                                            },
+                                            internalRecipe: {
+                                                required: ['recipeId'],
+                                                type: 'object',
+                                                properties: {
+                                                    recipeId: {
+                                                        type: 'string',
+                                                    },
+                                                },
+                                                additionalProperties: false,
+                                            },
+                                            preparation: {
+                                                type: 'string',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                text: {
+                                    type: 'string',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    produces: {
+                        anyOf: [
+                            {
+                                required: ['quantity'],
+                                type: 'object',
+                                properties: {
+                                    quantity: {
+                                        type: 'number',
+                                    },
+                                    measure: {
+                                        type: 'string',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            {
+                                required: ['serves'],
+                                type: 'object',
+                                properties: {
+                                    serves: {
+                                        minimum: 1,
+                                        type: 'number',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                        ],
+                    },
+                    ingredients: {
+                        type: 'array',
+                        items: {
+                            required: ['ingredients'],
+                            type: 'object',
+                            properties: {
+                                ingredients: {
+                                    type: 'array',
+                                    items: {
+                                        required: ['item', 'quantity'],
+                                        type: 'object',
+                                        properties: {
+                                            item: {
+                                                type: 'string',
+                                            },
+                                            quantity: {
+                                                type: 'number',
+                                            },
+                                            measure: {
+                                                type: 'string',
+                                            },
+                                            internalRecipe: {
+                                                required: ['recipeId'],
+                                                type: 'object',
+                                                properties: {
+                                                    recipeId: {
+                                                        type: 'string',
+                                                    },
+                                                },
+                                                additionalProperties: false,
+                                            },
+                                            preparation: {
+                                                type: 'string',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                section: {
+                                    type: 'string',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    id: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                    },
+                    calories: {
+                        maximum: 9007199254740991,
+                        minimum: 1,
+                        type: 'integer',
+                    },
+                    title: {
+                        type: 'string',
+                    },
+                    originalSource: {
+                        anyOf: [
+                            {
+                                required: ['page', 'title', 'type'],
+                                type: 'object',
+                                properties: {
+                                    series: {
+                                        type: 'string',
+                                        description:
+                                            'The series the book belongs to, e.g. "Pinch of Nom"',
+                                    },
+                                    page: {
+                                        type: 'number',
+                                    },
+                                    type: {
+                                        type: 'string',
+                                        enum: ['book'],
+                                    },
+                                    title: {
+                                        type: 'string',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            {
+                                required: ['type', 'url'],
+                                type: 'object',
+                                properties: {
+                                    type: {
+                                        type: 'string',
+                                        enum: ['online'],
+                                    },
+                                    url: {
+                                        type: 'string',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            {
+                                required: ['issue', 'page', 'title', 'type'],
+                                type: 'object',
+                                properties: {
+                                    issue: {
+                                        type: 'string',
+                                    },
+                                    page: {
+                                        type: 'number',
+                                    },
+                                    type: {
+                                        type: 'string',
+                                        enum: ['magazine'],
+                                    },
+                                    title: {
+                                        type: 'string',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                        ],
+                    },
+                    authors: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    tags: {
+                        required: [
+                            'cuisine',
+                            'dietary',
+                            'equipment',
+                            'mealType',
+                            'meat',
+                            'occasion',
+                        ],
+                        type: 'object',
+                        properties: {
+                            occasion: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['christmas', 'eurovision', 'bbq'],
+                                },
+                            },
+                            dietary: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['vegetarian', 'vegan', 'gluten free', 'dairy free'],
+                                },
+                            },
+                            mealType: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'appetiser',
+                                        'dessert',
+                                        'breakfast',
+                                        'lunch',
+                                        'tea',
+                                        'side dish',
+                                        'spice mix',
+                                        'sauce',
+                                    ],
+                                },
+                            },
+                            meat: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['poultry', 'beef', 'lamb', 'pork', 'game', 'fish'],
+                                },
+                            },
+                            cuisine: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'cajun',
+                                        'chinese',
+                                        'french',
+                                        'greek',
+                                        'indian',
+                                        'japanese',
+                                        'malay',
+                                        'mexican',
+                                        'persian',
+                                        'american',
+                                        'italian',
+                                        'british',
+                                        'korean',
+                                        'thai',
+                                        'vietnamese',
+                                        'african',
+                                        'spanish',
+                                        'turkish',
+                                        'caribbean',
+                                        'north african',
+                                        'middle eastern',
+                                        'dutch',
+                                    ],
+                                },
+                            },
+                            equipment: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'slow cooker',
+                                        'air fryer',
+                                        'pressure cooker',
+                                        'water bath',
+                                        'ice cream maker',
+                                    ],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                },
+                additionalProperties: false,
+            },
+            GetExtractedExternalRecipeBasicsResponseModel: {
+                title: 'GetExtractedExternalRecipeBasicsResponseModel',
+                required: ['duration', 'title'],
+                type: 'object',
+                properties: {
+                    duration: {
+                        required: ['cookingDuration', 'prepDuration', 'standingTime'],
+                        type: 'object',
+                        properties: {
+                            prepDuration: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the active time spent preparing the recipe, e.g. chopping and mixing',
+                            },
+                            cookingDuration: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the time spent cooking the recipe, e.g. baking or simmering',
+                            },
+                            standingTime: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling',
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                    title: {
+                        type: 'string',
+                    },
+                },
+                additionalProperties: false,
+            },
+            PutRecipeSuccessResponse: {
+                title: 'PutRecipeSuccessResponse',
+                required: ['id'],
+                type: 'object',
+                properties: {
+                    id: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                    },
+                },
+                additionalProperties: false,
+            },
+            PutRecordBodyModel: {
+                title: 'PutRecordBodyModel',
+                required: [
+                    'artists',
+                    'catNo',
+                    'format',
+                    'labels',
+                    'sides',
+                    'tags',
+                    'title',
+                    'type',
+                    'year',
+                ],
+                type: 'object',
+                properties: {
+                    image: {
+                        type: 'string',
+                        description:
+                            'The S3 key of the artwork associated with the record. This is just the file key, not the full path including userId and service prefix.',
+                    },
+                    artists: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    year: {
+                        maximum: 9007199254740991,
+                        minimum: -9007199254740991,
+                        type: 'integer',
+                    },
+                    catNo: {
+                        type: 'string',
+                        description: 'The catalogue number assigned to the release by its label',
+                    },
+                    format: {
+                        type: 'string',
+                        description:
+                            'The physical format of the release, e.g. "Vinyl", "CD" or "Cassette"',
+                    },
+                    sides: {
+                        type: 'array',
+                        items: {
+                            required: ['name', 'songs'],
+                            type: 'object',
+                            properties: {
+                                songs: {
+                                    type: 'array',
+                                    items: {
+                                        required: ['duration', 'title'],
+                                        type: 'object',
+                                        properties: {
+                                            duration: {
+                                                maximum: 9007199254740991,
+                                                minimum: 0,
+                                                type: 'integer',
+                                                description: 'In seconds the length of the song',
+                                            },
+                                            title: {
+                                                type: 'string',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                name: {
+                                    type: 'string',
+                                    description: 'The name of the side, e.g. "A" or "B"',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    title: {
+                        type: 'string',
+                    },
+                    type: {
+                        type: 'string',
+                        description: 'The type of release, e.g. "Album", "Single" or "EP"',
+                    },
+                    labels: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    tags: {
+                        required: ['colours', 'genres'],
+                        type: 'object',
+                        properties: {
+                            genres: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'pop',
+                                        'hip hop',
+                                        'electronic',
+                                        'r and b',
+                                        'indie',
+                                        'rock',
+                                        'jazz',
+                                        'classical',
+                                        'folk',
+                                        'acoustic',
+                                        'country',
+                                        'metal',
+                                        'blues',
+                                        'punk',
+                                        'ska',
+                                        'prog rock',
+                                    ],
+                                },
+                            },
+                            colours: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'red',
+                                        'pink',
+                                        'orange',
+                                        'yellow',
+                                        'purple',
+                                        'green',
+                                        'blue',
+                                        'brown',
+                                        'white',
+                                        'grey',
+                                        'black',
+                                        'clear',
+                                        'picture',
+                                        'gold',
+                                    ],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                },
+                additionalProperties: false,
+            },
+            GetExtractedExternalRecipeSuccessResponse: {
+                title: 'GetExtractedExternalRecipeSuccessResponse',
+                required: [
+                    'authors',
+                    'duration',
+                    'ingredients',
+                    'method',
+                    'originalSource',
+                    'produces',
+                    'tags',
+                    'title',
+                ],
+                type: 'object',
+                properties: {
+                    duration: {
+                        required: ['cookingDuration', 'prepDuration', 'standingTime'],
+                        type: 'object',
+                        properties: {
+                            prepDuration: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the active time spent preparing the recipe, e.g. chopping and mixing',
+                            },
+                            cookingDuration: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the time spent cooking the recipe, e.g. baking or simmering',
+                            },
+                            standingTime: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                type: 'integer',
+                                description:
+                                    'In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling',
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                    originalImageUrl: {
+                        type: 'string',
+                    },
+                    method: {
+                        type: 'array',
+                        items: {
+                            required: ['ingredients', 'text'],
+                            type: 'object',
+                            properties: {
+                                ingredients: {
+                                    type: 'array',
+                                    items: {
+                                        required: ['item', 'quantity'],
+                                        type: 'object',
+                                        properties: {
+                                            item: {
+                                                type: 'string',
+                                            },
+                                            quantity: {
+                                                type: 'number',
+                                            },
+                                            measure: {
+                                                type: 'string',
+                                            },
+                                            internalRecipe: {
+                                                required: ['recipeId'],
+                                                type: 'object',
+                                                properties: {
+                                                    recipeId: {
+                                                        type: 'string',
+                                                    },
+                                                },
+                                                additionalProperties: false,
+                                            },
+                                            preparation: {
+                                                type: 'string',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                text: {
+                                    type: 'string',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    produces: {
+                        anyOf: [
+                            {
+                                required: ['quantity'],
+                                type: 'object',
+                                properties: {
+                                    quantity: {
+                                        type: 'number',
+                                    },
+                                    measure: {
+                                        type: 'string',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            {
+                                required: ['serves'],
+                                type: 'object',
+                                properties: {
+                                    serves: {
+                                        minimum: 1,
+                                        type: 'number',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                        ],
+                    },
+                    ingredients: {
+                        type: 'array',
+                        items: {
+                            required: ['ingredients'],
+                            type: 'object',
+                            properties: {
+                                ingredients: {
+                                    type: 'array',
+                                    items: {
+                                        required: ['item', 'quantity'],
+                                        type: 'object',
+                                        properties: {
+                                            item: {
+                                                type: 'string',
+                                            },
+                                            quantity: {
+                                                type: 'number',
+                                            },
+                                            measure: {
+                                                type: 'string',
+                                            },
+                                            internalRecipe: {
+                                                required: ['recipeId'],
+                                                type: 'object',
+                                                properties: {
+                                                    recipeId: {
+                                                        type: 'string',
+                                                    },
+                                                },
+                                                additionalProperties: false,
+                                            },
+                                            preparation: {
+                                                type: 'string',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                section: {
+                                    type: 'string',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    title: {
+                        type: 'string',
+                    },
+                    originalSource: {
+                        anyOf: [
+                            {
+                                required: ['page', 'title', 'type'],
+                                type: 'object',
+                                properties: {
+                                    series: {
+                                        type: 'string',
+                                        description:
+                                            'The series the book belongs to, e.g. "Pinch of Nom"',
+                                    },
+                                    page: {
+                                        type: 'number',
+                                    },
+                                    type: {
+                                        type: 'string',
+                                        enum: ['book'],
+                                    },
+                                    title: {
+                                        type: 'string',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            {
+                                required: ['type', 'url'],
+                                type: 'object',
+                                properties: {
+                                    type: {
+                                        type: 'string',
+                                        enum: ['online'],
+                                    },
+                                    url: {
+                                        type: 'string',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            {
+                                required: ['issue', 'page', 'title', 'type'],
+                                type: 'object',
+                                properties: {
+                                    issue: {
+                                        type: 'string',
+                                    },
+                                    page: {
+                                        type: 'number',
+                                    },
+                                    type: {
+                                        type: 'string',
+                                        enum: ['magazine'],
+                                    },
+                                    title: {
+                                        type: 'string',
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                        ],
+                    },
+                    authors: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    tags: {
+                        required: [
+                            'cuisine',
+                            'dietary',
+                            'equipment',
+                            'mealType',
+                            'meat',
+                            'occasion',
+                        ],
+                        type: 'object',
+                        properties: {
+                            occasion: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['christmas', 'eurovision', 'bbq'],
+                                },
+                            },
+                            dietary: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['vegetarian', 'vegan', 'gluten free', 'dairy free'],
+                                },
+                            },
+                            mealType: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'appetiser',
+                                        'dessert',
+                                        'breakfast',
+                                        'lunch',
+                                        'tea',
+                                        'side dish',
+                                        'spice mix',
+                                        'sauce',
+                                    ],
+                                },
+                            },
+                            meat: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: ['poultry', 'beef', 'lamb', 'pork', 'game', 'fish'],
+                                },
+                            },
+                            cuisine: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'cajun',
+                                        'chinese',
+                                        'french',
+                                        'greek',
+                                        'indian',
+                                        'japanese',
+                                        'malay',
+                                        'mexican',
+                                        'persian',
+                                        'american',
+                                        'italian',
+                                        'british',
+                                        'korean',
+                                        'thai',
+                                        'vietnamese',
+                                        'african',
+                                        'spanish',
+                                        'turkish',
+                                        'caribbean',
+                                        'north african',
+                                        'middle eastern',
+                                        'dutch',
+                                    ],
+                                },
+                            },
+                            equipment: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'slow cooker',
+                                        'air fryer',
+                                        'pressure cooker',
+                                        'water bath',
+                                        'ice cream maker',
+                                    ],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                },
+                additionalProperties: false,
+            },
+            PostRecordSuccessResponse: {
+                title: 'PostRecordSuccessResponse',
+                required: ['id'],
+                type: 'object',
+                properties: {
+                    id: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                    },
+                },
+                additionalProperties: false,
+            },
+            PostPlaybackBodyModel: {
+                title: 'PostPlaybackBodyModel',
+                required: [
+                    'artist',
+                    'playbackId',
+                    'playbackStartTime',
+                    'songLength',
+                    'songTitle',
+                    'source',
+                ],
+                type: 'object',
+                properties: {
+                    songTitle: {
+                        minLength: 1,
+                        type: 'string',
+                        description: 'Title of the song',
+                    },
+                    playbackStartTime: {
+                        pattern:
+                            '^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$',
+                        type: 'string',
+                        description:
+                            'ISO 8601 time the song would have begun playing from its start, worked out as the current time minus the progress through the song. E.g. if Spotify reports 30 seconds of progress, this is now minus 30 seconds. Used with songLength to work out how far through the song it is',
+                    },
+                    playbackId: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                        description:
+                            'Id of this playback of the song, generated by the caller. Send the same id when the song is paused',
+                    },
+                    artist: {
+                        minLength: 1,
+                        type: 'string',
+                        description: 'Artist of the song',
+                    },
+                    album: {
+                        minLength: 1,
+                        type: 'string',
+                        description: 'Album the song is from',
+                    },
+                    artworkUrl: {
+                        type: 'string',
+                        description: 'URL of the artwork for the song',
+                    },
+                    songLength: {
+                        minimum: 0,
+                        exclusiveMinimum: true,
+                        type: 'number',
+                        description: 'Total length of the song in seconds',
+                    },
+                    source: {
+                        type: 'string',
+                        description: 'Where the song is playing from',
+                        enum: ['spotify'],
+                    },
+                },
+                additionalProperties: false,
+            },
+            PutMealPlanSuccessResponse: {
+                title: 'PutMealPlanSuccessResponse',
+                required: ['date', 'mealTime'],
+                type: 'object',
+                properties: {
+                    date: {
+                        pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+                        type: 'string',
+                    },
+                    mealTime: {
+                        type: 'string',
+                        enum: ['breakfast', 'lunch', 'dinner'],
+                    },
+                },
+                additionalProperties: false,
+            },
+            PostCalculateCaloriesBodyModel: {
+                title: 'PostCalculateCaloriesBodyModel',
+                required: ['ingredients', 'serves'],
+                type: 'object',
+                properties: {
+                    serves: {
+                        type: 'number',
+                        description: 'The number of servings the recipe makes',
+                    },
+                    ingredients: {
+                        type: 'array',
+                        description:
+                            'The list of ingredients in the recipe, flattened from all sections',
+                        items: {
+                            required: ['item', 'quantity'],
+                            type: 'object',
+                            properties: {
+                                item: {
+                                    type: 'string',
+                                },
+                                quantity: {
+                                    type: 'number',
+                                },
+                                measure: {
+                                    type: 'string',
+                                },
+                                internalRecipe: {
+                                    required: ['recipeId'],
+                                    type: 'object',
+                                    properties: {
+                                        recipeId: {
+                                            type: 'string',
+                                        },
+                                    },
+                                    additionalProperties: false,
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                },
+                additionalProperties: false,
+            },
+            GetRecordSuccessResponse: {
+                title: 'GetRecordSuccessResponse',
+                required: [
+                    'artists',
+                    'catNo',
+                    'format',
+                    'id',
+                    'labels',
+                    'sides',
+                    'tags',
+                    'title',
+                    'type',
+                    'year',
+                ],
+                type: 'object',
+                properties: {
+                    image: {
+                        type: 'string',
+                        description:
+                            'The S3 key of the artwork associated with the record. This is just the file key, not the full path including userId and service prefix.',
+                    },
+                    artists: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    year: {
+                        maximum: 9007199254740991,
+                        minimum: -9007199254740991,
+                        type: 'integer',
+                    },
+                    catNo: {
+                        type: 'string',
+                        description: 'The catalogue number assigned to the release by its label',
+                    },
+                    format: {
+                        type: 'string',
+                        description:
+                            'The physical format of the release, e.g. "Vinyl", "CD" or "Cassette"',
+                    },
+                    sides: {
+                        type: 'array',
+                        items: {
+                            required: ['name', 'songs'],
+                            type: 'object',
+                            properties: {
+                                songs: {
+                                    type: 'array',
+                                    items: {
+                                        required: ['duration', 'title'],
+                                        type: 'object',
+                                        properties: {
+                                            duration: {
+                                                maximum: 9007199254740991,
+                                                minimum: 0,
+                                                type: 'integer',
+                                                description: 'In seconds the length of the song',
+                                            },
+                                            title: {
+                                                type: 'string',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                name: {
+                                    type: 'string',
+                                    description: 'The name of the side, e.g. "A" or "B"',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    id: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                    },
+                    title: {
+                        type: 'string',
+                    },
+                    type: {
+                        type: 'string',
+                        description: 'The type of release, e.g. "Album", "Single" or "EP"',
+                    },
+                    labels: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    tags: {
+                        required: ['colours', 'genres'],
+                        type: 'object',
+                        properties: {
+                            genres: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'pop',
+                                        'hip hop',
+                                        'electronic',
+                                        'r and b',
+                                        'indie',
+                                        'rock',
+                                        'jazz',
+                                        'classical',
+                                        'folk',
+                                        'acoustic',
+                                        'country',
+                                        'metal',
+                                        'blues',
+                                        'punk',
+                                        'ska',
+                                        'prog rock',
+                                    ],
+                                },
+                            },
+                            colours: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'red',
+                                        'pink',
+                                        'orange',
+                                        'yellow',
+                                        'purple',
+                                        'green',
+                                        'blue',
+                                        'brown',
+                                        'white',
+                                        'grey',
+                                        'black',
+                                        'clear',
+                                        'picture',
+                                        'gold',
+                                    ],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                },
+                additionalProperties: false,
+            },
             GetImagesSuccessResponse: {
                 title: 'GetImagesSuccessResponse',
                 required: ['expiresAt', 'images', 'notFound'],
@@ -3293,21 +5524,15 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
-            GetImageSuccessResponse: {
-                title: 'GetImageSuccessResponse',
-                required: ['expiresAt', 'url'],
+            PutRecordSuccessResponse: {
+                title: 'PutRecordSuccessResponse',
+                required: ['id'],
                 type: 'object',
                 properties: {
-                    url: {
-                        type: 'string',
-                        description:
-                            'Pre-signed S3 URL that can be used directly to load the image.',
-                    },
-                    expiresAt: {
+                    id: {
                         pattern:
-                            '^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$',
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
                         type: 'string',
-                        description: 'ISO timestamp after which the URL will no longer work.',
                     },
                 },
                 additionalProperties: false,
@@ -3526,22 +5751,6 @@ const BackendApi = {
                             },
                             additionalProperties: false,
                         },
-                    },
-                },
-                additionalProperties: false,
-            },
-            PostImageBodyModel: {
-                title: 'PostImageBodyModel',
-                required: ['contentType', 'service'],
-                type: 'object',
-                properties: {
-                    service: {
-                        type: 'string',
-                        enum: ['recipe'],
-                    },
-                    contentType: {
-                        type: 'string',
-                        enum: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
                     },
                 },
                 additionalProperties: false,
@@ -3901,33 +6110,6 @@ const BackendApi = {
                     additionalProperties: false,
                 },
             },
-            PostImageSuccessResponse: {
-                title: 'PostImageSuccessResponse',
-                required: ['fields', 'fileKey', 'fullKey', 'url'],
-                type: 'object',
-                properties: {
-                    fullKey: {
-                        type: 'string',
-                        description:
-                            'The full key of the image in S3, including the userId and service prefix.',
-                    },
-                    fileKey: {
-                        type: 'string',
-                        description:
-                            'The file key of the image in S3, excluding the userId and service prefix.',
-                    },
-                    fields: {
-                        type: 'object',
-                        additionalProperties: {
-                            type: 'string',
-                        },
-                    },
-                    url: {
-                        type: 'string',
-                    },
-                },
-                additionalProperties: false,
-            },
             PostRecipeSuccessResponse: {
                 title: 'PostRecipeSuccessResponse',
                 required: ['id'],
@@ -3937,349 +6119,6 @@ const BackendApi = {
                         pattern:
                             '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
                         type: 'string',
-                    },
-                },
-                additionalProperties: false,
-            },
-            GetRecipeSuccessResponse: {
-                title: 'GetRecipeSuccessResponse',
-                required: [
-                    'authors',
-                    'calories',
-                    'duration',
-                    'id',
-                    'ingredients',
-                    'method',
-                    'originalSource',
-                    'produces',
-                    'tags',
-                    'title',
-                ],
-                type: 'object',
-                properties: {
-                    duration: {
-                        required: ['cookingDuration', 'prepDuration', 'standingTime'],
-                        type: 'object',
-                        properties: {
-                            prepDuration: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the active time spent preparing the recipe, e.g. chopping and mixing',
-                            },
-                            cookingDuration: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the time spent cooking the recipe, e.g. baking or simmering',
-                            },
-                            standingTime: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling',
-                            },
-                        },
-                        additionalProperties: false,
-                    },
-                    image: {
-                        type: 'string',
-                        description:
-                            'The S3 key of the image associated with the recipe. This is just the file key, not the full path including userId and service prefix.',
-                    },
-                    method: {
-                        type: 'array',
-                        items: {
-                            required: ['ingredients', 'text'],
-                            type: 'object',
-                            properties: {
-                                ingredients: {
-                                    type: 'array',
-                                    items: {
-                                        required: ['item', 'quantity'],
-                                        type: 'object',
-                                        properties: {
-                                            item: {
-                                                type: 'string',
-                                            },
-                                            quantity: {
-                                                type: 'number',
-                                            },
-                                            measure: {
-                                                type: 'string',
-                                            },
-                                            internalRecipe: {
-                                                required: ['recipeId'],
-                                                type: 'object',
-                                                properties: {
-                                                    recipeId: {
-                                                        type: 'string',
-                                                    },
-                                                },
-                                                additionalProperties: false,
-                                            },
-                                            preparation: {
-                                                type: 'string',
-                                            },
-                                        },
-                                        additionalProperties: false,
-                                    },
-                                },
-                                text: {
-                                    type: 'string',
-                                },
-                            },
-                            additionalProperties: false,
-                        },
-                    },
-                    produces: {
-                        anyOf: [
-                            {
-                                required: ['quantity'],
-                                type: 'object',
-                                properties: {
-                                    quantity: {
-                                        type: 'number',
-                                    },
-                                    measure: {
-                                        type: 'string',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                            {
-                                required: ['serves'],
-                                type: 'object',
-                                properties: {
-                                    serves: {
-                                        minimum: 1,
-                                        type: 'number',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                        ],
-                    },
-                    ingredients: {
-                        type: 'array',
-                        items: {
-                            required: ['ingredients'],
-                            type: 'object',
-                            properties: {
-                                ingredients: {
-                                    type: 'array',
-                                    items: {
-                                        required: ['item', 'quantity'],
-                                        type: 'object',
-                                        properties: {
-                                            item: {
-                                                type: 'string',
-                                            },
-                                            quantity: {
-                                                type: 'number',
-                                            },
-                                            measure: {
-                                                type: 'string',
-                                            },
-                                            internalRecipe: {
-                                                required: ['recipeId'],
-                                                type: 'object',
-                                                properties: {
-                                                    recipeId: {
-                                                        type: 'string',
-                                                    },
-                                                },
-                                                additionalProperties: false,
-                                            },
-                                            preparation: {
-                                                type: 'string',
-                                            },
-                                        },
-                                        additionalProperties: false,
-                                    },
-                                },
-                                section: {
-                                    type: 'string',
-                                },
-                            },
-                            additionalProperties: false,
-                        },
-                    },
-                    id: {
-                        pattern:
-                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
-                        type: 'string',
-                    },
-                    calories: {
-                        maximum: 9007199254740991,
-                        minimum: 1,
-                        type: 'integer',
-                    },
-                    title: {
-                        type: 'string',
-                    },
-                    originalSource: {
-                        anyOf: [
-                            {
-                                required: ['page', 'title', 'type'],
-                                type: 'object',
-                                properties: {
-                                    series: {
-                                        type: 'string',
-                                        description:
-                                            'The series the book belongs to, e.g. "Pinch of Nom"',
-                                    },
-                                    page: {
-                                        type: 'number',
-                                    },
-                                    type: {
-                                        type: 'string',
-                                        enum: ['book'],
-                                    },
-                                    title: {
-                                        type: 'string',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                            {
-                                required: ['type', 'url'],
-                                type: 'object',
-                                properties: {
-                                    type: {
-                                        type: 'string',
-                                        enum: ['online'],
-                                    },
-                                    url: {
-                                        type: 'string',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                            {
-                                required: ['issue', 'page', 'title', 'type'],
-                                type: 'object',
-                                properties: {
-                                    issue: {
-                                        type: 'string',
-                                    },
-                                    page: {
-                                        type: 'number',
-                                    },
-                                    type: {
-                                        type: 'string',
-                                        enum: ['magazine'],
-                                    },
-                                    title: {
-                                        type: 'string',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                        ],
-                    },
-                    authors: {
-                        type: 'array',
-                        items: {
-                            type: 'string',
-                        },
-                    },
-                    tags: {
-                        required: [
-                            'cuisine',
-                            'dietary',
-                            'equipment',
-                            'mealType',
-                            'meat',
-                            'occasion',
-                        ],
-                        type: 'object',
-                        properties: {
-                            occasion: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: ['christmas', 'eurovision', 'bbq'],
-                                },
-                            },
-                            dietary: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: ['vegetarian', 'vegan', 'gluten free', 'dairy free'],
-                                },
-                            },
-                            mealType: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: [
-                                        'appetiser',
-                                        'dessert',
-                                        'breakfast',
-                                        'lunch',
-                                        'tea',
-                                        'side dish',
-                                        'spice mix',
-                                        'sauce',
-                                    ],
-                                },
-                            },
-                            meat: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: ['poultry', 'beef', 'lamb', 'pork', 'game', 'fish'],
-                                },
-                            },
-                            cuisine: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: [
-                                        'cajun',
-                                        'chinese',
-                                        'french',
-                                        'greek',
-                                        'indian',
-                                        'japanese',
-                                        'malay',
-                                        'mexican',
-                                        'persian',
-                                        'american',
-                                        'italian',
-                                        'british',
-                                        'korean',
-                                        'thai',
-                                        'vietnamese',
-                                        'african',
-                                        'spanish',
-                                        'turkish',
-                                        'caribbean',
-                                        'north african',
-                                        'middle eastern',
-                                        'dutch',
-                                    ],
-                                },
-                            },
-                            equipment: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: [
-                                        'slow cooker',
-                                        'air fryer',
-                                        'pressure cooker',
-                                        'water bath',
-                                        'ice cream maker',
-                                    ],
-                                },
-                            },
-                        },
-                        additionalProperties: false,
                     },
                 },
                 additionalProperties: false,
@@ -4300,58 +6139,6 @@ const BackendApi = {
                         ],
                     },
                     message: {
-                        type: 'string',
-                    },
-                },
-                additionalProperties: false,
-            },
-            GetExtractedExternalRecipeBasicsResponseModel: {
-                title: 'GetExtractedExternalRecipeBasicsResponseModel',
-                required: ['duration', 'title'],
-                type: 'object',
-                properties: {
-                    duration: {
-                        required: ['cookingDuration', 'prepDuration', 'standingTime'],
-                        type: 'object',
-                        properties: {
-                            prepDuration: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the active time spent preparing the recipe, e.g. chopping and mixing',
-                            },
-                            cookingDuration: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the time spent cooking the recipe, e.g. baking or simmering',
-                            },
-                            standingTime: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling',
-                            },
-                        },
-                        additionalProperties: false,
-                    },
-                    title: {
-                        type: 'string',
-                    },
-                },
-                additionalProperties: false,
-            },
-            PutRecipeSuccessResponse: {
-                title: 'PutRecipeSuccessResponse',
-                required: ['id'],
-                type: 'object',
-                properties: {
-                    id: {
-                        pattern:
-                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
                         type: 'string',
                     },
                 },
@@ -4887,335 +6674,6 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
-            GetExtractedExternalRecipeSuccessResponse: {
-                title: 'GetExtractedExternalRecipeSuccessResponse',
-                required: [
-                    'authors',
-                    'duration',
-                    'ingredients',
-                    'method',
-                    'originalSource',
-                    'produces',
-                    'tags',
-                    'title',
-                ],
-                type: 'object',
-                properties: {
-                    duration: {
-                        required: ['cookingDuration', 'prepDuration', 'standingTime'],
-                        type: 'object',
-                        properties: {
-                            prepDuration: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the active time spent preparing the recipe, e.g. chopping and mixing',
-                            },
-                            cookingDuration: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the time spent cooking the recipe, e.g. baking or simmering',
-                            },
-                            standingTime: {
-                                maximum: 9007199254740991,
-                                minimum: 0,
-                                type: 'integer',
-                                description:
-                                    'In minutes the time spent waiting for the recipe to be ready, e.g. rising, marinating or chilling',
-                            },
-                        },
-                        additionalProperties: false,
-                    },
-                    originalImageUrl: {
-                        type: 'string',
-                    },
-                    method: {
-                        type: 'array',
-                        items: {
-                            required: ['ingredients', 'text'],
-                            type: 'object',
-                            properties: {
-                                ingredients: {
-                                    type: 'array',
-                                    items: {
-                                        required: ['item', 'quantity'],
-                                        type: 'object',
-                                        properties: {
-                                            item: {
-                                                type: 'string',
-                                            },
-                                            quantity: {
-                                                type: 'number',
-                                            },
-                                            measure: {
-                                                type: 'string',
-                                            },
-                                            internalRecipe: {
-                                                required: ['recipeId'],
-                                                type: 'object',
-                                                properties: {
-                                                    recipeId: {
-                                                        type: 'string',
-                                                    },
-                                                },
-                                                additionalProperties: false,
-                                            },
-                                            preparation: {
-                                                type: 'string',
-                                            },
-                                        },
-                                        additionalProperties: false,
-                                    },
-                                },
-                                text: {
-                                    type: 'string',
-                                },
-                            },
-                            additionalProperties: false,
-                        },
-                    },
-                    produces: {
-                        anyOf: [
-                            {
-                                required: ['quantity'],
-                                type: 'object',
-                                properties: {
-                                    quantity: {
-                                        type: 'number',
-                                    },
-                                    measure: {
-                                        type: 'string',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                            {
-                                required: ['serves'],
-                                type: 'object',
-                                properties: {
-                                    serves: {
-                                        minimum: 1,
-                                        type: 'number',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                        ],
-                    },
-                    ingredients: {
-                        type: 'array',
-                        items: {
-                            required: ['ingredients'],
-                            type: 'object',
-                            properties: {
-                                ingredients: {
-                                    type: 'array',
-                                    items: {
-                                        required: ['item', 'quantity'],
-                                        type: 'object',
-                                        properties: {
-                                            item: {
-                                                type: 'string',
-                                            },
-                                            quantity: {
-                                                type: 'number',
-                                            },
-                                            measure: {
-                                                type: 'string',
-                                            },
-                                            internalRecipe: {
-                                                required: ['recipeId'],
-                                                type: 'object',
-                                                properties: {
-                                                    recipeId: {
-                                                        type: 'string',
-                                                    },
-                                                },
-                                                additionalProperties: false,
-                                            },
-                                            preparation: {
-                                                type: 'string',
-                                            },
-                                        },
-                                        additionalProperties: false,
-                                    },
-                                },
-                                section: {
-                                    type: 'string',
-                                },
-                            },
-                            additionalProperties: false,
-                        },
-                    },
-                    title: {
-                        type: 'string',
-                    },
-                    originalSource: {
-                        anyOf: [
-                            {
-                                required: ['page', 'title', 'type'],
-                                type: 'object',
-                                properties: {
-                                    series: {
-                                        type: 'string',
-                                        description:
-                                            'The series the book belongs to, e.g. "Pinch of Nom"',
-                                    },
-                                    page: {
-                                        type: 'number',
-                                    },
-                                    type: {
-                                        type: 'string',
-                                        enum: ['book'],
-                                    },
-                                    title: {
-                                        type: 'string',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                            {
-                                required: ['type', 'url'],
-                                type: 'object',
-                                properties: {
-                                    type: {
-                                        type: 'string',
-                                        enum: ['online'],
-                                    },
-                                    url: {
-                                        type: 'string',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                            {
-                                required: ['issue', 'page', 'title', 'type'],
-                                type: 'object',
-                                properties: {
-                                    issue: {
-                                        type: 'string',
-                                    },
-                                    page: {
-                                        type: 'number',
-                                    },
-                                    type: {
-                                        type: 'string',
-                                        enum: ['magazine'],
-                                    },
-                                    title: {
-                                        type: 'string',
-                                    },
-                                },
-                                additionalProperties: false,
-                            },
-                        ],
-                    },
-                    authors: {
-                        type: 'array',
-                        items: {
-                            type: 'string',
-                        },
-                    },
-                    tags: {
-                        required: [
-                            'cuisine',
-                            'dietary',
-                            'equipment',
-                            'mealType',
-                            'meat',
-                            'occasion',
-                        ],
-                        type: 'object',
-                        properties: {
-                            occasion: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: ['christmas', 'eurovision', 'bbq'],
-                                },
-                            },
-                            dietary: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: ['vegetarian', 'vegan', 'gluten free', 'dairy free'],
-                                },
-                            },
-                            mealType: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: [
-                                        'appetiser',
-                                        'dessert',
-                                        'breakfast',
-                                        'lunch',
-                                        'tea',
-                                        'side dish',
-                                        'spice mix',
-                                        'sauce',
-                                    ],
-                                },
-                            },
-                            meat: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: ['poultry', 'beef', 'lamb', 'pork', 'game', 'fish'],
-                                },
-                            },
-                            cuisine: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: [
-                                        'cajun',
-                                        'chinese',
-                                        'french',
-                                        'greek',
-                                        'indian',
-                                        'japanese',
-                                        'malay',
-                                        'mexican',
-                                        'persian',
-                                        'american',
-                                        'italian',
-                                        'british',
-                                        'korean',
-                                        'thai',
-                                        'vietnamese',
-                                        'african',
-                                        'spanish',
-                                        'turkish',
-                                        'caribbean',
-                                        'north african',
-                                        'middle eastern',
-                                        'dutch',
-                                    ],
-                                },
-                            },
-                            equipment: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: [
-                                        'slow cooker',
-                                        'air fryer',
-                                        'pressure cooker',
-                                        'water bath',
-                                        'ice cream maker',
-                                    ],
-                                },
-                            },
-                        },
-                        additionalProperties: false,
-                    },
-                },
-                additionalProperties: false,
-            },
             DeleteRecipeSuccessResponse: {
                 title: 'DeleteRecipeSuccessResponse',
                 required: ['id'],
@@ -5229,24 +6687,163 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
-            PutMealPlanSuccessResponse: {
-                title: 'PutMealPlanSuccessResponse',
-                required: ['date', 'mealTime'],
+            PostRecordBodyModel: {
+                title: 'PostRecordBodyModel',
+                required: [
+                    'artists',
+                    'catNo',
+                    'format',
+                    'labels',
+                    'sides',
+                    'tags',
+                    'title',
+                    'type',
+                    'year',
+                ],
                 type: 'object',
                 properties: {
-                    date: {
-                        pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+                    image: {
+                        type: 'string',
+                        description:
+                            'The S3 key of the artwork associated with the record. This is just the file key, not the full path including userId and service prefix.',
+                    },
+                    artists: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    year: {
+                        maximum: 9007199254740991,
+                        minimum: -9007199254740991,
+                        type: 'integer',
+                    },
+                    catNo: {
+                        type: 'string',
+                        description: 'The catalogue number assigned to the release by its label',
+                    },
+                    format: {
+                        type: 'string',
+                        description:
+                            'The physical format of the release, e.g. "Vinyl", "CD" or "Cassette"',
+                    },
+                    sides: {
+                        type: 'array',
+                        items: {
+                            required: ['name', 'songs'],
+                            type: 'object',
+                            properties: {
+                                songs: {
+                                    type: 'array',
+                                    items: {
+                                        required: ['duration', 'title'],
+                                        type: 'object',
+                                        properties: {
+                                            duration: {
+                                                maximum: 9007199254740991,
+                                                minimum: 0,
+                                                type: 'integer',
+                                                description: 'In seconds the length of the song',
+                                            },
+                                            title: {
+                                                type: 'string',
+                                            },
+                                        },
+                                        additionalProperties: false,
+                                    },
+                                },
+                                name: {
+                                    type: 'string',
+                                    description: 'The name of the side, e.g. "A" or "B"',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                    },
+                    title: {
                         type: 'string',
                     },
-                    mealTime: {
+                    type: {
                         type: 'string',
-                        enum: ['breakfast', 'lunch', 'dinner'],
+                        description: 'The type of release, e.g. "Album", "Single" or "EP"',
+                    },
+                    labels: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                    tags: {
+                        required: ['colours', 'genres'],
+                        type: 'object',
+                        properties: {
+                            genres: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'pop',
+                                        'hip hop',
+                                        'electronic',
+                                        'r and b',
+                                        'indie',
+                                        'rock',
+                                        'jazz',
+                                        'classical',
+                                        'folk',
+                                        'acoustic',
+                                        'country',
+                                        'metal',
+                                        'blues',
+                                        'punk',
+                                        'ska',
+                                        'prog rock',
+                                    ],
+                                },
+                            },
+                            colours: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    enum: [
+                                        'red',
+                                        'pink',
+                                        'orange',
+                                        'yellow',
+                                        'purple',
+                                        'green',
+                                        'blue',
+                                        'brown',
+                                        'white',
+                                        'grey',
+                                        'black',
+                                        'clear',
+                                        'picture',
+                                        'gold',
+                                    ],
+                                },
+                            },
+                        },
+                        additionalProperties: false,
                     },
                 },
                 additionalProperties: false,
             },
         },
         securitySchemes: {
+            'home-automation-api-v2-machine-authorizer-dev': {
+                type: 'apiKey',
+                name: 'Authorization',
+                in: 'header',
+                'x-amazon-apigateway-authtype': 'custom',
+                'x-amazon-apigateway-authorizer': {
+                    authorizerUri:
+                        'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:home-automation-api-v2-machine-authorizer-lambda-dev/invocations',
+                    authorizerResultTtlInSeconds: 0,
+                    identitySource: 'method.request.header.Authorization',
+                    type: 'request',
+                },
+            },
             api_key: {
                 type: 'apiKey',
                 name: 'x-api-key',
@@ -5268,8 +6865,8 @@ const BackendApi = {
         },
     },
     'x-amazon-apigateway-documentation': {
-        version: '1vdbxe',
-        createdDate: '2026-09-26T11:48:49Z',
+        version: '3ro6mr',
+        createdDate: '2026-10-01T06:50:31Z',
         documentationParts: [
             {
                 location: {
@@ -5322,6 +6919,18 @@ const BackendApi = {
             {
                 location: {
                     type: 'QUERY_PARAMETER',
+                    path: '/records',
+                    method: 'GET',
+                    name: 'keywords',
+                },
+                properties: {
+                    description:
+                        'Matched against record titles, artists and song titles\n\nRepeat the query parameter to pass multiple values, for example ?keywords=quick&keywords=easy.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "description": "Matched against record titles, artists and song titles",\n  "type": "array",\n  "items": {\n    "type": "string"\n  }\n}',
+                },
+            },
+            {
+                location: {
+                    type: 'QUERY_PARAMETER',
                     path: '/recipes',
                     method: 'GET',
                     name: 'previousRecipeId',
@@ -5329,6 +6938,18 @@ const BackendApi = {
                 properties: {
                     description:
                         'ID of the last recipe in the previous page of results. Omit to get the first page. Up to 15 recipes are returned per request; fewer than 15 means there are no more results.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "description": "ID of the last recipe in the previous page of results. Omit to get the first page. Up to 15 recipes are returned per request; fewer than 15 means there are no more results.",\n  "type": "string",\n  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"\n}',
+                },
+            },
+            {
+                location: {
+                    type: 'QUERY_PARAMETER',
+                    path: '/records',
+                    method: 'GET',
+                    name: 'previousRecordId',
+                },
+                properties: {
+                    description:
+                        'ID of the last record in the previous page of results. Omit to get the first page. Up to 15 records are returned per request; fewer than 15 means there are no more results.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "description": "ID of the last record in the previous page of results. Omit to get the first page. Up to 15 records are returned per request; fewer than 15 means there are no more results.",\n  "type": "string",\n  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"\n}',
                 },
             },
             {
@@ -5353,6 +6974,18 @@ const BackendApi = {
                 properties: {
                     description:
                         'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "cuisine": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "cajun",\n          "chinese",\n          "french",\n          "greek",\n          "indian",\n          "japanese",\n          "malay",\n          "mexican",\n          "persian",\n          "american",\n          "italian",\n          "british",\n          "korean",\n          "thai",\n          "vietnamese",\n          "african",\n          "spanish",\n          "turkish",\n          "caribbean",\n          "north african",\n          "middle eastern",\n          "dutch"\n        ]\n      }\n    },\n    "mealType": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "appetiser",\n          "dessert",\n          "breakfast",\n          "lunch",\n          "tea",\n          "side dish",\n          "spice mix",\n          "sauce"\n        ]\n      }\n    },\n    "meat": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "poultry",\n          "beef",\n          "lamb",\n          "pork",\n          "game",\n          "fish"\n        ]\n      }\n    },\n    "dietary": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "vegetarian",\n          "vegan",\n          "gluten free",\n          "dairy free"\n        ]\n      }\n    },\n    "occasion": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "christmas",\n          "eurovision",\n          "bbq"\n        ]\n      }\n    },\n    "equipment": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "slow cooker",\n          "air fryer",\n          "pressure cooker",\n          "water bath",\n          "ice cream maker"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
+                },
+            },
+            {
+                location: {
+                    type: 'QUERY_PARAMETER',
+                    path: '/records',
+                    method: 'GET',
+                    name: 'tags',
+                },
+                properties: {
+                    description:
+                        'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "genres": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "pop",\n          "hip hop",\n          "electronic",\n          "r and b",\n          "indie",\n          "rock",\n          "jazz",\n          "classical",\n          "folk",\n          "acoustic",\n          "country",\n          "metal",\n          "blues",\n          "punk",\n          "ska",\n          "prog rock"\n        ]\n      }\n    },\n    "colours": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "red",\n          "pink",\n          "orange",\n          "yellow",\n          "purple",\n          "green",\n          "blue",\n          "brown",\n          "white",\n          "grey",\n          "black",\n          "clear",\n          "picture",\n          "gold"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
                 },
             },
             {
@@ -5387,10 +7020,6 @@ const BackendApi = {
             validateRequestParameters: true,
             validateRequestBody: false,
         },
-        'post-recipe-request-validator-dev': {
-            validateRequestParameters: false,
-            validateRequestBody: true,
-        },
         'put-meal-plan-request-validator-dev': {
             validateRequestParameters: false,
             validateRequestBody: true,
@@ -5415,15 +7044,39 @@ const BackendApi = {
             validateRequestParameters: true,
             validateRequestBody: false,
         },
-        'get-meal-plans-request-validator-dev': {
-            validateRequestParameters: true,
-            validateRequestBody: false,
+        'post-record-request-validator-dev': {
+            validateRequestParameters: false,
+            validateRequestBody: true,
+        },
+        'put-playback-request-validator-dev': {
+            validateRequestParameters: false,
+            validateRequestBody: true,
         },
         'get-extracted-external-recipe-basics-request-validator-dev': {
             validateRequestParameters: true,
             validateRequestBody: false,
         },
         'post-calculate-calories-request-validator-dev': {
+            validateRequestParameters: false,
+            validateRequestBody: true,
+        },
+        'get-records-request-validator-dev': {
+            validateRequestParameters: true,
+            validateRequestBody: false,
+        },
+        'post-recipe-request-validator-dev': {
+            validateRequestParameters: false,
+            validateRequestBody: true,
+        },
+        'put-record-request-validator-dev': {
+            validateRequestParameters: false,
+            validateRequestBody: true,
+        },
+        'get-meal-plans-request-validator-dev': {
+            validateRequestParameters: true,
+            validateRequestBody: false,
+        },
+        'post-playback-request-validator-dev': {
             validateRequestParameters: false,
             validateRequestBody: true,
         },

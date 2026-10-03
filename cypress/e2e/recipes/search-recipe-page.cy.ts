@@ -326,6 +326,29 @@ viewports.forEach((viewport) => {
             getLoadMoreButton().should('be.visible')
         })
 
+        it('keeps the loaded pages when going back from a recipe', () => {
+            const titles = buildTitles(`Cypress Back Recipe ${Date.now()}`, PAGE_SIZE + 2)
+
+            createRecipes(titles)
+
+            cy.visit('/recipes')
+            interceptLoadMoreRequests()
+            assertVisibleResults(viewport, PAGE_SIZE)
+
+            loadMore()
+            assertVisibleResults(viewport, titles.length)
+
+            // Open a recipe from the second page
+            cy.get('h3:visible').last().click()
+            cy.location('pathname').should('match', /^\/recipes\/.+/)
+
+            cy.go('back')
+
+            cy.location('pathname').should('eq', '/recipes')
+            assertVisibleResults(viewport, titles.length)
+            getLoadMoreButton().should('not.exist')
+        })
+
         it('does not show load more when all results fit on one page', () => {
             createRecipes(buildTitles(`Cypress Single Page Recipe ${Date.now()}`, 3))
 
