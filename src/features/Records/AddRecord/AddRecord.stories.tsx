@@ -6,7 +6,10 @@ import {
 } from '@awjh/home-automation-v2-api-models/records'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import MockRecord from '@test/mockData/records/MockRecord'
-import MockExternalRecords from '@test/mockData/records/MockExternalRecords'
+import { ExternalRecordSearchResult, getExternalRecordKey } from '@defs/ExternalRecord'
+import MockExternalRecords, {
+    MockDiscogsExternalRecords,
+} from '@test/mockData/records/MockExternalRecords'
 import MockRecordLookup from '@test/mockData/records/MockRecordLookup'
 import { expect, fn, waitFor, within } from 'storybook/test'
 import AddRecord from './AddRecord'
@@ -39,6 +42,7 @@ async function clickNext(canvas: PlayContext['canvas'], userEvent: PlayContext['
 async function searchAndSelectFirstRelease(
     canvas: PlayContext['canvas'],
     userEvent: PlayContext['userEvent'],
+    results: ExternalRecordSearchResult[] = MockExternalRecords,
 ) {
     await userEvent.type(
         canvas.getByLabelText(/catalogue number/i, { selector: 'input' }),
@@ -46,9 +50,7 @@ async function searchAndSelectFirstRelease(
     )
     await userEvent.click(canvas.getByRole('button', { name: /search/i }))
 
-    const release = await canvas.findByTestId(
-        `external-record-${MockExternalRecords[0].musicBrainzId}`,
-    )
+    const release = await canvas.findByTestId(`external-record-${getExternalRecordKey(results[0])}`)
     await userEvent.click(within(release).getByRole('button', { name: /^select$/i }))
 
     await waitFor(() => {
@@ -87,7 +89,10 @@ export const SearchFillsInRecordDetails: Story = {
         await searchAndSelectFirstRelease(canvas, userEvent)
 
         expect(args.searchExternalRecords).toHaveBeenCalledWith('K 56344')
-        expect(args.getExternalRecord).toHaveBeenCalledWith(MockExternalRecords[0].musicBrainzId)
+        expect(args.getExternalRecord).toHaveBeenCalledWith({
+            source: 'musicBrainz',
+            musicBrainzId: MockExternalRecords[0].musicBrainzId,
+        })
 
         await clickNext(canvas, userEvent)
         await waitForStep(canvas, 2)
@@ -128,6 +133,25 @@ export const SearchFillsInRecordDetails: Story = {
     },
 }
 
+export const SearchFallsBackToDiscogs: Story = {
+    args: {
+        searchExternalRecords: fn(async () => MockDiscogsExternalRecords),
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        await searchAndSelectFirstRelease(canvas, userEvent, MockDiscogsExternalRecords)
+
+        expect(args.getExternalRecord).toHaveBeenCalledWith({
+            source: 'discogs',
+            discogsId: MockDiscogsExternalRecords[0].discogsId,
+        })
+
+        await clickNext(canvas, userEvent)
+        await waitForStep(canvas, 2)
+
+        expect(canvas.getByLabelText(/^title/i, { selector: 'input' })).toHaveValue('Rumours')
+    },
+}
+
 export const SearchKeepsResultsWhenGoingBack: Story = {
     play: async ({ canvas, userEvent }) => {
         await searchAndSelectFirstRelease(canvas, userEvent)
@@ -138,11 +162,11 @@ export const SearchKeepsResultsWhenGoingBack: Story = {
         await waitForStep(canvas, 1)
 
         const release = canvas.getByTestId(
-            `external-record-${MockExternalRecords[0].musicBrainzId}`,
+            `external-record-${getExternalRecordKey(MockExternalRecords[0])}`,
         )
         expect(within(release).getByRole('button', { name: /^selected$/i })).toBeInTheDocument()
         expect(
-            canvas.getByTestId(`external-record-${MockExternalRecords[1].musicBrainzId}`),
+            canvas.getByTestId(`external-record-${getExternalRecordKey(MockExternalRecords[1])}`),
         ).toBeInTheDocument()
     },
 }

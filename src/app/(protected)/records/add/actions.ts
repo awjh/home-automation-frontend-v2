@@ -6,6 +6,7 @@ import {
     PostRecordBody,
     PostRecordResponse,
 } from '@awjh/home-automation-v2-api-models'
+import { ExternalRecordSource } from '@defs/ExternalRecord'
 import { UploadRecipeImageInput, UploadRecipeImageResponse } from '@defs/Image'
 import { RecordLookupResult } from '@defs/RecordLookup'
 import getEndpoint from '../../shared/getEndpoint'
@@ -52,33 +53,53 @@ export async function searchExternalRecords(catNo: string): Promise<GetExternalR
     }
 }
 
-export async function getExternalRecord(musicBrainzId: string): Promise<RecordLookupResult> {
+async function fetchExternalRecord(
+    release: ExternalRecordSource,
+): Promise<GetExternalRecordResponse> {
+    if (release.source === 'discogs') {
+        const callApiEndpoint = await getEndpoint({
+            endpoint: '/records/external/discogs/{discogsId}',
+            method: 'get',
+        })
+
+        return callApiEndpoint<GetExternalRecordResponse>({
+            pathParams: { discogsId: String(release.discogsId) },
+        })
+    }
+
     const callApiEndpoint = await getEndpoint({
-        endpoint: '/records/external/{musicBrainzId}',
+        endpoint: '/records/external/musicbrainz/{musicBrainzId}',
         method: 'get',
     })
 
-    let release: GetExternalRecordResponse
+    return callApiEndpoint<GetExternalRecordResponse>({
+        pathParams: { musicBrainzId: release.musicBrainzId },
+    })
+}
+
+// Gets the full details of a release from the source the search found it in
+export async function getExternalRecord(
+    release: ExternalRecordSource,
+): Promise<RecordLookupResult> {
+    let details: GetExternalRecordResponse
 
     try {
-        release = await callApiEndpoint<GetExternalRecordResponse>({
-            pathParams: { musicBrainzId },
-        })
+        details = await fetchExternalRecord(release)
     } catch (error) {
-        console.error('Error fetching external record:', error)
+        console.error(`Error fetching external record from ${release.source}:`, error)
         throw new Error('Failed to fetch record details')
     }
 
     // Only the fields the form uses, so the catalogue number entered is kept
     return {
-        title: release.title,
-        artists: release.artists,
-        labels: release.labels,
-        year: release.year,
-        type: release.type,
-        format: release.format,
-        sides: release.sides,
-        tags: release.tags,
-        imageUrl: release.originalImageUrl,
+        title: details.title,
+        artists: details.artists,
+        labels: details.labels,
+        year: details.year,
+        type: details.type,
+        format: details.format,
+        sides: details.sides,
+        tags: details.tags,
+        imageUrl: details.originalImageUrl,
     }
 }

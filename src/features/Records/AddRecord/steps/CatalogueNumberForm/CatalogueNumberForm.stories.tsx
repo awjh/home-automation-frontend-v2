@@ -1,6 +1,10 @@
 import { Box } from '@chakra-ui/react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import MockExternalRecords from '@test/mockData/records/MockExternalRecords'
+import { getExternalRecordKey } from '@defs/ExternalRecord'
+import useToaster from '@hooks/useToaster'
+import MockExternalRecords, {
+    MockDiscogsExternalRecords,
+} from '@test/mockData/records/MockExternalRecords'
 import { expect, fn, screen, waitFor, within } from 'storybook/test'
 import CatalogueNumberForm from './CatalogueNumberForm'
 
@@ -14,6 +18,10 @@ const meta: Meta<typeof CatalogueNumberForm> = {
             </Box>
         ),
     ],
+    // The toaster is shared across stories, so clear any toasts left over from the previous one
+    beforeEach: () => {
+        useToaster().remove()
+    },
     args: {
         searchByCatalogueNumber: fn(async () => MockExternalRecords),
         selectExternalRecord: fn(async () => {}),
@@ -71,7 +79,7 @@ export const ListsMatchingReleases: Story = {
         )
 
         const original = await canvas.findByTestId(
-            `external-record-${MockExternalRecords[0].musicBrainzId}`,
+            `external-record-${getExternalRecordKey(MockExternalRecords[0])}`,
         )
         expect(within(original).getByText('Rumours - Fleetwood Mac')).toBeInTheDocument()
         expect(
@@ -79,10 +87,40 @@ export const ListsMatchingReleases: Story = {
         ).toBeInTheDocument()
 
         const reissue = canvas.getByTestId(
-            `external-record-${MockExternalRecords[1].musicBrainzId}`,
+            `external-record-${getExternalRecordKey(MockExternalRecords[1])}`,
         )
         expect(within(reissue).getByText('12" · 11 tracks · red vinyl')).toBeInTheDocument()
         expect(within(reissue).getByText('red')).toBeInTheDocument()
+        expect(within(reissue).getByText('From MusicBrainz')).toBeInTheDocument()
+    },
+}
+
+export const ListsDiscogsReleases: Story = {
+    args: {
+        searchByCatalogueNumber: fn(async () => MockDiscogsExternalRecords),
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        await userEvent.type(
+            canvas.getByLabelText(/catalogue number/i, { selector: 'input' }),
+            'K 56344{Enter}',
+        )
+
+        const release = await canvas.findByTestId(
+            `external-record-${getExternalRecordKey(MockDiscogsExternalRecords[0])}`,
+        )
+        expect(within(release).getByText('From Discogs')).toBeInTheDocument()
+        // Discogs results have no track count, so it's left out rather than shown as undefined
+        expect(within(release).getByText('12" · album')).toBeInTheDocument()
+
+        await userEvent.click(within(release).getByRole('button', { name: /^select$/i }))
+
+        await waitFor(() => {
+            expect(args.selectExternalRecord).toHaveBeenCalledWith({
+                source: 'discogs',
+                discogsId: 1234567,
+            })
+            expect(within(release).getByRole('button', { name: /^selected$/i })).toBeInTheDocument()
+        })
     },
 }
 
@@ -94,14 +132,15 @@ export const SelectsRelease: Story = {
         )
 
         const reissue = await canvas.findByTestId(
-            `external-record-${MockExternalRecords[1].musicBrainzId}`,
+            `external-record-${getExternalRecordKey(MockExternalRecords[1])}`,
         )
         await userEvent.click(within(reissue).getByRole('button', { name: /^select$/i }))
 
         await waitFor(() => {
-            expect(args.selectExternalRecord).toHaveBeenCalledWith(
-                MockExternalRecords[1].musicBrainzId,
-            )
+            expect(args.selectExternalRecord).toHaveBeenCalledWith({
+                source: 'musicBrainz',
+                musicBrainzId: MockExternalRecords[1].musicBrainzId,
+            })
             expect(within(reissue).getByRole('button', { name: /^selected$/i })).toBeInTheDocument()
             expect(screen.getByText('Record details filled in')).toBeInTheDocument()
         })
@@ -121,7 +160,7 @@ export const ShowsWhenSelectingFails: Story = {
         )
 
         const original = await canvas.findByTestId(
-            `external-record-${MockExternalRecords[0].musicBrainzId}`,
+            `external-record-${getExternalRecordKey(MockExternalRecords[0])}`,
         )
         await userEvent.click(within(original).getByRole('button', { name: /^select$/i }))
 

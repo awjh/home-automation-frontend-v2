@@ -21,7 +21,7 @@
         "deploy:prod": "yarn build:open-next && cdk deploy --require-approval never --all -c stage=prod"
     },
     "dependencies": {
-        "@awjh/home-automation-v2-api-models": "^1.0.23",
+        "@awjh/home-automation-v2-api-models": "^1.0.24",
         "@chakra-ui/react": "^3.34.0",
         "@emotion/react": "^11.14.0",
         "@fontsource/inter": "^5.2.8",

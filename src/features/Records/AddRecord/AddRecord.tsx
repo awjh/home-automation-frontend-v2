@@ -15,6 +15,7 @@ import {
     UploadRecipeImageInput,
     UploadRecipeImageResponse,
 } from '@defs/Image'
+import { ExternalRecordSource, getExternalRecordKey } from '@defs/ExternalRecord'
 import { RecordLookupResult } from '@defs/RecordLookup'
 import ImageForm, {
     HasImageOption,
@@ -50,7 +51,7 @@ type AddRecordState = {
 
 type AddRecordSharedProps = {
     searchExternalRecords: (catNo: string) => Promise<GetExternalRecordsResponse>
-    getExternalRecord: (musicBrainzId: string) => Promise<RecordLookupResult>
+    getExternalRecord: (release: ExternalRecordSource) => Promise<RecordLookupResult>
 }
 
 type AddRecordCreateProps = AddRecordSharedProps & {
@@ -263,14 +264,14 @@ export default function AddRecord(props: AddRecordProps) {
 
                             return results
                         }}
-                        selectExternalRecord={async (musicBrainzId) => {
-                            const result = await getExternalRecord(musicBrainzId)
+                        selectExternalRecord={async (release) => {
+                            const result = await getExternalRecord(release)
 
                             setFormValues((currentValues) => ({
                                 ...mapLookupToFormState(result, currentValues),
                                 externalSearch: currentValues.externalSearch && {
                                     ...currentValues.externalSearch,
-                                    selectedMusicBrainzId: musicBrainzId,
+                                    selectedKey: getExternalRecordKey(release),
                                 },
                             }))
                         }}

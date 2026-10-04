@@ -2,7 +2,7 @@ const BackendApi = {
     openapi: '3.0.1',
     info: {
         title: 'home-automation-api-v2-dev',
-        version: '2026-10-03T14:13:22Z',
+        version: '2026-10-04T10:30:55Z',
     },
     servers: [
         {
@@ -81,7 +81,6 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
-                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/get-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/GetItem',
                     httpMethod: 'POST',
@@ -121,6 +120,7 @@ const BackendApi = {
                             '{"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECIPE~$context.authorizer.userId"},"sk":{"S":"$input.params(\'id\')"}}}',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'aws',
                 },
             },
             put: {
@@ -204,7 +204,6 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-recipe-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/put-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -244,6 +243,7 @@ const BackendApi = {
                             '\n    \n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $input.params(\'id\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECIPE~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$util.escapeJavaScript($data.id).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "book")\n                    "originalSource": { "M": {\n        \n#set($data_originalSource_has_series = $data.originalSource.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.originalSource.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            #if($data_originalSource_has_series),#end\n        \n                #if($data_originalSource_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.originalSource.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "online")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.originalSource.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "magazine")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.originalSource.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.originalSource.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$util.escapeJavaScript($data.image).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "authors": { "L": [\n        #foreach($data_authors_item in $data.authors)\n            {"S": "$util.escapeJavaScript($data_authors_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "calories": { "N": "$data.calories" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item in $data.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_has_section = $data_ingredients_item.containsKey(\'section\'))\n        \n                #if($data_ingredients_item_has_section)\n                    "section": { "S": "$util.escapeJavaScript($data_ingredients_item.section).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item_ingredients_item in $data_ingredients_item.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_ingredients_item_has_measure = $data_ingredients_item_ingredients_item.containsKey(\'measure\'))\n#set($data_ingredients_item_ingredients_item_has_preparation = $data_ingredients_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_ingredients_item_ingredients_item_has_internalRecipe = $data_ingredients_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_ingredients_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_ingredients_item_ingredients_item_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.measure).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "item": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.item).replace("\\\'", "\'")" }\n            #if($data_ingredients_item_ingredients_item_has_preparation || $data_ingredients_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_ingredients_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.preparation).replace("\\\'", "\'")" }\n                    #if($data_ingredients_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_ingredients_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.internalRecipe.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "method": { "L": [\n        #foreach($data_method_item in $data.method)\n            {"M": {\n        \n        \n            "text": { "S": "$util.escapeJavaScript($data_method_item.text).replace("\\\'", "\'")" }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_method_item_ingredients_item in $data_method_item.ingredients)\n            {"M": {\n        \n#set($data_method_item_ingredients_item_has_measure = $data_method_item_ingredients_item.containsKey(\'measure\'))\n#set($data_method_item_ingredients_item_has_preparation = $data_method_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_method_item_ingredients_item_has_internalRecipe = $data_method_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_method_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_method_item_ingredients_item_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.measure).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "item": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.item).replace("\\\'", "\'")" }\n            #if($data_method_item_ingredients_item_has_preparation || $data_method_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_method_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.preparation).replace("\\\'", "\'")" }\n                    #if($data_method_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_method_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.internalRecipe.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            \n                \n                \n                \n                #set($data_produces_M_has_quantity = $data.produces.containsKey(\'quantity\'))\n                #if($data_produces_M_has_quantity)\n                    "produces": { "M": {\n        \n#set($data_produces_has_measure = $data.produces.containsKey(\'measure\'))\n        \n            "quantity": { "N": "$data.produces.quantity" }\n            #if($data_produces_has_measure),#end\n        \n                #if($data_produces_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data.produces.measure).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_produces_M_has_serves = $data.produces.containsKey(\'serves\'))\n                #if($data_produces_M_has_serves)\n                    "produces": { "M": {\n        \n        \n            "serves": { "N": "$data.produces.serves" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "tags": { "M": {\n        \n        \n            "cuisine": { "L": [\n        #foreach($data_tags_cuisine_item in $data.tags.cuisine)\n            {"S": "$util.escapeJavaScript($data_tags_cuisine_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "mealType": { "L": [\n        #foreach($data_tags_mealType_item in $data.tags.mealType)\n            {"S": "$util.escapeJavaScript($data_tags_mealType_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "meat": { "L": [\n        #foreach($data_tags_meat_item in $data.tags.meat)\n            {"S": "$util.escapeJavaScript($data_tags_meat_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "dietary": { "L": [\n        #foreach($data_tags_dietary_item in $data.tags.dietary)\n            {"S": "$util.escapeJavaScript($data_tags_dietary_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "occasion": { "L": [\n        #foreach($data_tags_occasion_item in $data.tags.occasion)\n            {"S": "$util.escapeJavaScript($data_tags_occasion_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "equipment": { "L": [\n        #foreach($data_tags_equipment_item in $data.tags.equipment)\n            {"S": "$util.escapeJavaScript($data_tags_equipment_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'aws',
                 },
             },
             delete: {
@@ -316,7 +316,6 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
-                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/delete-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/DeleteItem',
@@ -357,6 +356,7 @@ const BackendApi = {
                             '\n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n\n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            {"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECIPE~$context.authorizer.userId"},"sk":{"S":"$id"}},"ConditionExpression":"attribute_exists(pk) AND attribute_exists(sk)"}\n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'aws',
                 },
             },
             options: {
@@ -399,7 +399,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -418,59 +417,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/records/external': {
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
                     type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -572,7 +519,6 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-meal-plan-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws',
                     credentials:
                         'arn:aws:iam::558946902552:role/put-meal-plan-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
@@ -613,6 +559,7 @@ const BackendApi = {
                             '\n    \n    #set($date = $input.params(\'date\'))\n    #set($mealTime = $input.params(\'mealTime\'))\n    #set($course = $input.params(\'course\'))\n\n    #set($context.requestOverride.path.date = $date)\n    #set($context.requestOverride.path.mealTime = $mealTime)\n    #set($context.requestOverride.path.course = $course)\n\n        #if(!$date.matches(\'^\\d{4}-\\d{2}-\\d{2}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid date format. Expected \'YYYY-MM-DD\'. Got \'$date\'.","reason":"bad_request"}\n        #elseif($mealTime != \'breakfast\' && $mealTime != \'lunch\' && $mealTime != \'dinner\')\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid meal time.","reason":"bad_request"}\n        #elseif($course != \'starter\' && $course != \'main\' && $course != \'dessert\' && $course != \'side\')\n            #set($context.responseOverride.status = 400)\n\n            {"message":"Invalid course.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.date = $input.params(\'date\'))\n#set($data.mealTime = $input.params(\'mealTime\'))\n#set($data.course = $input.params(\'course\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$util.escapeJavaScript($data.author).replace("\\\'", "\'")" }\n            ,\n        \n            "course": { "S": "$util.escapeJavaScript($data.course).replace("\\\'", "\'")" }\n            ,\n        \n            "date": { "S": "$util.escapeJavaScript($data.date).replace("\\\'", "\'")" }\n            ,\n        \n            "mealTime": { "S": "$util.escapeJavaScript($data.mealTime).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.source.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.source.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.source.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "recipeId": { "S": "$util.escapeJavaScript($data.source.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "fromDate": { "S": "$util.escapeJavaScript($data.source.fromDate).replace("\\\'", "\'")" }\n            ,\n        \n            "fromMealTime": { "S": "$util.escapeJavaScript($data.source.fromMealTime).replace("\\\'", "\'")" }\n            ,\n        \n            "fromCourse": { "S": "$util.escapeJavaScript($data.source.fromCourse).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'aws',
                 },
             },
             delete: {
@@ -711,11 +658,11 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:delete-meal-plan-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -774,7 +721,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -793,399 +739,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/images/{service}/{filekey}': {
-            get: {
-                operationId: 'GetImage',
-                parameters: [
-                    {
-                        name: 'service',
-                        in: 'path',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                    {
-                        name: 'filekey',
-                        in: 'path',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
-                responses: {
-                    '404': {
-                        description: '404 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/GetImageSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '401': {
-                        description: '401 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
-                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-image-handler-dev/invocations',
-                    httpMethod: 'POST',
-                    passthroughBehavior: 'when_no_match',
-                    responseTransferMode: 'BUFFERED',
-                },
-            },
-            options: {
-                parameters: [
-                    {
-                        name: 'service',
-                        in: 'path',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                    {
-                        name: 'filekey',
-                        in: 'path',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
                     type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/records/external/search': {
-            get: {
-                operationId: 'GetExternalRecords',
-                parameters: [
-                    {
-                        name: 'catNo',
-                        in: 'query',
-                        description:
-                            'The catalogue number printed on the record, e.g. K 56344. Spacing does not need to match.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "string",\n  "minLength": 1,\n  "description": "The catalogue number printed on the record, e.g. K 56344. Spacing does not need to match."\n}',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
-                responses: {
-                    '503': {
-                        description: '503 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/GetExternalRecordsSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '401': {
-                        description: '401 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-request-validator':
-                    'get-external-records-request-validator-dev',
-                'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
-                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-external-records-handler-dev/invocations',
-                    httpMethod: 'POST',
-                    passthroughBehavior: 'when_no_match',
-                    responseTransferMode: 'BUFFERED',
-                },
-            },
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
-                    type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/meal-plans/{date}': {
-            options: {
-                parameters: [
-                    {
-                        name: 'date',
-                        in: 'path',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
-                    type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -1299,11 +853,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-recipes-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-recipes-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
                 },
             },
             post: {
@@ -1377,7 +931,6 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-recipe-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/post-recipe-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -1417,6 +970,7 @@ const BackendApi = {
                             '\n        #set($id = $context.authorizer.uniqueRequestId)\n        #set($context.requestOverride.path.id = $id)\n\n        \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $id)\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECIPE~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$util.escapeJavaScript($data.id).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "book")\n                    "originalSource": { "M": {\n        \n#set($data_originalSource_has_series = $data.originalSource.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.originalSource.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            #if($data_originalSource_has_series),#end\n        \n                #if($data_originalSource_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.originalSource.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "online")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.originalSource.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_originalSource_M_has_type = $data.originalSource.containsKey(\'type\'))\n                #if($data_originalSource_M_has_type && $data.originalSource.type == "magazine")\n                    "originalSource": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.originalSource.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.originalSource.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.originalSource.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.originalSource.page" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$util.escapeJavaScript($data.image).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "authors": { "L": [\n        #foreach($data_authors_item in $data.authors)\n            {"S": "$util.escapeJavaScript($data_authors_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "calories": { "N": "$data.calories" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item in $data.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_has_section = $data_ingredients_item.containsKey(\'section\'))\n        \n                #if($data_ingredients_item_has_section)\n                    "section": { "S": "$util.escapeJavaScript($data_ingredients_item.section).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "ingredients": { "L": [\n        #foreach($data_ingredients_item_ingredients_item in $data_ingredients_item.ingredients)\n            {"M": {\n        \n#set($data_ingredients_item_ingredients_item_has_measure = $data_ingredients_item_ingredients_item.containsKey(\'measure\'))\n#set($data_ingredients_item_ingredients_item_has_preparation = $data_ingredients_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_ingredients_item_ingredients_item_has_internalRecipe = $data_ingredients_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_ingredients_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_ingredients_item_ingredients_item_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.measure).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "item": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.item).replace("\\\'", "\'")" }\n            #if($data_ingredients_item_ingredients_item_has_preparation || $data_ingredients_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_ingredients_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.preparation).replace("\\\'", "\'")" }\n                    #if($data_ingredients_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_ingredients_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$util.escapeJavaScript($data_ingredients_item_ingredients_item.internalRecipe.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "method": { "L": [\n        #foreach($data_method_item in $data.method)\n            {"M": {\n        \n        \n            "text": { "S": "$util.escapeJavaScript($data_method_item.text).replace("\\\'", "\'")" }\n            ,\n        \n            "ingredients": { "L": [\n        #foreach($data_method_item_ingredients_item in $data_method_item.ingredients)\n            {"M": {\n        \n#set($data_method_item_ingredients_item_has_measure = $data_method_item_ingredients_item.containsKey(\'measure\'))\n#set($data_method_item_ingredients_item_has_preparation = $data_method_item_ingredients_item.containsKey(\'preparation\'))\n#set($data_method_item_ingredients_item_has_internalRecipe = $data_method_item_ingredients_item.containsKey(\'internalRecipe\'))\n        \n            "quantity": { "N": "$data_method_item_ingredients_item.quantity" }\n            ,\n        \n                #if($data_method_item_ingredients_item_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.measure).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "item": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.item).replace("\\\'", "\'")" }\n            #if($data_method_item_ingredients_item_has_preparation || $data_method_item_ingredients_item_has_internalRecipe),#end\n        \n                #if($data_method_item_ingredients_item_has_preparation)\n                    "preparation": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.preparation).replace("\\\'", "\'")" }\n                    #if($data_method_item_ingredients_item_has_internalRecipe),#end\n                #end\n            \n                #if($data_method_item_ingredients_item_has_internalRecipe)\n                    "internalRecipe": { "M": {\n        \n        \n            "recipeId": { "S": "$util.escapeJavaScript($data_method_item_ingredients_item.internalRecipe.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                    \n                #end\n            \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            \n                \n                \n                \n                #set($data_produces_M_has_quantity = $data.produces.containsKey(\'quantity\'))\n                #if($data_produces_M_has_quantity)\n                    "produces": { "M": {\n        \n#set($data_produces_has_measure = $data.produces.containsKey(\'measure\'))\n        \n            "quantity": { "N": "$data.produces.quantity" }\n            #if($data_produces_has_measure),#end\n        \n                #if($data_produces_has_measure)\n                    "measure": { "S": "$util.escapeJavaScript($data.produces.measure).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_produces_M_has_serves = $data.produces.containsKey(\'serves\'))\n                #if($data_produces_M_has_serves)\n                    "produces": { "M": {\n        \n        \n            "serves": { "N": "$data.produces.serves" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "tags": { "M": {\n        \n        \n            "cuisine": { "L": [\n        #foreach($data_tags_cuisine_item in $data.tags.cuisine)\n            {"S": "$util.escapeJavaScript($data_tags_cuisine_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "mealType": { "L": [\n        #foreach($data_tags_mealType_item in $data.tags.mealType)\n            {"S": "$util.escapeJavaScript($data_tags_mealType_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "meat": { "L": [\n        #foreach($data_tags_meat_item in $data.tags.meat)\n            {"S": "$util.escapeJavaScript($data_tags_meat_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "dietary": { "L": [\n        #foreach($data_tags_dietary_item in $data.tags.dietary)\n            {"S": "$util.escapeJavaScript($data_tags_dietary_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "occasion": { "L": [\n        #foreach($data_tags_occasion_item in $data.tags.occasion)\n            {"S": "$util.escapeJavaScript($data_tags_occasion_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "equipment": { "L": [\n        #foreach($data_tags_equipment_item in $data.tags.equipment)\n            {"S": "$util.escapeJavaScript($data_tags_equipment_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'aws',
                 },
             },
             options: {
@@ -1449,7 +1003,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1468,6 +1021,1996 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/meal-plans': {
+            get: {
+                operationId: 'GetMealPlans',
+                parameters: [
+                    {
+                        name: 'endDate',
+                        in: 'query',
+                        description:
+                            'The end date for the meal plans to retrieve e.g. only those before or on this date',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                    {
+                        name: 'startDate',
+                        in: 'query',
+                        description:
+                            'The start date for the meal plans to retrieve e.g. only those after or on this date',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetMealPlansSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'get-meal-plans-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/get-meal-plans-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/Query',
+                    httpMethod: 'POST',
+                    responses: {
+                        '400': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to query DynamoDB to retrieve MealPlans","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to query DynamoDB to retrieve MealPlans","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        \n        #set($items = $input.path(\'$.Items\'))\n        [\n            #foreach($dynamoResponse in $items)\n                {\n        \n\n        \n            "author": "$util.escapeJavaScript($dynamoResponse.author.S).replace("\\\'", "\'")"\n            ,\n        \n            "course": "$util.escapeJavaScript($dynamoResponse.course.S).replace("\\\'", "\'")"\n            ,\n        \n            "date": "$util.escapeJavaScript($dynamoResponse.date.S).replace("\\\'", "\'")"\n            ,\n        \n            "mealTime": "$util.escapeJavaScript($dynamoResponse.mealTime.S).replace("\\\'", "\'")"\n            ,\n        \n            "source": \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "book")\n                    {\n        \n#set($dynamoResponse.source.M_has_series = $dynamoResponse.source.M.containsKey(\'series\'))\n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.source.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "page": $dynamoResponse.source.M.page.N\n            #if($dynamoResponse.source.M_has_series),#end\n        \n                #if($dynamoResponse.source.M_has_series)\n                    "series": "$util.escapeJavaScript($dynamoResponse.source.M.series.S).replace("\\\'", "\'")"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "online")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "url": "$util.escapeJavaScript($dynamoResponse.source.M.url.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "magazine")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.source.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "issue": "$util.escapeJavaScript($dynamoResponse.source.M.issue.S).replace("\\\'", "\'")"\n            ,\n        \n            "page": $dynamoResponse.source.M.page.N\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "internal")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "recipeId": "$util.escapeJavaScript($dynamoResponse.source.M.recipeId.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "leftovers")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromDate": "$util.escapeJavaScript($dynamoResponse.source.M.fromDate.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromMealTime": "$util.escapeJavaScript($dynamoResponse.source.M.fromMealTime.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromCourse": "$util.escapeJavaScript($dynamoResponse.source.M.fromCourse.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "freezer")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "ready_prepared")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "duration": {\n        \n\n        \n            "prepDuration": $dynamoResponse.duration.M.prepDuration.N\n            ,\n        \n            "cookingDuration": $dynamoResponse.duration.M.cookingDuration.N\n            ,\n        \n            "standingTime": $dynamoResponse.duration.M.standingTime.N\n            \n        \n    }\n            \n        \n    }\n\n                #if($foreach.hasNext)\n                    ,\n                #end\n            #end\n        ]\n    \n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '{"TableName":"home-automation-read-store-v2-dev","ConsistentRead":true,"KeyConditionExpression":"#pk = :pk AND #sk BETWEEN :startSk AND :endSk","ExpressionAttributeNames":{"#pk":"pk","#sk":"sk"},"ExpressionAttributeValues":{":pk":{"S":"MEAL_PLAN~$context.authorizer.userId"},":startSk":{"S":"$input.params(\'startDate\')~breakfast~dessert"},":endSk":{"S":"$input.params(\'endDate\')~lunch~starter"}}}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'aws',
+                },
+            },
+            post: {
+                operationId: 'PostMealPlan',
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PostMealPlanBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PostMealPlanSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'post-meal-plan-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/post-meal-plan-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
+                    httpMethod: 'POST',
+                    responses: {
+                        '400': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put item in DynamoDB to create MealPlan","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put item in DynamoDB to create MealPlan","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'POST,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n        \n        #set($body = $util.parseJson($context.requestOverride.path.body))\n        \n        {"date":"$body.date","mealTime":"$body.mealTime"}\n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n        #set($context.requestOverride.path.body = $input.body)\n        #set($body = $input.path(\'$\'))\n\n        \n        #set($data = $input.path(\'$\'))\n\n        \n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$util.escapeJavaScript($data.author).replace("\\\'", "\'")" }\n            ,\n        \n            "course": { "S": "$util.escapeJavaScript($data.course).replace("\\\'", "\'")" }\n            ,\n        \n            "date": { "S": "$util.escapeJavaScript($data.date).replace("\\\'", "\'")" }\n            ,\n        \n            "mealTime": { "S": "$util.escapeJavaScript($data.mealTime).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.source.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.source.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.source.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "recipeId": { "S": "$util.escapeJavaScript($data.source.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "fromDate": { "S": "$util.escapeJavaScript($data.source.fromDate).replace("\\\'", "\'")" }\n            ,\n        \n            "fromMealTime": { "S": "$util.escapeJavaScript($data.source.fromMealTime).replace("\\\'", "\'")" }\n            ,\n        \n            "fromCourse": { "S": "$util.escapeJavaScript($data.source.fromCourse).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'aws',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/recipes/external': {
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/records/external/discogs/{discogsId}': {
+            get: {
+                operationId: 'GetDiscogsExternalRecord',
+                parameters: [
+                    {
+                        name: 'discogsId',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '503': {
+                        description: '503 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '404': {
+                        description: '404 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetDiscogsExternalRecordSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        description: '401 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-discogs-external-record-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
+                },
+            },
+            options: {
+                parameters: [
+                    {
+                        name: 'discogsId',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/records/search-filters': {
+            get: {
+                operationId: 'GetRecordSearchFilters',
+                responses: {
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetRecordSearchFiltersSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '200',
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n        #set($headers = $input.params().get(\'header\'))\n        #set($origin = $headers.origin)\n        \n        #if(!$origin || $origin == "")\n            #set($origin = $headers.Origin)\n        #end\n        \n        #if($origin == "http://localhost:3000")\n            #set($context.responseOverride.header.Access-Control-Allow-Origin = "$origin")\n        #end\n    \n\n        {"tags":{"genres":["pop","hip hop","electronic","r and b","indie","rock","jazz","classical","folk","acoustic","country","metal","blues","punk","ska","prog rock"],"colours":["red","pink","orange","yellow","purple","green","blue","brown","white","grey","black","clear","picture","gold"]},"filters":{"formats":["12\\"","10\\"","7\\""],"types":["album","ep","single"]}}\n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{"statusCode": 200}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/music-streaming/playback': {
+            put: {
+                operationId: 'PutPlayback',
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PutPlaybackBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PutPlaybackSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-machine-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'put-playback-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/put-events-playback-paused-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
+                    httpMethod: 'POST',
+                    responses: {
+                        '(4|5)\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put PlaybackPaused event on the shared event bus","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'PUT,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        #set($failedEntryCount = $input.path(\'$.FailedEntryCount\'))\n\n        #if("$failedEntryCount" != "0")\n            #set($context.responseOverride.status = 500)\n            {"message":"Failed to put PlaybackPaused event on the shared event bus","reason":"internal_server_error"}\n        #else\n            {"eventId":"$context.authorizer.uniqueRequestId"}\n        #end\n    ',
+                            },
+                        },
+                    },
+                    requestParameters: {
+                        'integration.request.header.X-Amz-Target': "'AWSEvents.PutEvents'",
+                        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"MusicStreaming","DetailType":"PlaybackPaused","Detail":"{\\"metadata\\":{\\"source\\":\\"MusicStreaming\\",\\"eventType\\":\\"PlaybackPaused\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
+                    },
+                    passthroughBehavior: 'never',
+                    type: 'aws',
+                },
+            },
+            post: {
+                operationId: 'PostPlayback',
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PostPlaybackBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PostPlaybackSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-machine-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator': 'post-playback-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/put-events-playback-started-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
+                    httpMethod: 'POST',
+                    responses: {
+                        '(4|5)\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put PlaybackStarted event on the shared event bus","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'POST,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        #set($failedEntryCount = $input.path(\'$.FailedEntryCount\'))\n\n        #if("$failedEntryCount" != "0")\n            #set($context.responseOverride.status = 500)\n            {"message":"Failed to put PlaybackStarted event on the shared event bus","reason":"internal_server_error"}\n        #else\n            {"eventId":"$context.authorizer.uniqueRequestId"}\n        #end\n    ',
+                            },
+                        },
+                    },
+                    requestParameters: {
+                        'integration.request.header.X-Amz-Target': "'AWSEvents.PutEvents'",
+                        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"MusicStreaming","DetailType":"PlaybackStarted","Detail":"{\\"metadata\\":{\\"source\\":\\"MusicStreaming\\",\\"eventType\\":\\"PlaybackStarted\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
+                    },
+                    passthroughBehavior: 'never',
+                    type: 'aws',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/recipes/search-filters': {
+            get: {
+                operationId: 'GetRecipeSearchFilters',
+                responses: {
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetRecipeSearchFiltersSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '200',
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n        #set($headers = $input.params().get(\'header\'))\n        #set($origin = $headers.origin)\n        \n        #if(!$origin || $origin == "")\n            #set($origin = $headers.Origin)\n        #end\n        \n        #if($origin == "http://localhost:3000")\n            #set($context.responseOverride.header.Access-Control-Allow-Origin = "$origin")\n        #end\n    \n\n        {"tags":{"cuisine":["cajun","chinese","french","greek","indian","japanese","malay","mexican","persian","american","italian","british","korean","thai","vietnamese","african","spanish","turkish","caribbean","north african","middle eastern","dutch"],"mealType":["appetiser","dessert","breakfast","lunch","tea","side dish","spice mix","sauce"],"meat":["poultry","beef","lamb","pork","game","fish"],"dietary":["vegetarian","vegan","gluten free","dairy free"],"occasion":["christmas","eurovision","bbq"],"equipment":["slow cooker","air fryer","pressure cooker","water bath","ice cream maker"]},"filters":{"calories":{"min":0,"max":5000},"duration":{"prepDuration":{"min":0,"max":720},"cookingDuration":{"min":0,"max":720},"standingTime":{"min":0,"max":2880},"totalTime":{"min":0,"max":4320}},"serves":{"min":1,"max":100}}}\n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{"statusCode": 200}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/records/external/discogs': {
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/recipes/external/extract': {
+            get: {
+                operationId: 'GetExtractedExternalRecipe',
+                parameters: [
+                    {
+                        name: 'url',
+                        in: 'query',
+                        description:
+                            'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "string"\n}',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetExtractedExternalRecipeSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        description: '401 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator':
+                    'get-extracted-external-recipe-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-extracted-external-recipe-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/recipes/external/extract/basics': {
+            get: {
+                operationId: 'GetExtractedExternalRecipeBasics',
+                parameters: [
+                    {
+                        name: 'url',
+                        in: 'query',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetExtractedExternalRecipeBasicsResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator':
+                    'get-extracted-external-recipe-basics-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    uri: 'https://api.spoonacular.com/recipes/extract',
+                    httpMethod: 'GET',
+                    responses: {
+                        '4\\d{2}': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to extract recipe from Spoonacular","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to extract recipe from Spoonacular","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        #set($preparationMinutes = $input.path(\'$.preparationMinutes\'))\n        #set($cookingMinutes = $input.path(\'$.cookingMinutes\'))\n        {\n          "title": $input.json(\'$.title\'),\n          "duration": {\n            "prepDuration": #if(!$preparationMinutes)0#{else}$preparationMinutes#end,\n            "cookingDuration": #if(!$cookingMinutes)0#{else}$cookingMinutes#end,\n            "standingTime": 0\n          }\n        }\n    ',
+                            },
+                        },
+                    },
+                    requestParameters: {
+                        'integration.request.querystring.url': 'method.request.querystring.url',
+                        'integration.request.querystring.apiKey':
+                            "'3992c4c9a5544a89820805fbad0dc85e'",
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'http',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/records/external/musicbrainz/{musicBrainzId}': {
+            get: {
+                operationId: 'GetMusicBrainzExternalRecord',
+                parameters: [
+                    {
+                        name: 'musicBrainzId',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '404': {
+                        description: '404 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '503': {
+                        description: '503 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetMusicBrainzExternalRecordSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        description: '401 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-music-brainz-external-record-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
+                },
+            },
+            options: {
+                parameters: [
+                    {
+                        name: 'musicBrainzId',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/records/external': {
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/images/{service}/{filekey}': {
+            get: {
+                operationId: 'GetImage',
+                parameters: [
+                    {
+                        name: 'service',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                    {
+                        name: 'filekey',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '404': {
+                        description: '404 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetImageSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        description: '401 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-image-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
+                },
+            },
+            options: {
+                parameters: [
+                    {
+                        name: 'service',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                    {
+                        name: 'filekey',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/records/external/search': {
+            get: {
+                operationId: 'GetExternalRecords',
+                parameters: [
+                    {
+                        name: 'catNo',
+                        in: 'query',
+                        description:
+                            'The catalogue number printed on the record, e.g. K 56344. Spacing does not need to match.\n\nPass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "string",\n  "minLength": 1,\n  "description": "The catalogue number printed on the record, e.g. K 56344. Spacing does not need to match."\n}',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '503': {
+                        description: '503 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetExternalRecordsSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        description: '401 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator':
+                    'get-external-records-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-external-records-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/meal-plans/{date}': {
+            options: {
+                parameters: [
+                    {
+                        name: 'date',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
                 },
             },
         },
@@ -1581,11 +3124,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-records-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-records-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
                 },
             },
             post: {
@@ -1659,7 +3202,6 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-record-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/post-record-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -1699,6 +3241,7 @@ const BackendApi = {
                             '\n        #set($id = $context.authorizer.uniqueRequestId)\n        #set($context.requestOverride.path.id = $id)\n\n        \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $id)\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECORD~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$util.escapeJavaScript($data.id).replace("\\\'", "\'")" }\n            ,\n        \n            "catNo": { "S": "$util.escapeJavaScript($data.catNo).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "artists": { "L": [\n        #foreach($data_artists_item in $data.artists)\n            {"S": "$util.escapeJavaScript($data_artists_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$util.escapeJavaScript($data.image).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "year": { "N": "$data.year" }\n            ,\n        \n            "labels": { "L": [\n        #foreach($data_labels_item in $data.labels)\n            {"S": "$util.escapeJavaScript($data_labels_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "type": { "S": "$util.escapeJavaScript($data.type).replace("\\\'", "\'")" }\n            ,\n        \n            "format": { "S": "$util.escapeJavaScript($data.format).replace("\\\'", "\'")" }\n            ,\n        \n            "sides": { "L": [\n        #foreach($data_sides_item in $data.sides)\n            {"M": {\n        \n        \n            "name": { "S": "$util.escapeJavaScript($data_sides_item.name).replace("\\\'", "\'")" }\n            ,\n        \n            "songs": { "L": [\n        #foreach($data_sides_item_songs_item in $data_sides_item.songs)\n            {"M": {\n        \n        \n            "title": { "S": "$util.escapeJavaScript($data_sides_item_songs_item.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "N": "$data_sides_item_songs_item.duration" }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "tags": { "M": {\n        \n        \n            "genres": { "L": [\n        #foreach($data_tags_genres_item in $data.tags.genres)\n            {"S": "$util.escapeJavaScript($data_tags_genres_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "colours": { "L": [\n        #foreach($data_tags_colours_item in $data.tags.colours)\n            {"S": "$util.escapeJavaScript($data_tags_colours_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'aws',
                 },
             },
             options: {
@@ -1731,7 +3274,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1750,6 +3292,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'mock',
                 },
             },
         },
@@ -1845,11 +3388,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'get-images-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-images-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -1892,7 +3435,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1911,6 +3453,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'mock',
                 },
             },
         },
@@ -1945,7 +3488,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -1964,6 +3506,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'mock',
                 },
             },
         },
@@ -2068,11 +3611,11 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-external-record-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -2115,7 +3658,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2134,299 +3676,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/meal-plans': {
-            get: {
-                operationId: 'GetMealPlans',
-                parameters: [
-                    {
-                        name: 'endDate',
-                        in: 'query',
-                        description:
-                            'The end date for the meal plans to retrieve e.g. only those before or on this date',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                    {
-                        name: 'startDate',
-                        in: 'query',
-                        description:
-                            'The start date for the meal plans to retrieve e.g. only those after or on this date',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
-                responses: {
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/GetMealPlansSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-request-validator': 'get-meal-plans-request-validator-dev',
-                'x-amazon-apigateway-integration': {
-                    type: 'aws',
-                    credentials:
-                        'arn:aws:iam::558946902552:role/get-meal-plans-integration-role-dev',
-                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/Query',
-                    httpMethod: 'POST',
-                    responses: {
-                        '400': {
-                            statusCode: '400',
-                            responseTemplates: {
-                                'application/json':
-                                    '{"message":"Failed to query DynamoDB to retrieve MealPlans","reason":"bad_request"}',
-                            },
-                        },
-                        '5\\d{2}': {
-                            statusCode: '500',
-                            responseTemplates: {
-                                'application/json':
-                                    '{"message":"Failed to query DynamoDB to retrieve MealPlans","reason":"internal_server_error"}',
-                            },
-                        },
-                        '2\\d{2}': {
-                            statusCode: '200',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                            },
-                            responseTemplates: {
-                                'application/json':
-                                    '\n        \n\n        \n        #set($items = $input.path(\'$.Items\'))\n        [\n            #foreach($dynamoResponse in $items)\n                {\n        \n\n        \n            "author": "$util.escapeJavaScript($dynamoResponse.author.S).replace("\\\'", "\'")"\n            ,\n        \n            "course": "$util.escapeJavaScript($dynamoResponse.course.S).replace("\\\'", "\'")"\n            ,\n        \n            "date": "$util.escapeJavaScript($dynamoResponse.date.S).replace("\\\'", "\'")"\n            ,\n        \n            "mealTime": "$util.escapeJavaScript($dynamoResponse.mealTime.S).replace("\\\'", "\'")"\n            ,\n        \n            "source": \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "book")\n                    {\n        \n#set($dynamoResponse.source.M_has_series = $dynamoResponse.source.M.containsKey(\'series\'))\n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.source.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "page": $dynamoResponse.source.M.page.N\n            #if($dynamoResponse.source.M_has_series),#end\n        \n                #if($dynamoResponse.source.M_has_series)\n                    "series": "$util.escapeJavaScript($dynamoResponse.source.M.series.S).replace("\\\'", "\'")"\n                    \n                #end\n            \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "online")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "url": "$util.escapeJavaScript($dynamoResponse.source.M.url.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "magazine")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.source.M.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "issue": "$util.escapeJavaScript($dynamoResponse.source.M.issue.S).replace("\\\'", "\'")"\n            ,\n        \n            "page": $dynamoResponse.source.M.page.N\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "internal")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "recipeId": "$util.escapeJavaScript($dynamoResponse.source.M.recipeId.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "leftovers")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromDate": "$util.escapeJavaScript($dynamoResponse.source.M.fromDate.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromMealTime": "$util.escapeJavaScript($dynamoResponse.source.M.fromMealTime.S).replace("\\\'", "\'")"\n            ,\n        \n            "fromCourse": "$util.escapeJavaScript($dynamoResponse.source.M.fromCourse.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "freezer")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n                \n                #set($dynamoResponse_source_M_has_type = $dynamoResponse.source.M.containsKey(\'type\'))\n                #if($dynamoResponse_source_M_has_type && $dynamoResponse.source.M.type.S == "ready_prepared")\n                    {\n        \n\n        \n            "type": "$util.escapeJavaScript($dynamoResponse.source.M.type.S).replace("\\\'", "\'")"\n            \n        \n    }\n                #end\n            \n            ,\n        \n            "title": "$util.escapeJavaScript($dynamoResponse.title.S).replace("\\\'", "\'")"\n            ,\n        \n            "duration": {\n        \n\n        \n            "prepDuration": $dynamoResponse.duration.M.prepDuration.N\n            ,\n        \n            "cookingDuration": $dynamoResponse.duration.M.cookingDuration.N\n            ,\n        \n            "standingTime": $dynamoResponse.duration.M.standingTime.N\n            \n        \n    }\n            \n        \n    }\n\n                #if($foreach.hasNext)\n                    ,\n                #end\n            #end\n        ]\n    \n    ',
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json':
-                            '{"TableName":"home-automation-read-store-v2-dev","ConsistentRead":true,"KeyConditionExpression":"#pk = :pk AND #sk BETWEEN :startSk AND :endSk","ExpressionAttributeNames":{"#pk":"pk","#sk":"sk"},"ExpressionAttributeValues":{":pk":{"S":"MEAL_PLAN~$context.authorizer.userId"},":startSk":{"S":"$input.params(\'startDate\')~breakfast~dessert"},":endSk":{"S":"$input.params(\'endDate\')~lunch~starter"}}}',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-            post: {
-                operationId: 'PostMealPlan',
-                requestBody: {
-                    content: {
-                        'application/json': {
-                            schema: {
-                                $ref: '#/components/schemas/PostMealPlanBodyModel',
-                            },
-                        },
-                    },
-                    required: true,
-                },
-                responses: {
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/PostMealPlanSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-request-validator': 'post-meal-plan-request-validator-dev',
-                'x-amazon-apigateway-integration': {
-                    type: 'aws',
-                    credentials:
-                        'arn:aws:iam::558946902552:role/post-meal-plan-integration-role-dev',
-                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
-                    httpMethod: 'POST',
-                    responses: {
-                        '400': {
-                            statusCode: '400',
-                            responseTemplates: {
-                                'application/json':
-                                    '{"message":"Failed to put item in DynamoDB to create MealPlan","reason":"bad_request"}',
-                            },
-                        },
-                        '5\\d{2}': {
-                            statusCode: '500',
-                            responseTemplates: {
-                                'application/json':
-                                    '{"message":"Failed to put item in DynamoDB to create MealPlan","reason":"internal_server_error"}',
-                            },
-                        },
-                        '2\\d{2}': {
-                            statusCode: '200',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'POST,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                            },
-                            responseTemplates: {
-                                'application/json':
-                                    '\n        \n        \n        #set($body = $util.parseJson($context.requestOverride.path.body))\n        \n        {"date":"$body.date","mealTime":"$body.mealTime"}\n    ',
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json':
-                            '\n        #set($context.requestOverride.path.body = $input.body)\n        #set($body = $input.path(\'$\'))\n\n        \n        #set($data = $input.path(\'$\'))\n\n        \n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "MEAL_PLAN~$context.authorizer.userId"},\n        "sk": {"S": "$data.date~$data.mealTime~$data.course"},\n        \n        \n\n        #if($data.source.type == "leftovers")\n        "gsi1Pk": {"S": "MEAL_PLAN~$context.authorizer.userId~leftovers"},"gsi1Sk": {"S": "$data.source.fromDate~$data.source.fromMealTime~$data.source.fromCourse"},\n    #end\n\n        \n        \n        \n            "author": { "S": "$util.escapeJavaScript($data.author).replace("\\\'", "\'")" }\n            ,\n        \n            "course": { "S": "$util.escapeJavaScript($data.course).replace("\\\'", "\'")" }\n            ,\n        \n            "date": { "S": "$util.escapeJavaScript($data.date).replace("\\\'", "\'")" }\n            ,\n        \n            "mealTime": { "S": "$util.escapeJavaScript($data.mealTime).replace("\\\'", "\'")" }\n            ,\n        \n            \n                \n                \n                \n                \n                \n                \n                \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "book")\n                    "source": { "M": {\n        \n#set($data_source_has_series = $data.source.containsKey(\'series\'))\n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            #if($data_source_has_series),#end\n        \n                #if($data_source_has_series)\n                    "series": { "S": "$util.escapeJavaScript($data.source.series).replace("\\\'", "\'")" }\n                    \n                #end\n            \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "online")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "url": { "S": "$util.escapeJavaScript($data.source.url).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "magazine")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.source.title).replace("\\\'", "\'")" }\n            ,\n        \n            "issue": { "S": "$util.escapeJavaScript($data.source.issue).replace("\\\'", "\'")" }\n            ,\n        \n            "page": { "N": "$data.source.page" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "internal")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "recipeId": { "S": "$util.escapeJavaScript($data.source.recipeId).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "leftovers")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            ,\n        \n            "fromDate": { "S": "$util.escapeJavaScript($data.source.fromDate).replace("\\\'", "\'")" }\n            ,\n        \n            "fromMealTime": { "S": "$util.escapeJavaScript($data.source.fromMealTime).replace("\\\'", "\'")" }\n            ,\n        \n            "fromCourse": { "S": "$util.escapeJavaScript($data.source.fromCourse).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "freezer")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n                \n                #set($data_source_M_has_type = $data.source.containsKey(\'type\'))\n                #if($data_source_M_has_type && $data.source.type == "ready_prepared")\n                    "source": { "M": {\n        \n        \n            "type": { "S": "$util.escapeJavaScript($data.source.type).replace("\\\'", "\'")" }\n            \n        \n    } }\n                #end\n            \n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "M": {\n        \n        \n            "prepDuration": { "N": "$data.duration.prepDuration" }\n            ,\n        \n            "cookingDuration": { "N": "$data.duration.cookingDuration" }\n            ,\n        \n            "standingTime": { "N": "$data.duration.standingTime" }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"\n        }\n    ',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
                     type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -2479,7 +3729,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2498,6 +3747,60 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/records/external/musicbrainz': {
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
                 },
             },
         },
@@ -2584,11 +3887,11 @@ const BackendApi = {
                 'x-amazon-apigateway-request-validator':
                     'post-calculate-calories-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:post-calculate-calories-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -2621,7 +3924,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2640,59 +3942,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/recipes/external': {
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
                     type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -2778,11 +4028,11 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'post-image-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
                     uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:post-image-handler-dev/invocations',
                     httpMethod: 'POST',
                     passthroughBehavior: 'when_no_match',
                     responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -2815,7 +4065,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2834,6 +4083,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'mock',
                 },
             },
         },
@@ -2868,7 +4118,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -2887,115 +4136,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/records/search-filters': {
-            get: {
-                operationId: 'GetRecordSearchFilters',
-                responses: {
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/GetRecordSearchFiltersSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-integration': {
                     type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '200',
-                            responseTemplates: {
-                                'application/json':
-                                    '\n        \n        #set($headers = $input.params().get(\'header\'))\n        #set($origin = $headers.origin)\n        \n        #if(!$origin || $origin == "")\n            #set($origin = $headers.Origin)\n        #end\n        \n        #if($origin == "http://localhost:3000")\n            #set($context.responseOverride.header.Access-Control-Allow-Origin = "$origin")\n        #end\n    \n\n        {"tags":{"genres":["pop","hip hop","electronic","r and b","indie","rock","jazz","classical","folk","acoustic","country","metal","blues","punk","ska","prog rock"],"colours":["red","pink","orange","yellow","purple","green","blue","brown","white","grey","black","clear","picture","gold"]},"filters":{"formats":["12\\"","10\\"","7\\""],"types":["album","ep","single"]}}\n    ',
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{"statusCode": 200}',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
-                    type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -3030,7 +4171,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -3049,281 +4189,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/music-streaming/playback': {
-            put: {
-                operationId: 'PutPlayback',
-                requestBody: {
-                    content: {
-                        'application/json': {
-                            schema: {
-                                $ref: '#/components/schemas/PutPlaybackBodyModel',
-                            },
-                        },
-                    },
-                    required: true,
-                },
-                responses: {
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/PutPlaybackSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-machine-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-request-validator': 'put-playback-request-validator-dev',
-                'x-amazon-apigateway-integration': {
-                    type: 'aws',
-                    credentials:
-                        'arn:aws:iam::558946902552:role/put-events-playback-paused-integration-role-dev',
-                    uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
-                    httpMethod: 'POST',
-                    responses: {
-                        '(4|5)\\d{2}': {
-                            statusCode: '500',
-                            responseTemplates: {
-                                'application/json':
-                                    '{"message":"Failed to put PlaybackPaused event on the shared event bus","reason":"internal_server_error"}',
-                            },
-                        },
-                        '2\\d{2}': {
-                            statusCode: '200',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'PUT,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                            },
-                            responseTemplates: {
-                                'application/json':
-                                    '\n        \n\n        #set($failedEntryCount = $input.path(\'$.FailedEntryCount\'))\n\n        #if("$failedEntryCount" != "0")\n            #set($context.responseOverride.status = 500)\n            {"message":"Failed to put PlaybackPaused event on the shared event bus","reason":"internal_server_error"}\n        #else\n            {"eventId":"$context.authorizer.uniqueRequestId"}\n        #end\n    ',
-                            },
-                        },
-                    },
-                    requestParameters: {
-                        'integration.request.header.X-Amz-Target': "'AWSEvents.PutEvents'",
-                        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
-                    },
-                    requestTemplates: {
-                        'application/json':
-                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"MusicStreaming","DetailType":"PlaybackPaused","Detail":"{\\"metadata\\":{\\"source\\":\\"MusicStreaming\\",\\"eventType\\":\\"PlaybackPaused\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
-                    },
-                    passthroughBehavior: 'never',
-                },
-            },
-            post: {
-                operationId: 'PostPlayback',
-                requestBody: {
-                    content: {
-                        'application/json': {
-                            schema: {
-                                $ref: '#/components/schemas/PostPlaybackBodyModel',
-                            },
-                        },
-                    },
-                    required: true,
-                },
-                responses: {
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/PostPlaybackSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-machine-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-request-validator': 'post-playback-request-validator-dev',
-                'x-amazon-apigateway-integration': {
-                    type: 'aws',
-                    credentials:
-                        'arn:aws:iam::558946902552:role/put-events-playback-started-integration-role-dev',
-                    uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
-                    httpMethod: 'POST',
-                    responses: {
-                        '(4|5)\\d{2}': {
-                            statusCode: '500',
-                            responseTemplates: {
-                                'application/json':
-                                    '{"message":"Failed to put PlaybackStarted event on the shared event bus","reason":"internal_server_error"}',
-                            },
-                        },
-                        '2\\d{2}': {
-                            statusCode: '200',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'POST,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                            },
-                            responseTemplates: {
-                                'application/json':
-                                    '\n        \n\n        #set($failedEntryCount = $input.path(\'$.FailedEntryCount\'))\n\n        #if("$failedEntryCount" != "0")\n            #set($context.responseOverride.status = 500)\n            {"message":"Failed to put PlaybackStarted event on the shared event bus","reason":"internal_server_error"}\n        #else\n            {"eventId":"$context.authorizer.uniqueRequestId"}\n        #end\n    ',
-                            },
-                        },
-                    },
-                    requestParameters: {
-                        'integration.request.header.X-Amz-Target': "'AWSEvents.PutEvents'",
-                        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
-                    },
-                    requestTemplates: {
-                        'application/json':
-                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"MusicStreaming","DetailType":"PlaybackStarted","Detail":"{\\"metadata\\":{\\"source\\":\\"MusicStreaming\\",\\"eventType\\":\\"PlaybackStarted\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
-                    },
-                    passthroughBehavior: 'never',
-                },
-            },
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
                     type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -3398,7 +4264,6 @@ const BackendApi = {
                     },
                 ],
                 'x-amazon-apigateway-integration': {
-                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/get-record-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/GetItem',
                     httpMethod: 'POST',
@@ -3438,6 +4303,7 @@ const BackendApi = {
                             '{"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECORD~$context.authorizer.userId"},"sk":{"S":"$input.params(\'id\')"}}}',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'aws',
                 },
             },
             put: {
@@ -3521,7 +4387,6 @@ const BackendApi = {
                 ],
                 'x-amazon-apigateway-request-validator': 'put-record-request-validator-dev',
                 'x-amazon-apigateway-integration': {
-                    type: 'aws',
                     credentials: 'arn:aws:iam::558946902552:role/put-record-integration-role-dev',
                     uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/PutItem',
                     httpMethod: 'POST',
@@ -3561,6 +4426,7 @@ const BackendApi = {
                             '\n    \n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n            \n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            \n        #set($data = $input.path(\'$\'))\n\n        #set($data.id = $input.params(\'id\'))\n\n        {\n            "TableName": "home-automation-read-store-v2-dev",\n            "Item": {\n        "pk": {"S": "RECORD~$context.authorizer.userId"},\n        "sk": {"S": "$data.id"},\n        \n        \n\n        \n\n        \n        \n#set($data_has_image = $data.containsKey(\'image\'))\n        \n            "id": { "S": "$util.escapeJavaScript($data.id).replace("\\\'", "\'")" }\n            ,\n        \n            "catNo": { "S": "$util.escapeJavaScript($data.catNo).replace("\\\'", "\'")" }\n            ,\n        \n            "title": { "S": "$util.escapeJavaScript($data.title).replace("\\\'", "\'")" }\n            ,\n        \n            "artists": { "L": [\n        #foreach($data_artists_item in $data.artists)\n            {"S": "$util.escapeJavaScript($data_artists_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n                #if($data_has_image)\n                    "image": { "S": "$util.escapeJavaScript($data.image).replace("\\\'", "\'")" }\n                    ,\n                #end\n            \n            "year": { "N": "$data.year" }\n            ,\n        \n            "labels": { "L": [\n        #foreach($data_labels_item in $data.labels)\n            {"S": "$util.escapeJavaScript($data_labels_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "type": { "S": "$util.escapeJavaScript($data.type).replace("\\\'", "\'")" }\n            ,\n        \n            "format": { "S": "$util.escapeJavaScript($data.format).replace("\\\'", "\'")" }\n            ,\n        \n            "sides": { "L": [\n        #foreach($data_sides_item in $data.sides)\n            {"M": {\n        \n        \n            "name": { "S": "$util.escapeJavaScript($data_sides_item.name).replace("\\\'", "\'")" }\n            ,\n        \n            "songs": { "L": [\n        #foreach($data_sides_item_songs_item in $data_sides_item.songs)\n            {"M": {\n        \n        \n            "title": { "S": "$util.escapeJavaScript($data_sides_item_songs_item.title).replace("\\\'", "\'")" }\n            ,\n        \n            "duration": { "N": "$data_sides_item_songs_item.duration" }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    }}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "tags": { "M": {\n        \n        \n            "genres": { "L": [\n        #foreach($data_tags_genres_item in $data.tags.genres)\n            {"S": "$util.escapeJavaScript($data_tags_genres_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            ,\n        \n            "colours": { "L": [\n        #foreach($data_tags_colours_item in $data.tags.colours)\n            {"S": "$util.escapeJavaScript($data_tags_colours_item).replace("\\\'", "\'")"}\n\n            #if($foreach.hasNext),#end\n        #end\n    ] }\n            \n        \n    } }\n            \n        \n    \n     }\n    ,\n            "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)"\n        }\n    \n        #end',
                     },
                     passthroughBehavior: 'when_no_match',
+                    type: 'aws',
                 },
             },
             options: {
@@ -3603,7 +4469,6 @@ const BackendApi = {
                     },
                 },
                 'x-amazon-apigateway-integration': {
-                    type: 'mock',
                     responses: {
                         default: {
                             statusCode: '204',
@@ -3622,426 +4487,7 @@ const BackendApi = {
                         'application/json': '{ statusCode: 200 }',
                     },
                     passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/recipes/search-filters': {
-            get: {
-                operationId: 'GetRecipeSearchFilters',
-                responses: {
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/GetRecipeSearchFiltersSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-integration': {
                     type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '200',
-                            responseTemplates: {
-                                'application/json':
-                                    '\n        \n        #set($headers = $input.params().get(\'header\'))\n        #set($origin = $headers.origin)\n        \n        #if(!$origin || $origin == "")\n            #set($origin = $headers.Origin)\n        #end\n        \n        #if($origin == "http://localhost:3000")\n            #set($context.responseOverride.header.Access-Control-Allow-Origin = "$origin")\n        #end\n    \n\n        {"tags":{"cuisine":["cajun","chinese","french","greek","indian","japanese","malay","mexican","persian","american","italian","british","korean","thai","vietnamese","african","spanish","turkish","caribbean","north african","middle eastern","dutch"],"mealType":["appetiser","dessert","breakfast","lunch","tea","side dish","spice mix","sauce"],"meat":["poultry","beef","lamb","pork","game","fish"],"dietary":["vegetarian","vegan","gluten free","dairy free"],"occasion":["christmas","eurovision","bbq"],"equipment":["slow cooker","air fryer","pressure cooker","water bath","ice cream maker"]},"filters":{"calories":{"min":0,"max":5000},"duration":{"prepDuration":{"min":0,"max":720},"cookingDuration":{"min":0,"max":720},"standingTime":{"min":0,"max":2880},"totalTime":{"min":0,"max":4320}},"serves":{"min":1,"max":100}}}\n    ',
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{"statusCode": 200}',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
-                    type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/recipes/external/extract': {
-            get: {
-                operationId: 'GetExtractedExternalRecipe',
-                parameters: [
-                    {
-                        name: 'url',
-                        in: 'query',
-                        description:
-                            'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "string"\n}',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
-                responses: {
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/GetExtractedExternalRecipeSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '401': {
-                        description: '401 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-request-validator':
-                    'get-extracted-external-recipe-request-validator-dev',
-                'x-amazon-apigateway-integration': {
-                    type: 'aws_proxy',
-                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-extracted-external-recipe-handler-dev/invocations',
-                    httpMethod: 'POST',
-                    passthroughBehavior: 'when_no_match',
-                    responseTransferMode: 'BUFFERED',
-                },
-            },
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
-                    type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-        },
-        '/recipes/external/extract/basics': {
-            get: {
-                operationId: 'GetExtractedExternalRecipeBasics',
-                parameters: [
-                    {
-                        name: 'url',
-                        in: 'query',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
-                responses: {
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/GetExtractedExternalRecipeBasicsResponseModel',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-request-validator':
-                    'get-extracted-external-recipe-basics-request-validator-dev',
-                'x-amazon-apigateway-integration': {
-                    type: 'http',
-                    uri: 'https://api.spoonacular.com/recipes/extract',
-                    httpMethod: 'GET',
-                    responses: {
-                        '4\\d{2}': {
-                            statusCode: '400',
-                            responseTemplates: {
-                                'application/json':
-                                    '{"message":"Failed to extract recipe from Spoonacular","reason":"bad_request"}',
-                            },
-                        },
-                        '5\\d{2}': {
-                            statusCode: '500',
-                            responseTemplates: {
-                                'application/json':
-                                    '{"message":"Failed to extract recipe from Spoonacular","reason":"internal_server_error"}',
-                            },
-                        },
-                        '2\\d{2}': {
-                            statusCode: '200',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                            },
-                            responseTemplates: {
-                                'application/json':
-                                    '\n        #set($preparationMinutes = $input.path(\'$.preparationMinutes\'))\n        #set($cookingMinutes = $input.path(\'$.cookingMinutes\'))\n        {\n          "title": $input.json(\'$.title\'),\n          "duration": {\n            "prepDuration": #if(!$preparationMinutes)0#{else}$preparationMinutes#end,\n            "cookingDuration": #if(!$cookingMinutes)0#{else}$cookingMinutes#end,\n            "standingTime": 0\n          }\n        }\n    ',
-                            },
-                        },
-                    },
-                    requestParameters: {
-                        'integration.request.querystring.url': 'method.request.querystring.url',
-                        'integration.request.querystring.apiKey':
-                            "'3992c4c9a5544a89820805fbad0dc85e'",
-                    },
-                    passthroughBehavior: 'when_no_match',
-                },
-            },
-            options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
-                    type: 'mock',
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
                 },
             },
         },
@@ -4932,6 +5378,358 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
+            GetDiscogsExternalRecordSuccessResponse: {
+                title: 'GetDiscogsExternalRecordSuccessResponse',
+                description:
+                    'An external release in the shape of a record, to fill out a new record. Fields the source does not know are left out.',
+                oneOf: [
+                    {
+                        required: [
+                            'artists',
+                            'catNo',
+                            'labels',
+                            'musicBrainzId',
+                            'sides',
+                            'source',
+                            'tags',
+                            'title',
+                        ],
+                        type: 'object',
+                        properties: {
+                            country: {
+                                type: 'string',
+                                description:
+                                    'Where this pressing was released, e.g. GB from MusicBrainz or UK from Discogs',
+                            },
+                            releaseDate: {
+                                type: 'string',
+                                description:
+                                    'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
+                            },
+                            year: {
+                                maximum: 9007199254740991,
+                                minimum: -9007199254740991,
+                                type: 'integer',
+                            },
+                            musicBrainzId: {
+                                pattern:
+                                    '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+                                type: 'string',
+                                description:
+                                    'The MusicBrainz release ID, used to get the full release from MusicBrainz',
+                            },
+                            format: {
+                                type: 'string',
+                                description: 'The physical size of the record: 12", 10" or 7"',
+                                enum: ['12"', '10"', '7"'],
+                            },
+                            source: {
+                                type: 'string',
+                                enum: ['musicBrainz'],
+                            },
+                            title: {
+                                type: 'string',
+                            },
+                            type: {
+                                type: 'string',
+                                description: 'The type of release: album, ep or single',
+                                enum: ['album', 'ep', 'single'],
+                            },
+                            labels: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                },
+                            },
+                            tags: {
+                                required: ['colours', 'genres'],
+                                type: 'object',
+                                properties: {
+                                    genres: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'string',
+                                            enum: [
+                                                'pop',
+                                                'hip hop',
+                                                'electronic',
+                                                'r and b',
+                                                'indie',
+                                                'rock',
+                                                'jazz',
+                                                'classical',
+                                                'folk',
+                                                'acoustic',
+                                                'country',
+                                                'metal',
+                                                'blues',
+                                                'punk',
+                                                'ska',
+                                                'prog rock',
+                                            ],
+                                        },
+                                    },
+                                    colours: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'string',
+                                            enum: [
+                                                'red',
+                                                'pink',
+                                                'orange',
+                                                'yellow',
+                                                'purple',
+                                                'green',
+                                                'blue',
+                                                'brown',
+                                                'white',
+                                                'grey',
+                                                'black',
+                                                'clear',
+                                                'picture',
+                                                'gold',
+                                            ],
+                                        },
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            originalImageUrl: {
+                                type: 'string',
+                                description:
+                                    'Cover art from the Cover Art Archive, only present for MusicBrainz releases that have some',
+                            },
+                            artists: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                },
+                            },
+                            catNo: {
+                                type: 'string',
+                                description:
+                                    'The catalogue number assigned to the release by its label',
+                            },
+                            disambiguation: {
+                                type: 'string',
+                                description:
+                                    'Notes that tell pressings apart, e.g. "red vinyl", "textured sleeve" or "Repress"',
+                            },
+                            sides: {
+                                type: 'array',
+                                items: {
+                                    required: ['name', 'songs'],
+                                    type: 'object',
+                                    properties: {
+                                        songs: {
+                                            type: 'array',
+                                            items: {
+                                                required: ['duration', 'title'],
+                                                type: 'object',
+                                                properties: {
+                                                    duration: {
+                                                        maximum: 9007199254740991,
+                                                        minimum: 0,
+                                                        type: 'integer',
+                                                        description:
+                                                            'In seconds the length of the song',
+                                                    },
+                                                    title: {
+                                                        type: 'string',
+                                                    },
+                                                },
+                                                additionalProperties: false,
+                                            },
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            description: 'The name of the side, e.g. "A" or "B"',
+                                        },
+                                    },
+                                    additionalProperties: false,
+                                },
+                            },
+                            barcode: {
+                                type: 'string',
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                    {
+                        required: [
+                            'artists',
+                            'catNo',
+                            'discogsId',
+                            'labels',
+                            'sides',
+                            'source',
+                            'tags',
+                            'title',
+                        ],
+                        type: 'object',
+                        properties: {
+                            country: {
+                                type: 'string',
+                                description:
+                                    'Where this pressing was released, e.g. GB from MusicBrainz or UK from Discogs',
+                            },
+                            releaseDate: {
+                                type: 'string',
+                                description:
+                                    'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
+                            },
+                            year: {
+                                maximum: 9007199254740991,
+                                minimum: -9007199254740991,
+                                type: 'integer',
+                            },
+                            format: {
+                                type: 'string',
+                                description: 'The physical size of the record: 12", 10" or 7"',
+                                enum: ['12"', '10"', '7"'],
+                            },
+                            source: {
+                                type: 'string',
+                                enum: ['discogs'],
+                            },
+                            title: {
+                                type: 'string',
+                            },
+                            type: {
+                                type: 'string',
+                                description: 'The type of release: album, ep or single',
+                                enum: ['album', 'ep', 'single'],
+                            },
+                            labels: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                },
+                            },
+                            tags: {
+                                required: ['colours', 'genres'],
+                                type: 'object',
+                                properties: {
+                                    genres: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'string',
+                                            enum: [
+                                                'pop',
+                                                'hip hop',
+                                                'electronic',
+                                                'r and b',
+                                                'indie',
+                                                'rock',
+                                                'jazz',
+                                                'classical',
+                                                'folk',
+                                                'acoustic',
+                                                'country',
+                                                'metal',
+                                                'blues',
+                                                'punk',
+                                                'ska',
+                                                'prog rock',
+                                            ],
+                                        },
+                                    },
+                                    colours: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'string',
+                                            enum: [
+                                                'red',
+                                                'pink',
+                                                'orange',
+                                                'yellow',
+                                                'purple',
+                                                'green',
+                                                'blue',
+                                                'brown',
+                                                'white',
+                                                'grey',
+                                                'black',
+                                                'clear',
+                                                'picture',
+                                                'gold',
+                                            ],
+                                        },
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            originalImageUrl: {
+                                type: 'string',
+                                description:
+                                    'Cover art from the Cover Art Archive, only present for MusicBrainz releases that have some',
+                            },
+                            artists: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                },
+                            },
+                            catNo: {
+                                type: 'string',
+                                description:
+                                    'The catalogue number assigned to the release by its label',
+                            },
+                            disambiguation: {
+                                type: 'string',
+                                description:
+                                    'Notes that tell pressings apart, e.g. "red vinyl", "textured sleeve" or "Repress"',
+                            },
+                            sides: {
+                                type: 'array',
+                                items: {
+                                    required: ['name', 'songs'],
+                                    type: 'object',
+                                    properties: {
+                                        songs: {
+                                            type: 'array',
+                                            items: {
+                                                required: ['duration', 'title'],
+                                                type: 'object',
+                                                properties: {
+                                                    duration: {
+                                                        maximum: 9007199254740991,
+                                                        minimum: 0,
+                                                        type: 'integer',
+                                                        description:
+                                                            'In seconds the length of the song',
+                                                    },
+                                                    title: {
+                                                        type: 'string',
+                                                    },
+                                                },
+                                                additionalProperties: false,
+                                            },
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            description: 'The name of the side, e.g. "A" or "B"',
+                                        },
+                                    },
+                                    additionalProperties: false,
+                                },
+                            },
+                            barcode: {
+                                type: 'string',
+                            },
+                            discogsId: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                exclusiveMinimum: true,
+                                type: 'integer',
+                                description:
+                                    'The Discogs release ID, used to get the full release from Discogs',
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                ],
+            },
             GetRecipeSuccessResponse: {
                 title: 'GetRecipeSuccessResponse',
                 required: [
@@ -5469,6 +6267,358 @@ const BackendApi = {
                     },
                 },
                 additionalProperties: false,
+            },
+            GetMusicBrainzExternalRecordSuccessResponse: {
+                title: 'GetMusicBrainzExternalRecordSuccessResponse',
+                description:
+                    'An external release in the shape of a record, to fill out a new record. Fields the source does not know are left out.',
+                oneOf: [
+                    {
+                        required: [
+                            'artists',
+                            'catNo',
+                            'labels',
+                            'musicBrainzId',
+                            'sides',
+                            'source',
+                            'tags',
+                            'title',
+                        ],
+                        type: 'object',
+                        properties: {
+                            country: {
+                                type: 'string',
+                                description:
+                                    'Where this pressing was released, e.g. GB from MusicBrainz or UK from Discogs',
+                            },
+                            releaseDate: {
+                                type: 'string',
+                                description:
+                                    'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
+                            },
+                            year: {
+                                maximum: 9007199254740991,
+                                minimum: -9007199254740991,
+                                type: 'integer',
+                            },
+                            musicBrainzId: {
+                                pattern:
+                                    '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+                                type: 'string',
+                                description:
+                                    'The MusicBrainz release ID, used to get the full release from MusicBrainz',
+                            },
+                            format: {
+                                type: 'string',
+                                description: 'The physical size of the record: 12", 10" or 7"',
+                                enum: ['12"', '10"', '7"'],
+                            },
+                            source: {
+                                type: 'string',
+                                enum: ['musicBrainz'],
+                            },
+                            title: {
+                                type: 'string',
+                            },
+                            type: {
+                                type: 'string',
+                                description: 'The type of release: album, ep or single',
+                                enum: ['album', 'ep', 'single'],
+                            },
+                            labels: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                },
+                            },
+                            tags: {
+                                required: ['colours', 'genres'],
+                                type: 'object',
+                                properties: {
+                                    genres: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'string',
+                                            enum: [
+                                                'pop',
+                                                'hip hop',
+                                                'electronic',
+                                                'r and b',
+                                                'indie',
+                                                'rock',
+                                                'jazz',
+                                                'classical',
+                                                'folk',
+                                                'acoustic',
+                                                'country',
+                                                'metal',
+                                                'blues',
+                                                'punk',
+                                                'ska',
+                                                'prog rock',
+                                            ],
+                                        },
+                                    },
+                                    colours: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'string',
+                                            enum: [
+                                                'red',
+                                                'pink',
+                                                'orange',
+                                                'yellow',
+                                                'purple',
+                                                'green',
+                                                'blue',
+                                                'brown',
+                                                'white',
+                                                'grey',
+                                                'black',
+                                                'clear',
+                                                'picture',
+                                                'gold',
+                                            ],
+                                        },
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            originalImageUrl: {
+                                type: 'string',
+                                description:
+                                    'Cover art from the Cover Art Archive, only present for MusicBrainz releases that have some',
+                            },
+                            artists: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                },
+                            },
+                            catNo: {
+                                type: 'string',
+                                description:
+                                    'The catalogue number assigned to the release by its label',
+                            },
+                            disambiguation: {
+                                type: 'string',
+                                description:
+                                    'Notes that tell pressings apart, e.g. "red vinyl", "textured sleeve" or "Repress"',
+                            },
+                            sides: {
+                                type: 'array',
+                                items: {
+                                    required: ['name', 'songs'],
+                                    type: 'object',
+                                    properties: {
+                                        songs: {
+                                            type: 'array',
+                                            items: {
+                                                required: ['duration', 'title'],
+                                                type: 'object',
+                                                properties: {
+                                                    duration: {
+                                                        maximum: 9007199254740991,
+                                                        minimum: 0,
+                                                        type: 'integer',
+                                                        description:
+                                                            'In seconds the length of the song',
+                                                    },
+                                                    title: {
+                                                        type: 'string',
+                                                    },
+                                                },
+                                                additionalProperties: false,
+                                            },
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            description: 'The name of the side, e.g. "A" or "B"',
+                                        },
+                                    },
+                                    additionalProperties: false,
+                                },
+                            },
+                            barcode: {
+                                type: 'string',
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                    {
+                        required: [
+                            'artists',
+                            'catNo',
+                            'discogsId',
+                            'labels',
+                            'sides',
+                            'source',
+                            'tags',
+                            'title',
+                        ],
+                        type: 'object',
+                        properties: {
+                            country: {
+                                type: 'string',
+                                description:
+                                    'Where this pressing was released, e.g. GB from MusicBrainz or UK from Discogs',
+                            },
+                            releaseDate: {
+                                type: 'string',
+                                description:
+                                    'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
+                            },
+                            year: {
+                                maximum: 9007199254740991,
+                                minimum: -9007199254740991,
+                                type: 'integer',
+                            },
+                            format: {
+                                type: 'string',
+                                description: 'The physical size of the record: 12", 10" or 7"',
+                                enum: ['12"', '10"', '7"'],
+                            },
+                            source: {
+                                type: 'string',
+                                enum: ['discogs'],
+                            },
+                            title: {
+                                type: 'string',
+                            },
+                            type: {
+                                type: 'string',
+                                description: 'The type of release: album, ep or single',
+                                enum: ['album', 'ep', 'single'],
+                            },
+                            labels: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                },
+                            },
+                            tags: {
+                                required: ['colours', 'genres'],
+                                type: 'object',
+                                properties: {
+                                    genres: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'string',
+                                            enum: [
+                                                'pop',
+                                                'hip hop',
+                                                'electronic',
+                                                'r and b',
+                                                'indie',
+                                                'rock',
+                                                'jazz',
+                                                'classical',
+                                                'folk',
+                                                'acoustic',
+                                                'country',
+                                                'metal',
+                                                'blues',
+                                                'punk',
+                                                'ska',
+                                                'prog rock',
+                                            ],
+                                        },
+                                    },
+                                    colours: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'string',
+                                            enum: [
+                                                'red',
+                                                'pink',
+                                                'orange',
+                                                'yellow',
+                                                'purple',
+                                                'green',
+                                                'blue',
+                                                'brown',
+                                                'white',
+                                                'grey',
+                                                'black',
+                                                'clear',
+                                                'picture',
+                                                'gold',
+                                            ],
+                                        },
+                                    },
+                                },
+                                additionalProperties: false,
+                            },
+                            originalImageUrl: {
+                                type: 'string',
+                                description:
+                                    'Cover art from the Cover Art Archive, only present for MusicBrainz releases that have some',
+                            },
+                            artists: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                },
+                            },
+                            catNo: {
+                                type: 'string',
+                                description:
+                                    'The catalogue number assigned to the release by its label',
+                            },
+                            disambiguation: {
+                                type: 'string',
+                                description:
+                                    'Notes that tell pressings apart, e.g. "red vinyl", "textured sleeve" or "Repress"',
+                            },
+                            sides: {
+                                type: 'array',
+                                items: {
+                                    required: ['name', 'songs'],
+                                    type: 'object',
+                                    properties: {
+                                        songs: {
+                                            type: 'array',
+                                            items: {
+                                                required: ['duration', 'title'],
+                                                type: 'object',
+                                                properties: {
+                                                    duration: {
+                                                        maximum: 9007199254740991,
+                                                        minimum: 0,
+                                                        type: 'integer',
+                                                        description:
+                                                            'In seconds the length of the song',
+                                                    },
+                                                    title: {
+                                                        type: 'string',
+                                                    },
+                                                },
+                                                additionalProperties: false,
+                                            },
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            description: 'The name of the side, e.g. "A" or "B"',
+                                        },
+                                    },
+                                    additionalProperties: false,
+                                },
+                            },
+                            barcode: {
+                                type: 'string',
+                            },
+                            discogsId: {
+                                maximum: 9007199254740991,
+                                minimum: 0,
+                                exclusiveMinimum: true,
+                                type: 'integer',
+                                description:
+                                    'The Discogs release ID, used to get the full release from Discogs',
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                ],
             },
             GetExtractedExternalRecipeSuccessResponse: {
                 title: 'GetExtractedExternalRecipeSuccessResponse',
@@ -7422,115 +8572,239 @@ const BackendApi = {
                 title: 'GetExternalRecordsSuccessResponse',
                 type: 'array',
                 description:
-                    'Vinyl releases on MusicBrainz matching the catalogue number, best match first. Pick one and get its full details by musicBrainzId.',
+                    'Vinyl releases matching the catalogue number, best match first. MusicBrainz is searched first, then Discogs when MusicBrainz has no matches. Pick one and get its full details from the source it came from.',
                 items: {
-                    required: [
-                        'artists',
-                        'catNo',
-                        'colours',
-                        'labels',
-                        'musicBrainzId',
-                        'thumbnailUrl',
-                        'title',
-                        'trackCount',
+                    oneOf: [
+                        {
+                            required: [
+                                'artists',
+                                'catNo',
+                                'colours',
+                                'labels',
+                                'musicBrainzId',
+                                'source',
+                                'title',
+                            ],
+                            type: 'object',
+                            properties: {
+                                country: {
+                                    type: 'string',
+                                    description:
+                                        'Where this pressing was released, e.g. GB from MusicBrainz or UK from Discogs',
+                                },
+                                releaseDate: {
+                                    type: 'string',
+                                    description:
+                                        'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
+                                },
+                                year: {
+                                    maximum: 9007199254740991,
+                                    minimum: -9007199254740991,
+                                    type: 'integer',
+                                },
+                                musicBrainzId: {
+                                    pattern:
+                                        '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+                                    type: 'string',
+                                    description:
+                                        'The MusicBrainz release ID, used to get the full release from MusicBrainz',
+                                },
+                                format: {
+                                    type: 'string',
+                                    description: 'The physical size of the record: 12", 10" or 7"',
+                                    enum: ['12"', '10"', '7"'],
+                                },
+                                source: {
+                                    type: 'string',
+                                    enum: ['musicBrainz'],
+                                },
+                                title: {
+                                    type: 'string',
+                                },
+                                type: {
+                                    type: 'string',
+                                    description: 'The type of release: album, ep or single',
+                                    enum: ['album', 'ep', 'single'],
+                                },
+                                labels: {
+                                    type: 'array',
+                                    items: {
+                                        type: 'string',
+                                    },
+                                },
+                                trackCount: {
+                                    maximum: 9007199254740991,
+                                    minimum: 0,
+                                    type: 'integer',
+                                    description: 'Only known for MusicBrainz releases',
+                                },
+                                artists: {
+                                    type: 'array',
+                                    items: {
+                                        type: 'string',
+                                    },
+                                },
+                                catNo: {
+                                    type: 'string',
+                                    description:
+                                        'The catalogue number assigned to the release by its label',
+                                },
+                                disambiguation: {
+                                    type: 'string',
+                                    description:
+                                        'Notes that tell pressings apart, e.g. "red vinyl", "textured sleeve" or "Repress"',
+                                },
+                                barcode: {
+                                    type: 'string',
+                                },
+                                colours: {
+                                    type: 'array',
+                                    description:
+                                        'Colours worked out from the release notes, empty when none are mentioned',
+                                    items: {
+                                        type: 'string',
+                                        enum: [
+                                            'red',
+                                            'pink',
+                                            'orange',
+                                            'yellow',
+                                            'purple',
+                                            'green',
+                                            'blue',
+                                            'brown',
+                                            'white',
+                                            'grey',
+                                            'black',
+                                            'clear',
+                                            'picture',
+                                            'gold',
+                                        ],
+                                    },
+                                },
+                                thumbnailUrl: {
+                                    type: 'string',
+                                    description:
+                                        'Small cover art to help pick a release. From the Cover Art Archive for MusicBrainz, where not every release has cover art so this can 404, or Discogs when the release has an image.',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
+                        {
+                            required: [
+                                'artists',
+                                'catNo',
+                                'colours',
+                                'discogsId',
+                                'labels',
+                                'source',
+                                'title',
+                            ],
+                            type: 'object',
+                            properties: {
+                                country: {
+                                    type: 'string',
+                                    description:
+                                        'Where this pressing was released, e.g. GB from MusicBrainz or UK from Discogs',
+                                },
+                                releaseDate: {
+                                    type: 'string',
+                                    description:
+                                        'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
+                                },
+                                year: {
+                                    maximum: 9007199254740991,
+                                    minimum: -9007199254740991,
+                                    type: 'integer',
+                                },
+                                format: {
+                                    type: 'string',
+                                    description: 'The physical size of the record: 12", 10" or 7"',
+                                    enum: ['12"', '10"', '7"'],
+                                },
+                                source: {
+                                    type: 'string',
+                                    enum: ['discogs'],
+                                },
+                                title: {
+                                    type: 'string',
+                                },
+                                type: {
+                                    type: 'string',
+                                    description: 'The type of release: album, ep or single',
+                                    enum: ['album', 'ep', 'single'],
+                                },
+                                labels: {
+                                    type: 'array',
+                                    items: {
+                                        type: 'string',
+                                    },
+                                },
+                                trackCount: {
+                                    maximum: 9007199254740991,
+                                    minimum: 0,
+                                    type: 'integer',
+                                    description: 'Only known for MusicBrainz releases',
+                                },
+                                artists: {
+                                    type: 'array',
+                                    items: {
+                                        type: 'string',
+                                    },
+                                },
+                                catNo: {
+                                    type: 'string',
+                                    description:
+                                        'The catalogue number assigned to the release by its label',
+                                },
+                                disambiguation: {
+                                    type: 'string',
+                                    description:
+                                        'Notes that tell pressings apart, e.g. "red vinyl", "textured sleeve" or "Repress"',
+                                },
+                                barcode: {
+                                    type: 'string',
+                                },
+                                discogsId: {
+                                    maximum: 9007199254740991,
+                                    minimum: 0,
+                                    exclusiveMinimum: true,
+                                    type: 'integer',
+                                    description:
+                                        'The Discogs release ID, used to get the full release from Discogs',
+                                },
+                                colours: {
+                                    type: 'array',
+                                    description:
+                                        'Colours worked out from the release notes, empty when none are mentioned',
+                                    items: {
+                                        type: 'string',
+                                        enum: [
+                                            'red',
+                                            'pink',
+                                            'orange',
+                                            'yellow',
+                                            'purple',
+                                            'green',
+                                            'blue',
+                                            'brown',
+                                            'white',
+                                            'grey',
+                                            'black',
+                                            'clear',
+                                            'picture',
+                                            'gold',
+                                        ],
+                                    },
+                                },
+                                thumbnailUrl: {
+                                    type: 'string',
+                                    description:
+                                        'Small cover art to help pick a release. From the Cover Art Archive for MusicBrainz, where not every release has cover art so this can 404, or Discogs when the release has an image.',
+                                },
+                            },
+                            additionalProperties: false,
+                        },
                     ],
-                    type: 'object',
-                    properties: {
-                        country: {
-                            type: 'string',
-                            description:
-                                'Where this pressing was released, usually an ISO 3166-1 code like GB',
-                        },
-                        releaseDate: {
-                            type: 'string',
-                            description:
-                                'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
-                        },
-                        year: {
-                            maximum: 9007199254740991,
-                            minimum: -9007199254740991,
-                            type: 'integer',
-                        },
-                        musicBrainzId: {
-                            pattern:
-                                '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
-                            type: 'string',
-                            description: 'The MusicBrainz release ID, used to get the full release',
-                        },
-                        format: {
-                            type: 'string',
-                            description: 'The physical size of the record: 12", 10" or 7"',
-                            enum: ['12"', '10"', '7"'],
-                        },
-                        title: {
-                            type: 'string',
-                        },
-                        type: {
-                            type: 'string',
-                            description: 'The type of release: album, ep or single',
-                            enum: ['album', 'ep', 'single'],
-                        },
-                        labels: {
-                            type: 'array',
-                            items: {
-                                type: 'string',
-                            },
-                        },
-                        trackCount: {
-                            maximum: 9007199254740991,
-                            minimum: 0,
-                            type: 'integer',
-                        },
-                        artists: {
-                            type: 'array',
-                            items: {
-                                type: 'string',
-                            },
-                        },
-                        catNo: {
-                            type: 'string',
-                            description:
-                                'The catalogue number assigned to the release by its label',
-                        },
-                        disambiguation: {
-                            type: 'string',
-                            description:
-                                'Notes that tell pressings apart, e.g. "red vinyl" or "textured sleeve"',
-                        },
-                        barcode: {
-                            type: 'string',
-                        },
-                        colours: {
-                            type: 'array',
-                            description:
-                                'Colours worked out from the release notes, empty when none are mentioned',
-                            items: {
-                                type: 'string',
-                                enum: [
-                                    'red',
-                                    'pink',
-                                    'orange',
-                                    'yellow',
-                                    'purple',
-                                    'green',
-                                    'blue',
-                                    'brown',
-                                    'white',
-                                    'grey',
-                                    'black',
-                                    'clear',
-                                    'picture',
-                                    'gold',
-                                ],
-                            },
-                        },
-                        thumbnailUrl: {
-                            type: 'string',
-                            description:
-                                'Small cover art from the Cover Art Archive. Not every release has cover art, so this can 404.',
-                        },
-                    },
-                    additionalProperties: false,
                 },
             },
             DeleteRecipeSuccessResponse: {
@@ -7697,11 +8971,11 @@ const BackendApi = {
                 in: 'header',
                 'x-amazon-apigateway-authtype': 'custom',
                 'x-amazon-apigateway-authorizer': {
-                    type: 'request',
                     authorizerUri:
                         'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:home-automation-api-v2-machine-authorizer-lambda-dev/invocations',
                     authorizerResultTtlInSeconds: 0,
                     identitySource: 'method.request.header.Authorization',
+                    type: 'request',
                 },
             },
             api_key: {
@@ -7715,18 +8989,18 @@ const BackendApi = {
                 in: 'header',
                 'x-amazon-apigateway-authtype': 'custom',
                 'x-amazon-apigateway-authorizer': {
-                    type: 'request',
                     authorizerUri:
                         'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:home-automation-api-v2-basic-user-authorizer-lambda-dev/invocations',
                     authorizerResultTtlInSeconds: 0,
                     identitySource: 'method.request.header.Authorization',
+                    type: 'request',
                 },
             },
         },
     },
     'x-amazon-apigateway-documentation': {
-        version: 'o1egz1',
-        createdDate: '2026-10-03T14:13:24Z',
+        version: 'petcr5',
+        createdDate: '2026-10-04T10:31:35Z',
         documentationParts: [
             {
                 location: {

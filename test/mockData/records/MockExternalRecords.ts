@@ -1,9 +1,13 @@
-import { GetExternalRecordsResponse } from '@awjh/home-automation-v2-api-models'
+import { ExternalRecordSearchResult } from '@defs/ExternalRecord'
 import { Colour, RecordFormat, ReleaseType } from '@awjh/home-automation-v2-api-models/records'
 import MockRecord from './MockRecord'
 
-const MockExternalRecords: GetExternalRecordsResponse = [
+type MusicBrainzSearchResult = Extract<ExternalRecordSearchResult, { source: 'musicBrainz' }>
+type DiscogsSearchResult = Extract<ExternalRecordSearchResult, { source: 'discogs' }>
+
+const MockExternalRecords: MusicBrainzSearchResult[] = [
     {
+        source: 'musicBrainz',
         musicBrainzId: '0b6d4d55-8e3d-4b8c-9f5e-3f4c2a7d1e01',
         catNo: MockRecord.catNo,
         title: MockRecord.title,
@@ -20,6 +24,7 @@ const MockExternalRecords: GetExternalRecordsResponse = [
         thumbnailUrl: 'https://coverartarchive.org/release/0b6d4d55/front-250',
     },
     {
+        source: 'musicBrainz',
         musicBrainzId: '7a1e9c3b-2f4d-4e6a-8b5c-9d0e1f2a3b02',
         catNo: MockRecord.catNo,
         title: MockRecord.title,
@@ -33,6 +38,24 @@ const MockExternalRecords: GetExternalRecordsResponse = [
         colours: [Colour.RED],
         trackCount: 11,
         thumbnailUrl: 'https://coverartarchive.org/release/7a1e9c3b/front-250',
+    },
+]
+
+// What the search returns when MusicBrainz has no matches and it falls back to Discogs
+export const MockDiscogsExternalRecords: DiscogsSearchResult[] = [
+    {
+        source: 'discogs',
+        discogsId: 1234567,
+        catNo: MockRecord.catNo,
+        title: MockRecord.title,
+        artists: MockRecord.artists,
+        labels: MockRecord.labels,
+        year: MockRecord.year,
+        type: ReleaseType.ALBUM,
+        format: RecordFormat.TWELVE_INCH,
+        country: 'UK',
+        colours: [],
+        thumbnailUrl: 'https://i.discogs.com/rumours-150.jpg',
     },
 ]
 

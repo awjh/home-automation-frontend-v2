@@ -96,6 +96,64 @@ describe('add record page', () => {
         })
     })
 
+    it('falls back to Discogs when MusicBrainz has no releases for the catalogue number', () => {
+        // Unconditionally Guaranteed, which is on Discogs but not MusicBrainz
+        searchCatalogueNumber('OVED 66')
+
+        getExternalRecordOptions().should('have.length.at.least', 1)
+        // Every result coming from Discogs also shows MusicBrainz had none, so this fails loudly
+        // rather than quietly testing MusicBrainz if MusicBrainz ever adds the release
+        getExternalRecordOptions().each(($option) => {
+            cy.wrap($option).should('contain.text', 'From Discogs')
+        })
+
+        getExternalRecordOptions()
+            .first()
+            .within(() => {
+                cy.contains('button', /^select$/i).click()
+                cy.contains('button', /^selected$/i, { timeout: 30000 }).should('be.visible')
+            })
+        cy.contains('Record details filled in').should('be.visible')
+
+        clickWizardNext()
+        waitForStep('Add', 2, ADD_STEP_COUNT)
+
+        cy.getInputByLabel(/^title/i)
+            .invoke('val')
+            .should('match', /unconditionally guaranteed/i)
+        cy.getInputByLabel(/^artist/i)
+            .invoke('val')
+            .should('match', /captain beefheart/i)
+        cy.getInputByLabel(/^year/i).then(($year) => {
+            if (!$year.val()) {
+                cy.wrap($year).type('1974')
+            }
+        })
+        clickWizardNext()
+
+        // Discogs releases don't come with cover art to fill in
+        waitForStep('Add', 3, ADD_STEP_COUNT)
+        clickWizardNext()
+
+        waitForStep('Add', 4, ADD_STEP_COUNT)
+        cy.get('input')
+            .filter((_, input) => (input as HTMLInputElement).value !== '')
+            .should('have.length.at.least', 1)
+        clickWizardNext()
+
+        waitForStep('Add', 5, ADD_STEP_COUNT)
+        clickWizardFinish()
+
+        getRecordIdFromRedirect().then((recordId) => {
+            cy.getRecord(recordId).then((record) => {
+                expect(record.catNo).to.equal('OVED 66')
+                expect(record.title).to.match(/unconditionally guaranteed/i)
+                expect(record.artists.join(', ')).to.match(/captain beefheart/i)
+                expect(record.sides.flatMap((side) => side.songs)).to.have.length.at.least(1)
+            })
+        })
+    })
+
     it('lets the record be entered manually when nothing matches the catalogue number', () => {
         const catNo = `CYPRESS NO MATCH ${Date.now()}`
         const title = `Cypress Manual Record ${Date.now()}`

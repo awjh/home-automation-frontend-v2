@@ -1,19 +1,23 @@
 import Button from '@atoms/Button/Button'
 import ImageWithFallback from '@atoms/ImageWithFallback/ImageWithFallback'
 import Tag from '@atoms/Tag/Tag'
-import { GetExternalRecordsResponse } from '@awjh/home-automation-v2-api-models'
 import { Flex, HStack, Text, VStack } from '@chakra-ui/react'
+import {
+    EXTERNAL_RECORD_SOURCE_NAMES,
+    ExternalRecordSearchResult,
+    getExternalRecordKey,
+} from '@defs/ExternalRecord'
 import useColorMode from '@hooks/useColorMode'
 
 export interface ExternalRecordOptionProps {
-    release: GetExternalRecordsResponse[number]
+    release: ExternalRecordSearchResult
     isSelected: boolean
     isLoading: boolean
     disabled: boolean
     onSelect: () => void
 }
 
-// One MusicBrainz pressing in the catalogue number search results
+// One pressing in the catalogue number search results, from MusicBrainz or Discogs
 export default function ExternalRecordOption({
     release,
     isSelected,
@@ -36,7 +40,9 @@ export default function ExternalRecordOption({
     const pressing = [
         release.format,
         release.type,
-        `${release.trackCount} track${release.trackCount === 1 ? '' : 's'}`,
+        // Discogs search results don't include a track count
+        release.trackCount !== undefined &&
+            `${release.trackCount} track${release.trackCount === 1 ? '' : 's'}`,
         release.disambiguation,
     ]
         .filter(Boolean)
@@ -50,7 +56,7 @@ export default function ExternalRecordOption({
             p={3}
             alignItems={'center'}
             gap={3}
-            data-testid={`external-record-${release.musicBrainzId}`}
+            data-testid={`external-record-${getExternalRecordKey(release)}`}
         >
             <ImageWithFallback
                 w={'64px'}
@@ -68,6 +74,9 @@ export default function ExternalRecordOption({
                 </Text>
                 <Text color={keyColors.primary} fontSize={'sm'}>
                     {pressing}
+                </Text>
+                <Text color={keyColors.primary} fontSize={'xs'}>
+                    From {EXTERNAL_RECORD_SOURCE_NAMES[release.source]}
                 </Text>
                 {release.colours.length > 0 && (
                     <HStack gap={2} flexWrap={'wrap'}>

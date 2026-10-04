@@ -2,6 +2,12 @@ import Button from '@atoms/Button/Button'
 import TextInput from '@atoms/TextInput/TextInput'
 import { GetExternalRecordsResponse } from '@awjh/home-automation-v2-api-models'
 import { Field, Fieldset, HStack, Text, VStack } from '@chakra-ui/react'
+import {
+    ExternalRecordSearchResult,
+    getExternalRecordKey,
+    getExternalRecordSource,
+    type ExternalRecordSource,
+} from '@defs/ExternalRecord'
 import useColorMode from '@hooks/useColorMode'
 import useToaster from '@hooks/useToaster'
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react'
@@ -15,7 +21,8 @@ export type CatalogueNumberFormValues = {
 // The releases found for the last search, kept so they are still there after going back a step
 export type ExternalRecordSearch = {
     results: GetExternalRecordsResponse
-    selectedMusicBrainzId?: string
+    // From getExternalRecordKey, as MusicBrainz and Discogs IDs could clash
+    selectedKey?: string
 }
 
 export interface CatalogueNumberFormProps {
@@ -23,7 +30,7 @@ export interface CatalogueNumberFormProps {
     initialSearch?: ExternalRecordSearch
     searchByCatalogueNumber: (catNo: string) => Promise<GetExternalRecordsResponse>
     // Fills in the rest of the form from the chosen release
-    selectExternalRecord: (musicBrainzId: string) => Promise<void>
+    selectExternalRecord: (release: ExternalRecordSource) => Promise<void>
     isLookupLoading: (val: boolean) => void
     onSubmitStep: (values: CatalogueNumberFormValues) => void
 }
@@ -46,8 +53,8 @@ const CatalogueNumberForm = forwardRef<
 
     const [search, setSearch] = useState<ExternalRecordSearch | undefined>(props.initialSearch)
     const [lookupLoading, setLookupLoading] = useState(false)
-    const [loadingMusicBrainzId, setLoadingMusicBrainzId] = useState<string>()
-    const isBusy = lookupLoading || loadingMusicBrainzId !== undefined
+    const [loadingKey, setLoadingKey] = useState<string>()
+    const isBusy = lookupLoading || loadingKey !== undefined
 
     useEffect(() => {
         props.isLookupLoading(isBusy)
@@ -109,11 +116,13 @@ const CatalogueNumberForm = forwardRef<
         }
     }
 
-    const selectRelease = async (musicBrainzId: string) => {
-        setLoadingMusicBrainzId(musicBrainzId)
+    const selectRelease = async (release: ExternalRecordSearchResult) => {
+        const key = getExternalRecordKey(release)
+
+        setLoadingKey(key)
 
         try {
-            await props.selectExternalRecord(musicBrainzId)
+            await props.selectExternalRecord(getExternalRecordSource(release))
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_error) {
             toaster.create({
@@ -124,10 +133,10 @@ const CatalogueNumberForm = forwardRef<
             })
             return
         } finally {
-            setLoadingMusicBrainzId(undefined)
+            setLoadingKey(undefined)
         }
 
-        setSearch((current) => current && { ...current, selectedMusicBrainzId: musicBrainzId })
+        setSearch((current) => current && { ...current, selectedKey: key })
 
         toaster.create({
             title: 'Record details filled in',
@@ -197,18 +206,20 @@ const CatalogueNumberForm = forwardRef<
                             <Text color={keyColors.primary}>
                                 Choose the pressing that matches your record.
                             </Text>
-                            {search.results.map((release) => (
-                                <ExternalRecordOption
-                                    key={release.musicBrainzId}
-                                    release={release}
-                                    isSelected={
-                                        search.selectedMusicBrainzId === release.musicBrainzId
-                                    }
-                                    isLoading={loadingMusicBrainzId === release.musicBrainzId}
-                                    disabled={isBusy}
-                                    onSelect={() => void selectRelease(release.musicBrainzId)}
-                                />
-                            ))}
+                            {search.results.map((release) => {
+                                const key = getExternalRecordKey(release)
+
+                                return (
+                                    <ExternalRecordOption
+                                        key={key}
+                                        release={release}
+                                        isSelected={search.selectedKey === key}
+                                        isLoading={loadingKey === key}
+                                        disabled={isBusy}
+                                        onSelect={() => void selectRelease(release)}
+                                    />
+                                )
+                            })}
                         </VStack>
                     )}
                 </VStack>
