@@ -40,6 +40,46 @@ export const SuccessfulLogin: Story = {
     },
 }
 
+const loginWithRedirect = (redirect: string, expectedPath: string): Story => ({
+    parameters: {
+        nextjs: {
+            appDirectory: true,
+            navigation: {
+                query: [['redirect', redirect]],
+            },
+        },
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        const router = getRouter()
+
+        const submitButton = await fillValidCredentials(canvas, userEvent)
+        await userEvent.click(submitButton)
+
+        await waitFor(() => expect(args.onSubmit).toHaveBeenCalledWith(ValidEmail, ValidPassword))
+        await waitFor(() => expect(router.push).toHaveBeenCalledWith(expectedPath))
+    },
+})
+
+export const SuccessfulLoginRedirectsBackWithQuery = loginWithRedirect(
+    '/oauth/authorize?client_id=abc&state=xyz',
+    '/oauth/authorize?client_id=abc&state=xyz',
+)
+
+export const SuccessfulLoginIgnoresExternalRedirect = loginWithRedirect(
+    'https://evil.example/phish',
+    '/',
+)
+
+export const SuccessfulLoginIgnoresProtocolRelativeRedirect = loginWithRedirect(
+    '//evil.example/phish',
+    '/',
+)
+
+export const SuccessfulLoginIgnoresBackslashRedirect = loginWithRedirect(
+    '/\\evil.example/phish',
+    '/',
+)
+
 export const FailedLoginShowsToast: Story = {
     play: async ({ args, canvas, userEvent }) => {
         ;(args.onSubmit as unknown as Mock).mockRejectedValue(new Error('Invalid credentials'))

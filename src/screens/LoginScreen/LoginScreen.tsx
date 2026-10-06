@@ -5,6 +5,7 @@ import RedirectSearchParam from '@constants/RedirectSearchParam'
 import Login from '@features/Login/Login'
 import NavBar from '@features/NavBar/NavBar'
 import useToaster from '@hooks/useToaster'
+import getSafeRedirectPath from '@utils/getSafeRedirectPath'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 export type LoginScreenProps = {
@@ -19,7 +20,7 @@ export default function LoginScreen({ onSubmit }: LoginScreenProps) {
     const handleSubmit = async (email: string, password: string) => {
         try {
             await onSubmit(email, password)
-            const next = searchParams.get(RedirectSearchParam) ?? '/'
+            const next = getSafeRedirectPath(searchParams.get(RedirectSearchParam))
             router.push(next)
         } catch {
             toaster.create({
