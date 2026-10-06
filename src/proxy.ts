@@ -7,7 +7,8 @@ export function proxy(req: NextRequest) {
     const jwt = req.cookies.get('stytch_session_jwt')?.value
 
     const loginUrl = new URL('/login', req.url)
-    loginUrl.searchParams.set(RedirectSearchParam, req.nextUrl.pathname)
+    // Keep the query string, as the OAuth authorize page carries its whole request in it
+    loginUrl.searchParams.set(RedirectSearchParam, `${req.nextUrl.pathname}${req.nextUrl.search}`)
 
     // No token → redirect immediately
     if (!jwt) {
@@ -30,5 +31,5 @@ export function proxy(req: NextRequest) {
 
 // Protect specific routes
 export const config = {
-    matcher: ['/', '/meal-plans'],
+    matcher: ['/', '/meal-plans', '/oauth/authorize'],
 }
