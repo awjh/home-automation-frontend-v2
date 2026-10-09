@@ -32,6 +32,13 @@ export default forwardRef<HTMLInputElement, TextInputProps>(function TextInput(
                 borderRadius={0}
                 color={keyColors.primary}
                 pl={4}
+                css={{
+                    MozAppearance: 'textfield',
+                    '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                    },
+                }}
                 {...inputProps}
             />
             {(reserveErrorSpace || errorMessage) && (

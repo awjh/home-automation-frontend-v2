@@ -66,10 +66,12 @@ export default function SelectInput(props: SelectInputProps) {
                         color={keyColors.primary}
                         borderRadius={0}
                         textTransform={'capitalize'}
+                        ps={4}
+                        pe={10}
                     >
                         <Select.ValueText />
                     </Select.Trigger>
-                    <Select.IndicatorGroup>
+                    <Select.IndicatorGroup pe={3}>
                         <Select.Indicator color={keyColors.primary} />
                     </Select.IndicatorGroup>
                 </Select.Control>
