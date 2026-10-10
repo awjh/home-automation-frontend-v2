@@ -10,11 +10,7 @@ import {
 } from '@awjh/home-automation-v2-api-models'
 import { MusicRecord, RecordTags } from '@awjh/home-automation-v2-api-models/records'
 import { HStack, Text, VStack } from '@chakra-ui/react'
-import {
-    isSupportedImageContentType,
-    UploadRecipeImageInput,
-    UploadRecipeImageResponse,
-} from '@defs/Image'
+import { UploadRecipeImageInput, UploadRecipeImageResponse } from '@defs/Image'
 import { ExternalRecordSource, getExternalRecordKey } from '@defs/ExternalRecord'
 import { RecordLookupResult } from '@defs/RecordLookup'
 import ImageForm, {
@@ -23,7 +19,7 @@ import ImageForm, {
     ImageSourceOption,
 } from '@features/Recipes/AddRecipe/steps/ImageForm/ImageForm'
 import useColorMode from '@hooks/useColorMode'
-import fileToBase64 from '@utils/fileToBase64'
+import uploadImageFile from '@utils/uploadImageFile'
 import formatTrackDuration from '@utils/formatTrackDuration'
 import parseTrackDuration from '@utils/parseTrackDuration'
 import { useRouter } from 'next/navigation'
@@ -162,17 +158,7 @@ async function resolveImageKey(
             return undefined
         }
 
-        if (!isSupportedImageContentType(imageValues.imageFile.type)) {
-            throw new Error(`Unsupported image content type: ${imageValues.imageFile.type}`)
-        }
-
-        const { key } = await uploadRecordImage({
-            source: 'file',
-            contentType: imageValues.imageFile.type,
-            data: await fileToBase64(imageValues.imageFile),
-        })
-
-        return key
+        return uploadImageFile(imageValues.imageFile, uploadRecordImage)
     }
 
     if (!imageValues.imageUrl) {

@@ -6,6 +6,23 @@ import addDays from '../mealPlans/utils/addDays'
 import formatIsoDate from '../mealPlans/utils/formatIsoDate'
 import getMondayOfWeek from '../mealPlans/utils/getMondayOfWeek'
 
+// A click before hydration is dropped, so keep clicking until the popup opens
+function openEditImagePopup(attemptsLeft = 5) {
+    cy.contains('button', /change image|add image/i).click({ force: true })
+    cy.get('body').then(($body) => {
+        if ($body.find('[data-testid="edit-recipe-image-popup"]').length > 0) {
+            return
+        }
+
+        if (attemptsLeft <= 1) {
+            throw new Error('Edit recipe image popup did not open')
+        }
+
+        cy.wait(500)
+        openEditImagePopup(attemptsLeft - 1)
+    })
+}
+
 describe('recipe page', () => {
     beforeEach(() => {
         cy.loginAsTestUser()
@@ -49,6 +66,78 @@ describe('recipe page', () => {
                 .should('be.visible')
                 .and('have.attr', 'src')
                 .and('include', 'recipe.jpg')
+        })
+    })
+
+    it('replaces the recipe image with an uploaded file', () => {
+        const recipeTitle = `Cypress Recipe Change Image ${Date.now()}`
+
+        cy.createRecipe({
+            ...buildBookRecipe(recipeTitle),
+            image: '/recipe.jpg',
+        }).then((recipeId) => {
+            cy.visit(`/recipes/${recipeId}`)
+
+            cy.get(`img[alt="${recipeTitle}"]`).should('have.attr', 'src', '/recipe.jpg')
+
+            openEditImagePopup()
+            cy.getByTestId('edit-recipe-image-popup').within(() => {
+                cy.get('input[type="file"]').selectFile('public/recipe.jpg')
+                cy.clickButtonByText('Save')
+            })
+
+            cy.getByTestId('edit-recipe-image-popup').should('not.exist')
+            cy.contains(/updated image/i).should('be.visible')
+
+            cy.getRecipe(recipeId).then((recipe) => {
+                expect(recipe.image).to.be.a('string').and.not.equal('/recipe.jpg')
+
+                const assertShowsUploadedImage = () =>
+                    cy
+                        .get(`img[alt="${recipeTitle}"]`)
+                        .should('be.visible')
+                        .and(($img) => {
+                            expect($img.attr('src')).to.include(recipe.image)
+                            expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0)
+                        })
+
+                assertShowsUploadedImage()
+
+                // Still shown after a reload, so it was saved rather than only held in state
+                cy.reload()
+                assertShowsUploadedImage()
+            })
+        })
+    })
+
+    it('removes the recipe image', () => {
+        const recipeTitle = `Cypress Recipe Remove Image ${Date.now()}`
+
+        cy.createRecipe({
+            ...buildBookRecipe(recipeTitle),
+            image: '/recipe.jpg',
+        }).then((recipeId) => {
+            cy.visit(`/recipes/${recipeId}`)
+
+            cy.get(`img[alt="${recipeTitle}"]`).should('be.visible')
+
+            openEditImagePopup()
+            cy.getByTestId('edit-recipe-image-popup').within(() => {
+                cy.getInputByLabel(/would you like to remove the image/i, 'select').select('yes', {
+                    force: true,
+                })
+                cy.contains('label', /how would you like to provide the image/i).should('not.exist')
+                cy.clickButtonByText('Remove')
+            })
+
+            cy.getByTestId('edit-recipe-image-popup').should('not.exist')
+            cy.get(`img[alt="${recipeTitle}"]`).should('not.exist')
+
+            cy.getRecipe(recipeId).its('image').should('be.undefined')
+
+            cy.reload()
+            cy.contains('h1', recipeTitle).should('be.visible')
+            cy.get(`img[alt="${recipeTitle}"]`).should('not.exist')
         })
     })
 

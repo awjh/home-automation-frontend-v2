@@ -6,6 +6,8 @@ import {
     GetRecipeResponse,
     PostMealPlanBody,
     PostMealPlanResponse,
+    PutRecipeBody,
+    PutRecipeResponse,
 } from '@awjh/home-automation-v2-api-models'
 import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import MealPlan from '@defs/MealPlan'
@@ -57,6 +59,37 @@ export async function getRecipe(id: string): Promise<GetRecipeResponse> {
 
 export async function getRecipeImageUrl(imageId: string | undefined): Promise<string | undefined> {
     return getImageUrl('recipe', imageId)
+}
+
+export async function updateRecipeImage(
+    recipeId: string,
+    imageKey: string | undefined,
+): Promise<string | undefined> {
+    // PUT replaces the whole recipe, so re-fetch it rather than trusting the client's copy
+    // whose image has already been swapped for a resolved URL.
+    const { id, ...recipe } = await getRecipe(recipeId)
+
+    const callApiEndpoint = await getEndpoint({
+        endpoint: `/recipes/{id}`,
+        method: 'put',
+    })
+
+    try {
+        await callApiEndpoint<PutRecipeResponse>({
+            additionalHeaders: {
+                'Content-Type': 'application/json',
+            },
+            pathParams: {
+                id,
+            },
+            body: { ...recipe, image: imageKey } satisfies PutRecipeBody,
+        })
+    } catch (error) {
+        console.error('Error updating recipe image:', error)
+        throw new Error('Failed to update recipe image')
+    }
+
+    return getRecipeImageUrl(imageKey)
 }
 
 export async function getRecipeMealPlanDates(recipeId: string): Promise<RecipeMealPlanDate[]> {

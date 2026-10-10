@@ -5,7 +5,9 @@ import {
     deleteMealPlanFromRecipePage,
     getRecipeImageUrl,
     getRecipeMealPlanDates,
+    updateRecipeImage,
 } from './actions'
+import { uploadRecipeImage } from '../add/actions'
 import getCachedRecipe from './getCachedRecipe'
 
 interface ViewRecipeProps {
@@ -39,6 +41,8 @@ export default async function ViewRecipe({ params }: ViewRecipeProps) {
             dates={mealPlanDates}
             onAddMealSubmit={addMealPlanFromRecipePage}
             onDeleteMealSubmit={deleteMealPlanFromRecipePage}
+            uploadRecipeImage={uploadRecipeImage}
+            updateRecipeImage={updateRecipeImage}
         />
     )
 }

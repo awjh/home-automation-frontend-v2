@@ -14,13 +14,8 @@ import { SourceType } from '@awjh/home-automation-v2-api-models/mealPlans'
 import { Recipe, RecipeTags } from '@awjh/home-automation-v2-api-models/recipes'
 import { Text, VStack } from '@chakra-ui/react'
 import Button from '@atoms/Button/Button'
-import {
-    isSupportedImageContentType,
-    UploadRecipeImageInput,
-    UploadRecipeImageResponse,
-} from '@defs/Image'
+import { UploadRecipeImageInput, UploadRecipeImageResponse } from '@defs/Image'
 import useColorMode from '@hooks/useColorMode'
-import fileToBase64 from '@utils/fileToBase64'
 import { useRouter } from 'next/navigation'
 import { useMemo, useRef, useState } from 'react'
 import BasicDetailsForm, {
@@ -33,6 +28,7 @@ import ImageForm, {
     ImageFormValues,
     ImageSourceOption,
 } from './steps/ImageForm/ImageForm'
+import resolveImageKey from './steps/ImageForm/resolveImageKey'
 import IngredientsForm from './steps/IngredientsForm/IngredientsForm'
 import { IngredientsFormValues } from './steps/IngredientsForm/IngredientsSectionForm/IngredientsSectionForm'
 import MethodForm, { MethodFormValues } from './steps/MethodForm/MethodForm'
@@ -296,43 +292,6 @@ function buildPostRecipeBody(formValues: AddRecipeState, imageKey?: string): Pos
 
 type AddRecipeStepHandle = {
     submit: () => Promise<boolean>
-}
-
-async function resolveImageKey(
-    imageValues: ImageFormValues | undefined,
-    uploadRecipeImage: (input: UploadRecipeImageInput) => Promise<UploadRecipeImageResponse>,
-): Promise<string | undefined> {
-    if (!imageValues || imageValues.hasImage !== HasImageOption.YES) {
-        return undefined
-    }
-
-    if (imageValues.imageSource === ImageSourceOption.UPLOAD) {
-        if (!imageValues.imageFile) {
-            return undefined
-        }
-
-        if (!isSupportedImageContentType(imageValues.imageFile.type)) {
-            throw new Error(`Unsupported image content type: ${imageValues.imageFile.type}`)
-        }
-
-        const data = await fileToBase64(imageValues.imageFile)
-
-        const { key } = await uploadRecipeImage({
-            source: 'file',
-            contentType: imageValues.imageFile.type,
-            data,
-        })
-
-        return key
-    }
-
-    if (!imageValues.imageUrl) {
-        return undefined
-    }
-
-    const { key } = await uploadRecipeImage({ source: 'url', url: imageValues.imageUrl })
-
-    return key
 }
 
 type AddRecipeStepKey =

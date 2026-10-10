@@ -18,10 +18,10 @@
         "cypress:run": "cypress run",
         "build-storybook": "storybook build",
         "cdk": "cdk",
-        "deploy:prod": "yarn build:open-next && cdk deploy --require-approval never --all -c stage=prod"
+        "deploy:prod": "NEXT_DEPLOYMENT_ID=$(date +%s) yarn build:open-next && cdk deploy --require-approval never --all -c stage=prod"
     },
     "dependencies": {
-        "@awjh/home-automation-v2-api-models": "^1.0.24",
+        "@awjh/home-automation-v2-api-models": "^1.0.25",
         "@chakra-ui/react": "^3.34.0",
         "@emotion/react": "^11.14.0",
         "@fontsource/inter": "^5.2.8",

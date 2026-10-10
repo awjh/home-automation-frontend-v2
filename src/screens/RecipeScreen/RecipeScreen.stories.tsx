@@ -44,6 +44,8 @@ const meta: Meta<typeof RecipeScreen> = {
         ],
         onAddMealSubmit: fn(async (values) => createMealPlanFromFormValues(values)),
         onDeleteMealSubmit: fn(async (mealPlan) => mealPlan),
+        uploadRecipeImage: fn(async () => ({ key: 'new-image-key' })),
+        updateRecipeImage: fn(async () => '/recipe.jpg'),
     },
 }
 
@@ -259,6 +261,63 @@ export const DeletesMealPlanAndClearsWeekdayHighlight: Story = {
                 'data-status',
                 'default',
             )
+        })
+    },
+}
+
+export const ChangesRecipeImageFromUrl: Story = {
+    play: async ({ canvas, userEvent, args }) => {
+        await userEvent.click(canvas.getByRole('button', { name: /change recipe image/i }))
+
+        const popup = within(canvas.getByTestId('edit-recipe-image-popup'))
+
+        await userEvent.selectOptions(
+            popup.getByLabelText(/how would you like to provide the image/i, {
+                selector: 'select',
+            }),
+            'url',
+        )
+        await userEvent.type(
+            popup.getByLabelText(/image url/i, { selector: 'input' }),
+            'https://example.com/new.jpg',
+        )
+        await userEvent.click(popup.getByRole('button', { name: /save/i }))
+
+        await waitFor(() => {
+            expect(args.uploadRecipeImage).toHaveBeenCalledWith({
+                source: 'url',
+                url: 'https://example.com/new.jpg',
+            })
+            expect(args.updateRecipeImage).toHaveBeenCalledWith(args.recipe.id, 'new-image-key')
+            expect(canvas.queryByTestId('edit-recipe-image-popup')).not.toBeInTheDocument()
+            expect(screen.getByText(/updated image/i)).toBeInTheDocument()
+        })
+    },
+}
+
+export const RemovesRecipeImage: Story = {
+    play: async ({ canvas, userEvent, args }) => {
+        await userEvent.click(canvas.getByRole('button', { name: /change recipe image/i }))
+
+        const popup = within(canvas.getByTestId('edit-recipe-image-popup'))
+
+        await userEvent.selectOptions(
+            popup.getByLabelText(/would you like to remove the image/i, { selector: 'select' }),
+            'yes',
+        )
+
+        expect(
+            popup.queryByLabelText(/how would you like to provide the image/i, {
+                selector: 'select',
+            }),
+        ).not.toBeInTheDocument()
+
+        await userEvent.click(popup.getByRole('button', { name: /remove/i }))
+
+        await waitFor(() => {
+            expect(args.uploadRecipeImage).not.toHaveBeenCalled()
+            expect(args.updateRecipeImage).toHaveBeenCalledWith(args.recipe.id, undefined)
+            expect(canvas.queryByTestId('edit-recipe-image-popup')).not.toBeInTheDocument()
         })
     },
 }

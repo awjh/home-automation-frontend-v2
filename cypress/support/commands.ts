@@ -3,6 +3,7 @@
 import { jwtDecode } from 'jwt-decode'
 import type {
     GetMealPlansResponse,
+    GetRecipeResponse,
     GetRecordResponse,
     GetRecipesQueryParameters,
     GetRecipesResponse,
@@ -59,6 +60,7 @@ declare global {
             createMealPlan(mealPlan: PostMealPlanBody): Chainable<void>
             createRecipe(recipe: PostRecipeBody): Chainable<PostRecipeResponse['id']>
             createRecord(record: PostRecordBody): Chainable<PostRecordResponse['id']>
+            getRecipe(recipeId: string): Chainable<GetRecipeResponse>
             getRecord(recordId: string): Chainable<GetRecordResponse>
             deleteRecipe(recipeId: string): Chainable<void>
             deleteAllRecipes(): Chainable<void>
@@ -237,6 +239,20 @@ Cypress.Commands.add('createRecord', (record: PostRecordBody) => {
                     body: record,
                 })
                 .its('body.id')
+        })
+    })
+})
+
+Cypress.Commands.add('getRecipe', (recipeId: string) => {
+    return getRequiredEnv('API_BASE_URL').then((apiBaseUrl) => {
+        return getAuthHeaders().then((headers) => {
+            return cy
+                .request<GetRecipeResponse>({
+                    method: 'GET',
+                    url: `${apiBaseUrl}/recipes/${encodeURIComponent(recipeId)}`,
+                    headers,
+                })
+                .its('body')
         })
     })
 })

@@ -34,34 +34,23 @@ function guessContentTypeFromUrl(url: string): ImageContentType | undefined {
     }
 }
 
-async function resolveImageData(
-    input: UploadRecipeImageInput,
+async function downloadImage(
+    url: string,
 ): Promise<{ data: Uint8Array; contentType: ImageContentType }> {
-    if (input.source === 'file') {
-        if (!isSupportedImageContentType(input.contentType)) {
-            throw new Error(`Unsupported image content type: ${input.contentType}`)
-        }
-
-        return {
-            data: new Uint8Array(Buffer.from(input.data, 'base64')),
-            contentType: input.contentType,
-        }
-    }
-
-    const response = await fetch(input.url)
+    const response = await fetch(url)
 
     if (!response.ok) {
-        throw new Error(`Failed to download image from URL: ${input.url}`)
+        throw new Error(`Failed to download image from URL: ${url}`)
     }
 
     const headerContentType = response.headers.get('content-type')?.split(';')[0].trim()
     const contentType =
         (headerContentType && isSupportedImageContentType(headerContentType)
             ? headerContentType
-            : undefined) ?? guessContentTypeFromUrl(input.url)
+            : undefined) ?? guessContentTypeFromUrl(url)
 
     if (!contentType) {
-        throw new Error(`Unable to determine a supported image content type for: ${input.url}`)
+        throw new Error(`Unable to determine a supported image content type for: ${url}`)
     }
 
     return {
@@ -70,21 +59,17 @@ async function resolveImageData(
     }
 }
 
-export default async function uploadImage(
+async function requestImageUpload(
     service: 'recipe' | 'record',
-    input: UploadRecipeImageInput,
-): Promise<UploadRecipeImageResponse> {
-    const { data, contentType } = await resolveImageData(input)
-
+    contentType: ImageContentType,
+): Promise<PostImageResponse> {
     const callApiEndpoint = await getEndpoint({
         endpoint: '/images',
         method: 'post',
     })
 
-    let uploadDetails: PostImageResponse
-
     try {
-        uploadDetails = await callApiEndpoint<PostImageResponse>({
+        return await callApiEndpoint<PostImageResponse>({
             additionalHeaders: {
                 'Content-Type': 'application/json',
             },
@@ -97,6 +82,26 @@ export default async function uploadImage(
         console.error(`Error requesting ${service} image upload URL:`, error)
         throw new Error(`Failed to prepare ${service} image upload`)
     }
+}
+
+export default async function uploadImage(
+    service: 'recipe' | 'record',
+    input: UploadRecipeImageInput,
+): Promise<UploadRecipeImageResponse> {
+    // Files are uploaded by the browser straight to S3, so only hand back the presigned POST
+    if (input.source === 'file') {
+        if (!isSupportedImageContentType(input.contentType)) {
+            throw new Error(`Unsupported image content type: ${input.contentType}`)
+        }
+
+        const { url, fields, fileKey } = await requestImageUpload(service, input.contentType)
+
+        return { key: fileKey, upload: { url, fields } }
+    }
+
+    // URLs are fetched here as the browser can't read most third-party images due to CORS
+    const { data, contentType } = await downloadImage(input.url)
+    const uploadDetails = await requestImageUpload(service, contentType)
 
     const formData = new FormData()
 
