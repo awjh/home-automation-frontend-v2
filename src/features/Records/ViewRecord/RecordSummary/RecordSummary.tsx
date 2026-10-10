@@ -1,3 +1,4 @@
+import EditLinkButton from '@atoms/EditLinkButton/EditLinkButton'
 import Tag from '@atoms/Tag/Tag'
 import { Heading, HStack, VStack } from '@chakra-ui/react'
 import { MusicRecord } from '@awjh/home-automation-v2-api-models/records'
@@ -8,7 +9,9 @@ import RecordDetails from '../RecordDetails/RecordDetails'
 export type RecordSummaryProps = Pick<
     MusicRecord,
     'title' | 'artists' | 'tags' | 'labels' | 'catNo' | 'year'
->
+> & {
+    editHref?: string
+}
 
 export default function RecordSummary({
     title,
@@ -17,30 +20,34 @@ export default function RecordSummary({
     labels,
     catNo,
     year,
+    editHref,
 }: RecordSummaryProps) {
     const { keyColors } = useColorMode()
 
     return (
-        <VStack alignItems={'start'} gap={{ base: 4, md: 2, lg: 4 }}>
-            <VStack alignItems={'start'} gap={{ base: 0, xl: 2 }}>
-                <Heading
-                    as={'h1'}
-                    color={keyColors.primary}
-                    fontSize={{ base: 'xl', lg: '2xl', xl: '3xl' }}
-                    fontWeight={'normal'}
-                >
-                    {title}
-                </Heading>
-                <Heading
-                    as={'h2'}
-                    color={keyColors.primary}
-                    fontSize={{ base: 'lg', lg: 'xl', xl: '2xl' }}
-                    fontWeight={'normal'}
-                >
-                    {formatAuthors(artists)}
-                </Heading>
-                <RecordDetails labels={labels} catNo={catNo} year={year} />
-            </VStack>
+        <VStack alignItems={'start'} gap={{ base: 4, md: 2, lg: 4 }} w={'full'}>
+            <HStack w={'full'} justifyContent={'space-between'} alignItems={'start'} gap={4}>
+                <VStack alignItems={'start'} gap={{ base: 0, xl: 2 }}>
+                    <Heading
+                        as={'h1'}
+                        color={keyColors.primary}
+                        fontSize={{ base: 'xl', lg: '2xl', xl: '3xl' }}
+                        fontWeight={'normal'}
+                    >
+                        {title}
+                    </Heading>
+                    <Heading
+                        as={'h2'}
+                        color={keyColors.primary}
+                        fontSize={{ base: 'lg', lg: 'xl', xl: '2xl' }}
+                        fontWeight={'normal'}
+                    >
+                        {formatAuthors(artists)}
+                    </Heading>
+                    <RecordDetails labels={labels} catNo={catNo} year={year} />
+                </VStack>
+                {editHref && <EditLinkButton href={editHref} label={'Edit record'} />}
+            </HStack>
             <HStack gap={{ base: 2, md: 4 }} flexWrap={'wrap'}>
                 {Object.values(tags)
                     .flat()

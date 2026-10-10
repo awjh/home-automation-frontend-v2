@@ -73,6 +73,23 @@ describe('record page', () => {
         })
     })
 
+    it('links to the edit page from the pencil button', () => {
+        const title = `Cypress Record Edit Link ${Date.now()}`
+        const record = buildRecord(title)
+
+        cy.createRecord(record).then((recordId) => {
+            cy.visit(`/records/${recordId}`)
+
+            cy.get('a[aria-label="Edit record"]')
+                .should('have.attr', 'href', `/records/${recordId}/edit`)
+                .click()
+
+            // The edit route can take a while to compile on a cold dev server
+            cy.location('pathname', { timeout: 30000 }).should('eq', `/records/${recordId}/edit`)
+            cy.getInputByLabel(/catalogue number/i).should('have.value', record.catNo)
+        })
+    })
+
     it('replaces the record artwork with an uploaded file', () => {
         const title = `Cypress Record Change Image ${Date.now()}`
 

@@ -54,7 +54,7 @@ export default function ViewRecord({ record, onImageClick }: ViewRecordProps) {
                         alt={record.title}
                     />
                 )}
-                <RecordSummary {...record} />
+                <RecordSummary {...record} editHref={`/records/${record.id}/edit`} />
             </Stack>
             <Flex mt={{ base: 2, md: 0 }} h={0.5} alignSelf={'stretch'} bg={keyColors.primary} />
             <VStack

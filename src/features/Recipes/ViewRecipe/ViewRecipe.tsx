@@ -65,7 +65,7 @@ export default function ViewRecipe({ recipe, dates, onDateClick, onImageClick }:
                     h={imageHeights}
                     w={'full'}
                 >
-                    <RecipeSummary {...recipe} />
+                    <RecipeSummary {...recipe} editHref={`/recipes/${recipe.id}/edit`} />
                     <RecipeMealPlans dates={dates} onDateClick={onDateClick} />
                 </VStack>
             </Stack>

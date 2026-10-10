@@ -52,6 +52,22 @@ describe('recipe page', () => {
         })
     })
 
+    it('links to the edit page from the pencil button', () => {
+        const recipeTitle = `Cypress Recipe Edit Link ${Date.now()}`
+
+        cy.createRecipe(buildBookRecipe(recipeTitle)).then((recipeId) => {
+            cy.visit(`/recipes/${recipeId}`)
+
+            cy.get('a[aria-label="Edit recipe"]')
+                .should('have.attr', 'href', `/recipes/${recipeId}/edit`)
+                .click()
+
+            // The edit route can take a while to compile on a cold dev server
+            cy.location('pathname', { timeout: 30000 }).should('eq', `/recipes/${recipeId}/edit`)
+            cy.contains(/edit recipe/i).should('be.visible')
+        })
+    })
+
     it('replaces the recipe image with an uploaded file', () => {
         const recipeTitle = `Cypress Recipe Change Image ${Date.now()}`
 
