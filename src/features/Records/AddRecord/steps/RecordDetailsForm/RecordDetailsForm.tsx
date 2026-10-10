@@ -21,6 +21,7 @@ export const RELEASE_TYPE_LABELS: Record<ReleaseType, string> = {
     [ReleaseType.ALBUM]: 'Album',
     [ReleaseType.EP]: 'EP',
     [ReleaseType.SINGLE]: 'Single',
+    [ReleaseType.NON_MUSIC]: 'Non-Music',
 }
 
 export function createEmptyRecordDetails(): RecordDetailsFormValues {

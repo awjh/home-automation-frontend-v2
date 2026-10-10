@@ -65,6 +65,7 @@ declare global {
             deleteRecipe(recipeId: string): Chainable<void>
             deleteAllRecipes(): Chainable<void>
             getByTestId(testId: string): Chainable<JQuery<HTMLElement>>
+            openEditImagePopup(): Chainable<void>
             loginAsTestUser(redirectPath?: string): Chainable<void>
             searchRecipes(
                 keywords: string,
@@ -91,6 +92,27 @@ Cypress.Commands.add(
         return cy.contains('label', label).parent().find(selector).first()
     },
 )
+
+// A click before hydration is dropped, so keep clicking the image until the popup opens
+function openEditImagePopup(attemptsLeft = 5) {
+    cy.getByTestId('editable-image').click({ force: true })
+    cy.get('body').then(($body) => {
+        if ($body.find('[data-testid="edit-image-popup"]').length > 0) {
+            return
+        }
+
+        if (attemptsLeft <= 1) {
+            throw new Error('Edit image popup did not open')
+        }
+
+        cy.wait(500)
+        openEditImagePopup(attemptsLeft - 1)
+    })
+}
+
+Cypress.Commands.add('openEditImagePopup', () => {
+    openEditImagePopup()
+})
 
 Cypress.Commands.add('clickButtonByText', (label: string) => {
     cy.contains('button', new RegExp(`^${label}$`, 'i')).click()

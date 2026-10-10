@@ -269,7 +269,7 @@ export const ChangesRecipeImageFromUrl: Story = {
     play: async ({ canvas, userEvent, args }) => {
         await userEvent.click(canvas.getByRole('button', { name: /change recipe image/i }))
 
-        const popup = within(canvas.getByTestId('edit-recipe-image-popup'))
+        const popup = within(canvas.getByTestId('edit-image-popup'))
 
         await userEvent.selectOptions(
             popup.getByLabelText(/how would you like to provide the image/i, {
@@ -289,7 +289,7 @@ export const ChangesRecipeImageFromUrl: Story = {
                 url: 'https://example.com/new.jpg',
             })
             expect(args.updateRecipeImage).toHaveBeenCalledWith(args.recipe.id, 'new-image-key')
-            expect(canvas.queryByTestId('edit-recipe-image-popup')).not.toBeInTheDocument()
+            expect(canvas.queryByTestId('edit-image-popup')).not.toBeInTheDocument()
             expect(screen.getByText(/updated image/i)).toBeInTheDocument()
         })
     },
@@ -299,7 +299,7 @@ export const RemovesRecipeImage: Story = {
     play: async ({ canvas, userEvent, args }) => {
         await userEvent.click(canvas.getByRole('button', { name: /change recipe image/i }))
 
-        const popup = within(canvas.getByTestId('edit-recipe-image-popup'))
+        const popup = within(canvas.getByTestId('edit-image-popup'))
 
         await userEvent.selectOptions(
             popup.getByLabelText(/would you like to remove the image/i, { selector: 'select' }),
@@ -317,7 +317,7 @@ export const RemovesRecipeImage: Story = {
         await waitFor(() => {
             expect(args.uploadRecipeImage).not.toHaveBeenCalled()
             expect(args.updateRecipeImage).toHaveBeenCalledWith(args.recipe.id, undefined)
-            expect(canvas.queryByTestId('edit-recipe-image-popup')).not.toBeInTheDocument()
+            expect(canvas.queryByTestId('edit-image-popup')).not.toBeInTheDocument()
         })
     },
 }

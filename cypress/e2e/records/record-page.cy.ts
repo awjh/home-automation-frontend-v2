@@ -72,4 +72,71 @@ describe('record page', () => {
             cy.get(`img[alt="${title}"]`).should('not.exist')
         })
     })
+
+    it('replaces the record artwork with an uploaded file', () => {
+        const title = `Cypress Record Change Image ${Date.now()}`
+
+        cy.createRecord(buildRecord(title, { image: '/recipe.jpg' })).then((recordId) => {
+            cy.visit(`/records/${recordId}`)
+
+            cy.get(`img[alt="${title}"]`).should('have.attr', 'src', '/recipe.jpg')
+
+            cy.openEditImagePopup()
+            cy.getByTestId('edit-image-popup').within(() => {
+                cy.get('input[type="file"]').selectFile('public/recipe.jpg')
+                cy.clickButtonByText('Save')
+            })
+
+            cy.getByTestId('edit-image-popup').should('not.exist')
+            cy.contains(/updated image/i).should('be.visible')
+
+            cy.getRecord(recordId).then((record) => {
+                expect(record.image).to.be.a('string').and.not.equal('/recipe.jpg')
+
+                const assertShowsUploadedImage = () =>
+                    cy
+                        .get(`img[alt="${title}"]`)
+                        .should('be.visible')
+                        .and(($img) => {
+                            expect($img.attr('src')).to.include(record.image)
+                            expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0)
+                        })
+
+                assertShowsUploadedImage()
+
+                // Still shown after a reload, so it was saved rather than only held in state
+                cy.reload()
+                assertShowsUploadedImage()
+            })
+        })
+    })
+
+    it('removes the record artwork', () => {
+        const title = `Cypress Record Remove Image ${Date.now()}`
+
+        cy.createRecord(buildRecord(title, { image: '/recipe.jpg' })).then((recordId) => {
+            cy.visit(`/records/${recordId}`)
+
+            cy.get(`img[alt="${title}"]`).should('be.visible')
+
+            cy.openEditImagePopup()
+            cy.getByTestId('edit-image-popup').within(() => {
+                cy.getInputByLabel(/would you like to remove the image/i, 'select').select('yes', {
+                    force: true,
+                })
+                cy.contains('label', /how would you like to provide the image/i).should('not.exist')
+                cy.clickButtonByText('Remove')
+            })
+
+            cy.getByTestId('edit-image-popup').should('not.exist')
+            cy.contains(/removed image/i).should('be.visible')
+            cy.get(`img[alt="${title}"]`).should('not.exist')
+
+            cy.getRecord(recordId).its('image').should('be.undefined')
+
+            cy.reload()
+            cy.contains('h1', title).should('be.visible')
+            cy.get(`img[alt="${title}"]`).should('not.exist')
+        })
+    })
 })

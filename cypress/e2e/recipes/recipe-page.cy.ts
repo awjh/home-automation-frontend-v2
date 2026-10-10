@@ -6,23 +6,6 @@ import addDays from '../mealPlans/utils/addDays'
 import formatIsoDate from '../mealPlans/utils/formatIsoDate'
 import getMondayOfWeek from '../mealPlans/utils/getMondayOfWeek'
 
-// A click before hydration is dropped, so keep clicking until the popup opens
-function openEditImagePopup(attemptsLeft = 5) {
-    cy.contains('button', /change image|add image/i).click({ force: true })
-    cy.get('body').then(($body) => {
-        if ($body.find('[data-testid="edit-recipe-image-popup"]').length > 0) {
-            return
-        }
-
-        if (attemptsLeft <= 1) {
-            throw new Error('Edit recipe image popup did not open')
-        }
-
-        cy.wait(500)
-        openEditImagePopup(attemptsLeft - 1)
-    })
-}
-
 describe('recipe page', () => {
     beforeEach(() => {
         cy.loginAsTestUser()
@@ -80,13 +63,13 @@ describe('recipe page', () => {
 
             cy.get(`img[alt="${recipeTitle}"]`).should('have.attr', 'src', '/recipe.jpg')
 
-            openEditImagePopup()
-            cy.getByTestId('edit-recipe-image-popup').within(() => {
+            cy.openEditImagePopup()
+            cy.getByTestId('edit-image-popup').within(() => {
                 cy.get('input[type="file"]').selectFile('public/recipe.jpg')
                 cy.clickButtonByText('Save')
             })
 
-            cy.getByTestId('edit-recipe-image-popup').should('not.exist')
+            cy.getByTestId('edit-image-popup').should('not.exist')
             cy.contains(/updated image/i).should('be.visible')
 
             cy.getRecipe(recipeId).then((recipe) => {
@@ -121,8 +104,8 @@ describe('recipe page', () => {
 
             cy.get(`img[alt="${recipeTitle}"]`).should('be.visible')
 
-            openEditImagePopup()
-            cy.getByTestId('edit-recipe-image-popup').within(() => {
+            cy.openEditImagePopup()
+            cy.getByTestId('edit-image-popup').within(() => {
                 cy.getInputByLabel(/would you like to remove the image/i, 'select').select('yes', {
                     force: true,
                 })
@@ -130,7 +113,8 @@ describe('recipe page', () => {
                 cy.clickButtonByText('Remove')
             })
 
-            cy.getByTestId('edit-recipe-image-popup').should('not.exist')
+            cy.getByTestId('edit-image-popup').should('not.exist')
+            cy.contains(/removed image/i).should('be.visible')
             cy.get(`img[alt="${recipeTitle}"]`).should('not.exist')
 
             cy.getRecipe(recipeId).its('image').should('be.undefined')

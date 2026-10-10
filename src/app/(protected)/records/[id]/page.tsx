@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import RecordScreen from '@screens/RecordScreen/RecordScreen'
-import { getRecordImageUrl } from './actions'
+import { uploadRecordImage } from '../add/actions'
+import { getRecordImageUrl, updateRecordImage } from './actions'
 import getCachedRecord from './getCachedRecord'
 
 interface ViewRecordProps {
@@ -21,5 +22,11 @@ export default async function ViewRecord({ params }: ViewRecordProps) {
     const record = await getCachedRecord(id)
     const resolvedImage = await getRecordImageUrl(record.image)
 
-    return <RecordScreen record={{ ...record, image: resolvedImage }} />
+    return (
+        <RecordScreen
+            record={{ ...record, image: resolvedImage }}
+            uploadRecordImage={uploadRecordImage}
+            updateRecordImage={updateRecordImage}
+        />
+    )
 }

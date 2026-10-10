@@ -9,10 +9,8 @@ import MealPlan from '@defs/MealPlan'
 import AddMealPlanFormValues from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/AddMealPlanFormValues'
 import FlowSource from '@features/MealPlanner/AddMealPlan/AddMealPlanForm/defs/FlowSource'
 import MealPlanPopups from '@features/MealPlanner/MealPlanPopups/MealPlanPopups'
+import useEditImage from '@features/Images/EditImage/useEditImage'
 import NavBar from '@features/NavBar/NavBar'
-import { ImageFormValues } from '@features/Recipes/AddRecipe/steps/ImageForm/ImageForm'
-import resolveImageKey from '@features/Recipes/AddRecipe/steps/ImageForm/resolveImageKey'
-import EditRecipeImage from '@features/Recipes/ViewRecipe/EditRecipeImage/EditRecipeImage'
 import { RecipeMealPlanDate } from '@features/Recipes/ViewRecipe/RecipeMealPlans/RecipeMealPlans'
 import ViewRecipe from '@features/Recipes/ViewRecipe/ViewRecipe'
 import useColorMode from '@hooks/useColorMode'
@@ -46,31 +44,15 @@ export default function RecipeScreen({
     const { keyColors } = useColorMode()
     const toaster = useToaster()
     const [mealPlanDates, setMealPlanDates] = useState(dates)
-    const [recipeImage, setRecipeImage] = useState(recipe.image)
-    const [showEditImage, setShowEditImage] = useState(false)
-
-    const onEditImageSubmit = useCallback(
-        async (values: ImageFormValues) => {
-            try {
-                const imageKey = await resolveImageKey(values, uploadRecipeImage)
-                setRecipeImage(await updateRecipeImage(recipe.id, imageKey))
-                setShowEditImage(false)
-                toaster.create({
-                    title: 'Updated image',
-                    description: 'The recipe image has been successfully updated.',
-                    type: 'success',
-                })
-            } catch (error) {
-                console.error('Error updating recipe image:', error)
-                toaster.create({
-                    title: 'Failed to update image',
-                    description: 'There was an error while updating the image. Please try again.',
-                    type: 'error',
-                })
-            }
-        },
-        [recipe.id, toaster, updateRecipeImage, uploadRecipeImage],
+    const updateImage = useCallback(
+        (imageKey: string | undefined) => updateRecipeImage(recipe.id, imageKey),
+        [recipe.id, updateRecipeImage],
     )
+    const { image, openEditImage, editImagePopup } = useEditImage({
+        image: recipe.image,
+        uploadImage: uploadRecipeImage,
+        updateImage,
+    })
 
     const internalRecipeInitialValues = useMemo(
         () => ({
@@ -225,13 +207,7 @@ export default function RecipeScreen({
     return (
         <VStack width={'full'}>
             <NavBar />
-            {showEditImage && (
-                <EditRecipeImage
-                    hasImage={Boolean(recipeImage)}
-                    onSubmit={onEditImageSubmit}
-                    onClose={() => setShowEditImage(false)}
-                />
-            )}
+            {editImagePopup}
             <MealPlanPopups<RecipeMealPlanDate, DeleteMealPlanResponse>
                 flowSource={FlowSource.RECIPE_PAGE}
                 createAddInitialValues={createAddInitialValues}
@@ -245,9 +221,9 @@ export default function RecipeScreen({
                 {({ onAddMeal, onDeleteMeal }) => (
                     <VStack width={'full'} minHeight={'100vh'} borderColor={keyColors.primary}>
                         <ViewRecipe
-                            recipe={{ ...recipe, image: recipeImage }}
+                            recipe={{ ...recipe, image }}
                             dates={mealPlanDates}
-                            onImageClick={() => setShowEditImage(true)}
+                            onImageClick={openEditImage}
                             onDateClick={(date) =>
                                 onRecipeDateClick(date, {
                                     onAddMeal,

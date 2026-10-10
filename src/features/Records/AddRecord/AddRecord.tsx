@@ -18,8 +18,8 @@ import ImageForm, {
     ImageFormValues,
     ImageSourceOption,
 } from '@features/Recipes/AddRecipe/steps/ImageForm/ImageForm'
+import resolveImageKey from '@features/Recipes/AddRecipe/steps/ImageForm/resolveImageKey'
 import useColorMode from '@hooks/useColorMode'
-import uploadImageFile from '@utils/uploadImageFile'
 import formatTrackDuration from '@utils/formatTrackDuration'
 import parseTrackDuration from '@utils/parseTrackDuration'
 import { useRouter } from 'next/navigation'
@@ -143,31 +143,6 @@ function buildPostRecordBody(formValues: AddRecordState, imageKey?: string): Pos
             colours: tags?.colours ?? [],
         },
     }
-}
-
-async function resolveImageKey(
-    imageValues: ImageFormValues | undefined,
-    uploadRecordImage: AddRecordCreateProps['uploadRecordImage'],
-): Promise<string | undefined> {
-    if (!imageValues || imageValues.hasImage !== HasImageOption.YES) {
-        return undefined
-    }
-
-    if (imageValues.imageSource === ImageSourceOption.UPLOAD) {
-        if (!imageValues.imageFile) {
-            return undefined
-        }
-
-        return uploadImageFile(imageValues.imageFile, uploadRecordImage)
-    }
-
-    if (!imageValues.imageUrl) {
-        return undefined
-    }
-
-    const { key } = await uploadRecordImage({ source: 'url', url: imageValues.imageUrl })
-
-    return key
 }
 
 export default function AddRecord(props: AddRecordProps) {

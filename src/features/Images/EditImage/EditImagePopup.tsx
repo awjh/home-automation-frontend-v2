@@ -16,27 +16,27 @@ export enum RemoveImageOption {
     NO = 'no',
 }
 
-type EditRecipeImageFormValues = {
+type EditImageFormValues = {
     removeImage: RemoveImageOption
     imageSource: ImageSourceOption
     imageUrl: string
     imageFile: File | null
 }
 
-export interface EditRecipeImageProps {
+export interface EditImagePopupProps {
     hasImage: boolean
     onSubmit: (values: ImageFormValues) => Promise<void>
     onClose: () => void
 }
 
-export default function EditRecipeImage({ hasImage, onSubmit, onClose }: EditRecipeImageProps) {
+export default function EditImagePopup({ hasImage, onSubmit, onClose }: EditImagePopupProps) {
     const { keyColors } = useColorMode()
 
     const {
         control,
         handleSubmit,
         formState: { errors, isSubmitting },
-    } = useForm<EditRecipeImageFormValues>({
+    } = useForm<EditImageFormValues>({
         defaultValues: {
             removeImage: RemoveImageOption.NO,
             imageSource: ImageSourceOption.UPLOAD,
@@ -51,7 +51,7 @@ export default function EditRecipeImage({ hasImage, onSubmit, onClose }: EditRec
     const imageFile = useWatch({ control, name: 'imageFile' })
     const isReplacingImage = !hasImage || removeImage === RemoveImageOption.NO
 
-    const submitHandler = ({ imageSource, imageUrl, imageFile }: EditRecipeImageFormValues) =>
+    const submitHandler = ({ imageSource, imageUrl, imageFile }: EditImageFormValues) =>
         onSubmit({
             hasImage: isReplacingImage ? HasImageOption.YES : HasImageOption.NO,
             imageSource,
@@ -61,7 +61,7 @@ export default function EditRecipeImage({ hasImage, onSubmit, onClose }: EditRec
 
     return (
         <PopupForm
-            dataProps={{ testid: 'edit-recipe-image-popup' }}
+            dataProps={{ testid: 'edit-image-popup' }}
             heading={hasImage ? 'Change Image' : 'Add Image'}
             onClose={onClose}
         >

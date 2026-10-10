@@ -1,5 +1,6 @@
 import ImageWithFallback from '@atoms/ImageWithFallback/ImageWithFallback'
 import { Flex, Stack, Text, VStack } from '@chakra-ui/react'
+import EditableImage from '@molecules/EditableImage/EditableImage'
 import { MusicRecord } from '@awjh/home-automation-v2-api-models/records'
 import useColorMode from '@hooks/useColorMode'
 import RecordSummary from './RecordSummary/RecordSummary'
@@ -22,9 +23,10 @@ const trackListWidths = {
 
 interface ViewRecordProps {
     record: MusicRecord
+    onImageClick?: () => void
 }
 
-export default function ViewRecord({ record }: ViewRecordProps) {
+export default function ViewRecord({ record, onImageClick }: ViewRecordProps) {
     const { keyColors } = useColorMode()
 
     return (
@@ -35,12 +37,23 @@ export default function ViewRecord({ record }: ViewRecordProps) {
                 gap={6}
                 flexDirection={{ base: 'column', md: 'row' }}
             >
-                <ImageWithFallback
-                    w={imageSizes}
-                    h={imageSizes}
-                    src={record.image}
-                    alt={record.title}
-                />
+                {onImageClick ? (
+                    <EditableImage
+                        w={imageSizes}
+                        h={imageSizes}
+                        src={record.image}
+                        alt={record.title}
+                        subject={'record'}
+                        onClick={onImageClick}
+                    />
+                ) : (
+                    <ImageWithFallback
+                        w={imageSizes}
+                        h={imageSizes}
+                        src={record.image}
+                        alt={record.title}
+                    />
+                )}
                 <RecordSummary {...record} />
             </Stack>
             <Flex mt={{ base: 2, md: 0 }} h={0.5} alignSelf={'stretch'} bg={keyColors.primary} />

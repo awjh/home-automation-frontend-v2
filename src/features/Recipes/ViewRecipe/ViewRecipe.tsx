@@ -1,7 +1,7 @@
 import ImageWithFallback from '@atoms/ImageWithFallback/ImageWithFallback'
 import { Recipe } from '@awjh/home-automation-v2-api-models/recipes'
-import { Box, chakra, Flex, HStack, Stack, Text, VStack } from '@chakra-ui/react'
-import { LuImagePlus } from 'react-icons/lu'
+import { Box, Flex, HStack, Stack, Text, VStack } from '@chakra-ui/react'
+import EditableImage from '@molecules/EditableImage/EditableImage'
 import TabbedContent from '@molecules/TabbedContent/TabbedContent'
 import RecipeMealPlans, { RecipeMealPlanDate } from './RecipeMealPlans/RecipeMealPlans'
 import RecipeIngredients from './RecipeIngredients/RecipeIngredients'
@@ -42,40 +42,14 @@ export default function ViewRecipe({ recipe, dates, onDateClick, onImageClick }:
                 flexDirection={{ base: 'column', md: 'row' }}
             >
                 {onImageClick ? (
-                    <chakra.button
-                        type={'button'}
-                        aria-label={recipe.image ? 'Change recipe image' : 'Add recipe image'}
-                        onClick={onImageClick}
-                        position={'relative'}
+                    <EditableImage
                         w={imageWidths}
-                        cursor={'pointer'}
-                        flexShrink={0}
-                        className={'group'}
-                        data-testid={'recipe-image-button'}
-                    >
-                        <ImageWithFallback
-                            w={imageWidths}
-                            h={imageHeights}
-                            src={recipe.image}
-                            alt={recipe.title}
-                        />
-                        <Flex
-                            position={'absolute'}
-                            inset={0}
-                            alignItems={'center'}
-                            justifyContent={'center'}
-                            gap={2}
-                            bg={keyColors.secondary}
-                            color={keyColors.primary}
-                            opacity={0}
-                            transition={'opacity 0.2s'}
-                            _groupHover={{ opacity: 0.75 }}
-                            _groupFocusVisible={{ opacity: 0.75 }}
-                        >
-                            <LuImagePlus />
-                            <Text>{recipe.image ? 'Change image' : 'Add image'}</Text>
-                        </Flex>
-                    </chakra.button>
+                        h={imageHeights}
+                        src={recipe.image}
+                        alt={recipe.title}
+                        subject={'recipe'}
+                        onClick={onImageClick}
+                    />
                 ) : (
                     <ImageWithFallback
                         w={imageWidths}
