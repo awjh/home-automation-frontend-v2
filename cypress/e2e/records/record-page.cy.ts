@@ -33,6 +33,7 @@ describe('record page', () => {
                 'have.text',
                 `Cypress Label · ${record.catNo} · 2024`,
             )
+            cy.getByTestId('record-release').should('have.text', '12" · Album')
             cy.contains('rock').should('be.visible')
             cy.contains('black').should('be.visible')
 

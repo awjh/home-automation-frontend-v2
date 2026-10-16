@@ -5,10 +5,11 @@ import { MusicRecord } from '@awjh/home-automation-v2-api-models/records'
 import useColorMode from '@hooks/useColorMode'
 import formatAuthors from '@utils/formatAuthors'
 import RecordDetails from '../RecordDetails/RecordDetails'
+import RecordRelease from '../RecordRelease/RecordRelease'
 
 export type RecordSummaryProps = Pick<
     MusicRecord,
-    'title' | 'artists' | 'tags' | 'labels' | 'catNo' | 'year'
+    'title' | 'artists' | 'tags' | 'labels' | 'catNo' | 'year' | 'format' | 'type'
 > & {
     editHref?: string
 }
@@ -20,6 +21,8 @@ export default function RecordSummary({
     labels,
     catNo,
     year,
+    format,
+    type,
     editHref,
 }: RecordSummaryProps) {
     const { keyColors } = useColorMode()
@@ -45,6 +48,7 @@ export default function RecordSummary({
                         {formatAuthors(artists)}
                     </Heading>
                     <RecordDetails labels={labels} catNo={catNo} year={year} />
+                    <RecordRelease format={format} type={type} />
                 </VStack>
                 {editHref && <EditLinkButton href={editHref} label={'Edit record'} />}
             </HStack>

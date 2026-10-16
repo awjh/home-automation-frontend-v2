@@ -17,6 +17,7 @@ export const Default: Story = {
         await expect(canvas.getByText('rock')).toBeInTheDocument()
         await expect(canvas.getByText('black')).toBeInTheDocument()
         await expect(canvas.getByText('K 56344')).toBeInTheDocument()
+        await expect(canvas.getByTestId('record-release')).toHaveTextContent('12" · Album')
     },
 }
 

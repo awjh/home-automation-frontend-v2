@@ -2,6 +2,7 @@ import SelectInput from '@atoms/SelectInput/SelectInput'
 import TextInput from '@atoms/TextInput/TextInput'
 import { RecordFormat, ReleaseType } from '@awjh/home-automation-v2-api-models/records'
 import { Fieldset, VStack } from '@chakra-ui/react'
+import RELEASE_TYPE_LABELS from '@constants/ReleaseTypeLabels'
 import useColorMode from '@hooks/useColorMode'
 import MultipleEntryTextInput from '@molecules/MultipleEntryTextInput/MultipleEntryTextInput'
 import { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react'
@@ -15,13 +16,6 @@ export type RecordDetailsFormValues = {
     year: string
     type: ReleaseType
     format: RecordFormat
-}
-
-export const RELEASE_TYPE_LABELS: Record<ReleaseType, string> = {
-    [ReleaseType.ALBUM]: 'Album',
-    [ReleaseType.EP]: 'EP',
-    [ReleaseType.SINGLE]: 'Single',
-    [ReleaseType.NON_MUSIC]: 'Non-Music',
 }
 
 export function createEmptyRecordDetails(): RecordDetailsFormValues {
