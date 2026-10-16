@@ -38,9 +38,13 @@ export default function SearchKeywords() {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.delete('keywords')
 
-        keywordsInput.split(/\s+/).forEach((keyword) => {
-            newParams.append('keywords', keyword.trim())
-        })
+        // Skip empty keywords so a cleared search returns everything rather than matching ''
+        keywordsInput
+            .split(/\s+/)
+            .filter((keyword) => keyword.length > 0)
+            .forEach((keyword) => {
+                newParams.append('keywords', keyword)
+            })
 
         const queryString = newParams.toString()
         const nextPath = queryString ? `${pathname}?${queryString}` : pathname
