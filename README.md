@@ -83,7 +83,7 @@ Pushes to `main` run [.github/workflows/deploy.yml](.github/workflows/deploy.yml
 To deploy manually (the shell env must hold the **prod** values, as they override `.env` during the build):
 
 ```bash
-NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=... API_KEY=... STYTCH_PROJECT_ID=... STYTCH_SECRET=... yarn deploy:prod
+NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=... NEXT_PUBLIC_STYTCH_DOMAIN=... API_KEY=... STYTCH_PROJECT_ID=... STYTCH_SECRET=... yarn deploy:prod
 ```
 
 CDK tests run with `yarn test:cdk`.

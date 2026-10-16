@@ -139,6 +139,7 @@ jobs:
         env:
           # Inlined into the client bundle at build time
           NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN: ${{ secrets.STYTCH_PROD_PUBLIC_TOKEN }}
+          NEXT_PUBLIC_STYTCH_DOMAIN: https://thorn-angelfish-7819.customers.stytch.com
           API_KEY: ${{ secrets.PROD_API_KEY }}
           STYTCH_PROJECT_ID: ${{ secrets.STYTCH_PROD_PROJECT_ID }}
           STYTCH_SECRET: ${{ secrets.STYTCH_PROD_SECRET }}
