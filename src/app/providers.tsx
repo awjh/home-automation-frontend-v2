@@ -12,7 +12,7 @@ const stytch = createStytchClient(process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN!, 
 })
 
 // The OAuth authorize page's IdentityProvider redirects straight to whatever this returns, so this
-// is the only place to add the iss Stytch leaves out. The issuer is the project domain, matching
+// is the only place to correct the iss Stytch sends. The issuer is the project domain, matching
 // the issuer in its authorization server metadata
 const stytchIssuer = process.env.NEXT_PUBLIC_STYTCH_DOMAIN
 
