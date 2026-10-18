@@ -29,7 +29,7 @@ export default class HomeAutomationFrontendStackV2 extends Stack {
 
         new NextjsSite(this, {
             openNextPath: props.openNextPath,
-            domainName: DomainNames[props.stage],
+            domainNames: DomainNames[props.stage],
             certificateArn: CertificateArns[props.stage],
             environment: {
                 API_BASE_URL: ApiBaseUrls[props.stage],

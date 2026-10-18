@@ -33,7 +33,7 @@ import path from 'path'
 export interface NextjsSiteProps {
     /** Absolute path to the .open-next directory produced by `open-next build` */
     openNextPath: string
-    domainName: string
+    domainNames: string[]
     certificateArn: string
     environment: ServerFunctionEnvVars
     stage: Stage
@@ -255,7 +255,7 @@ export default class NextjsSite extends Construct {
 
         this.distribution = new Distribution(this, distributionId, {
             comment: `Home automation frontend v2 (${props.stage})`,
-            domainNames: [props.domainName],
+            domainNames: props.domainNames,
             certificate: Certificate.fromCertificateArn(
                 this,
                 NextjsSite.CertificateId,
@@ -307,7 +307,7 @@ export default class NextjsSite extends Construct {
 
         new CfnOutput(this, NextjsSite.DistributionDomainNameOutput, {
             value: this.distribution.distributionDomainName,
-            description: `CNAME target for ${props.domainName}`,
+            description: `CNAME target for ${props.domainNames.join(', ')}`,
         })
 
         new CfnOutput(this, NextjsSite.DistributionIdOutput, {

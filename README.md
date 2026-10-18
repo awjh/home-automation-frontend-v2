@@ -68,7 +68,7 @@ This project follows atomic design. Templates are used for full page view and th
 
 ## Deployment
 
-The app is deployed to AWS (production only) at https://home-automation-v2.andrewhurt.co.uk using [OpenNext](https://opennext.js.org/aws) and CDK.
+The app is deployed to AWS (production only) at https://home-automation.andrewhurt.co.uk (and https://home-automation-v2.andrewhurt.co.uk for now) using [OpenNext](https://opennext.js.org/aws) and CDK.
 
 `yarn build:open-next` runs `next build` and converts the output into Lambda bundles and static assets in `.open-next/` (see [open-next.config.ts](open-next.config.ts)). The CDK app in [bin/main.ts](bin/main.ts) then reads `.open-next/open-next.output.json` and deploys, via [cdk/constructs/NextjsSite.ts](cdk/constructs/NextjsSite.ts):
 

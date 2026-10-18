@@ -120,10 +120,10 @@ describe.each(Object.values(Stage).map((stage) => [stage]))('NextjsSite (%s)', (
         })
     })
 
-    it('serves the site on the custom domain with the us-east-1 certificate', () => {
+    it('serves the site on the custom domains with the us-east-1 certificate', () => {
         template.hasResourceProperties('AWS::CloudFront::Distribution', {
             DistributionConfig: {
-                Aliases: [DomainNames[stage]],
+                Aliases: DomainNames[stage],
                 ViewerCertificate: {
                     AcmCertificateArn: CertificateArns[stage],
                     SslSupportMethod: 'sni-only',
@@ -176,7 +176,7 @@ describe.each(Object.values(Stage).map((stage) => [stage]))('NextjsSite (%s)', (
 
     it('outputs the distribution domain for the CNAME record', () => {
         template.hasOutput('*', {
-            Description: `CNAME target for ${DomainNames[stage]}`,
+            Description: `CNAME target for ${DomainNames[stage].join(', ')}`,
         })
     })
 })
