@@ -10,6 +10,7 @@ const meta: Meta<typeof NavBarLinks> = {
             { href: '/recipes', label: 'Recipes' },
             { href: '/meal-planner', label: 'Meal Planner' },
             { href: '/records', label: 'Records' },
+            { href: '/bellboards', label: 'Bellboards' },
             { href: '/logout', label: 'Logout' },
         ],
     },

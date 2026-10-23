@@ -2,6 +2,7 @@
 
 import { jwtDecode } from 'jwt-decode'
 import type {
+    GetBellboardsResponse,
     GetMealPlansResponse,
     GetRecipeResponse,
     GetRecordResponse,
@@ -78,6 +79,7 @@ declare global {
                 selector?: 'input' | 'select',
             ): Chainable<JQuery<HTMLInputElement | HTMLSelectElement>>
             clickButtonByText(label: string): Chainable<void>
+            waitForBellboard(bellboardName: string): Chainable<void>
         }
     }
 }
@@ -360,3 +362,32 @@ Cypress.Commands.add(
 )
 
 export {}
+
+// Bellboards are created asynchronously from the status message published before the run, so
+// poll until the backend has processed it
+function waitForBellboard(bellboardName: string, attemptsLeft = 15) {
+    getRequiredEnv('API_BASE_URL').then((apiBaseUrl) => {
+        getAuthHeaders().then((headers) => {
+            cy.request<GetBellboardsResponse>({
+                method: 'GET',
+                url: `${apiBaseUrl}/bellboards`,
+                headers,
+            }).then(({ body }) => {
+                if (body.some((bellboard) => bellboard.bellboardName === bellboardName)) {
+                    return
+                }
+
+                if (attemptsLeft <= 1) {
+                    throw new Error(`Bellboard ${bellboardName} was not created`)
+                }
+
+                cy.wait(2000)
+                waitForBellboard(bellboardName, attemptsLeft - 1)
+            })
+        })
+    })
+}
+
+Cypress.Commands.add('waitForBellboard', (bellboardName: string) => {
+    waitForBellboard(bellboardName)
+})

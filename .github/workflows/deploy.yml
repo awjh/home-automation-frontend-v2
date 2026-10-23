@@ -81,6 +81,10 @@ jobs:
     concurrency:
       group: e2e-dev-backend
       cancel-in-progress: false
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
     env:
       NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN: ${{ secrets.STYTCH_DEV_PUBLIC_TOKEN }}
       API_BASE_URL: https://api.home-automation.dev.andrewhurt.co.uk
@@ -95,6 +99,24 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_E2E_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # The backend builds the Cypress user's bellboard from this status message, so publish it
+      # before the app build to give it time to be processed before the specs run
+      - name: Seed Cypress bellboard
+        env:
+          CYPRESS_USER_ID: ${{ secrets.CYPRESS_USER_ID }}
+        run: |
+          aws iot-data publish --region "$AWS_REGION" \
+            --topic "dev/$CYPRESS_USER_ID/hallwayboard/status" \
+            --qos 1 \
+            --cli-binary-format raw-in-base64-out \
+            --payload file://cypress/fixtures/bellboards/hallwayboardStatus.json
 
       - name: Cypress E2E tests
         uses: cypress-io/github-action@v6

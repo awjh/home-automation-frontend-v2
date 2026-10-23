@@ -2,7 +2,7 @@ const BackendApi = {
     openapi: '3.0.1',
     info: {
         title: 'home-automation-api-v2-dev',
-        version: '2026-10-04T10:30:55Z',
+        version: '2026-10-23T09:00:52Z',
     },
     servers: [
         {
@@ -10,6 +10,162 @@ const BackendApi = {
         },
     ],
     paths: {
+        '/bellboards': {
+            get: {
+                operationId: 'GetBellboards',
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetBellboardsSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/get-bellboards-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/Query',
+                    httpMethod: 'POST',
+                    responses: {
+                        '400': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to query DynamoDB to retrieve Bellboards","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to query DynamoDB to retrieve Bellboards","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        \n        #set($items = $input.path(\'$.Items\'))\n        [\n            #foreach($dynamoResponse in $items)\n                {\n        \n\n        \n            "bellboardName": "$util.escapeJavaScript($dynamoResponse.bellboardName.S).replace("\\\'", "\'")"\n            ,\n        \n            "rooms": [\n            #foreach($dynamoResponse_rooms_item in $dynamoResponse.rooms.L)\n                "$util.escapeJavaScript($dynamoResponse_rooms_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "version": "$util.escapeJavaScript($dynamoResponse.version.S).replace("\\\'", "\'")"\n            ,\n        \n            "lastUpdated": "$util.escapeJavaScript($dynamoResponse.lastUpdated.S).replace("\\\'", "\'")"\n            \n        \n    }\n\n                #if($foreach.hasNext)\n                    ,\n                #end\n            #end\n        ]\n    \n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '{"TableName":"home-automation-read-store-v2-dev","ConsistentRead":true,"KeyConditionExpression":"#pk = :pk","ExpressionAttributeNames":{"#pk":"pk"},"ExpressionAttributeValues":{":pk":{"S":"BELLBOARD_CONFIG~$context.authorizer.userId"}}}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'aws',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
         '/recipes/{id}': {
             get: {
                 operationId: 'GetRecipe',
@@ -421,6 +577,69 @@ const BackendApi = {
                 },
             },
         },
+        '/bellboard/{bellboardName}': {
+            options: {
+                parameters: [
+                    {
+                        name: 'bellboardName',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
         '/meal-plans/{date}/{mealTime}/{course}': {
             put: {
                 operationId: 'PutMealPlan',
@@ -685,6 +904,377 @@ const BackendApi = {
                     },
                     {
                         name: 'course',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/bellboards/{bellboardName}/ring': {
+            post: {
+                operationId: 'PostBellboardRing',
+                parameters: [
+                    {
+                        name: 'bellboardName',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PostBellboardRingBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PostBellboardRingSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator':
+                    'post-bellboard-ring-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/put-events-bellboard-rung-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
+                    httpMethod: 'POST',
+                    responses: {
+                        '(4|5)\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put BellboardRung event on the shared event bus","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'POST,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        #set($failedEntryCount = $input.path(\'$.FailedEntryCount\'))\n\n        #if("$failedEntryCount" != "0")\n            #set($context.responseOverride.status = 500)\n            {"message":"Failed to put BellboardRung event on the shared event bus","reason":"internal_server_error"}\n        #else\n            {"eventId":"$context.authorizer.uniqueRequestId"}\n        #end\n    ',
+                            },
+                        },
+                    },
+                    requestParameters: {
+                        'integration.request.header.X-Amz-Target': "'AWSEvents.PutEvents'",
+                        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"Bellboard","DetailType":"BellboardRung","Detail":"{\\"metadata\\":{\\"source\\":\\"Bellboard\\",\\"eventType\\":\\"BellboardRung\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",\\"bellboardName\\":\\"$util.escapeJavaScript($util.escapeJavaScript($util.urlDecode($input.params(\'bellboardName\'))).replace("\\\'", "\'")).replace("\\\'", "\'")\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
+                    },
+                    passthroughBehavior: 'never',
+                    type: 'aws',
+                },
+            },
+            options: {
+                parameters: [
+                    {
+                        name: 'bellboardName',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/bellboards/{bellboardName}': {
+            get: {
+                operationId: 'GetBellboard',
+                parameters: [
+                    {
+                        name: 'bellboardName',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '404': {
+                        description: '404 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/GetBellboardSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/get-bellboard-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/GetItem',
+                    httpMethod: 'POST',
+                    responses: {
+                        '400': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to getitem DynamoDB to retrieve Bellboard","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to getitem DynamoDB to retrieve Bellboard","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        \n            #set($dynamoResponse = $input.path(\'$.Item\'))\n    \n            #if($dynamoResponse.isEmpty())\n                #set($context.responseOverride.status = 404)\n                {"message":"Bellboard not found for given name","reason":"not_found"}\n            #else\n                {\n        \n\n        \n            "bellboardName": "$util.escapeJavaScript($dynamoResponse.bellboardName.S).replace("\\\'", "\'")"\n            ,\n        \n            "rooms": [\n            #foreach($dynamoResponse_rooms_item in $dynamoResponse.rooms.L)\n                "$util.escapeJavaScript($dynamoResponse_rooms_item.S).replace("\\\'", "\'")"\n                #if($foreach.hasNext),#end\n            #end\n        ]\n            ,\n        \n            "version": "$util.escapeJavaScript($dynamoResponse.version.S).replace("\\\'", "\'")"\n            ,\n        \n            "lastUpdated": "$util.escapeJavaScript($dynamoResponse.lastUpdated.S).replace("\\\'", "\'")"\n            \n        \n    }\n            #end\n        \n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '{"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"BELLBOARD_CONFIG~$context.authorizer.userId"},"sk":{"S":"$util.escapeJavaScript($util.urlDecode($input.params(\'bellboardName\'))).replace("\\\'", "\'")"}}}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'aws',
+                },
+            },
+            options: {
+                parameters: [
+                    {
+                        name: 'bellboardName',
                         in: 'path',
                         required: true,
                         schema: {
@@ -1587,7 +2177,7 @@ const BackendApi = {
                             statusCode: '200',
                             responseTemplates: {
                                 'application/json':
-                                    '\n        \n        #set($headers = $input.params().get(\'header\'))\n        #set($origin = $headers.origin)\n        \n        #if(!$origin || $origin == "")\n            #set($origin = $headers.Origin)\n        #end\n        \n        #if($origin == "http://localhost:3000")\n            #set($context.responseOverride.header.Access-Control-Allow-Origin = "$origin")\n        #end\n    \n\n        {"tags":{"genres":["pop","hip hop","electronic","r and b","indie","rock","jazz","classical","folk","acoustic","country","metal","blues","punk","ska","prog rock"],"colours":["red","pink","orange","yellow","purple","green","blue","brown","white","grey","black","clear","picture","gold"]},"filters":{"formats":["12\\"","10\\"","7\\""],"types":["album","ep","single"]}}\n    ',
+                                    '\n        \n        #set($headers = $input.params().get(\'header\'))\n        #set($origin = $headers.origin)\n        \n        #if(!$origin || $origin == "")\n            #set($origin = $headers.Origin)\n        #end\n        \n        #if($origin == "http://localhost:3000")\n            #set($context.responseOverride.header.Access-Control-Allow-Origin = "$origin")\n        #end\n    \n\n        {"tags":{"genres":["pop","hip hop","electronic","r and b","indie","rock","jazz","classical","folk","acoustic","country","metal","blues","punk","ska","prog rock","stand up"],"colours":["red","pink","orange","yellow","purple","green","blue","brown","white","grey","black","clear","picture","gold"]},"filters":{"formats":["12\\"","10\\"","7\\""],"types":["album","ep","single","non music"]}}\n    ',
                             },
                         },
                     },
@@ -1980,6 +2570,89 @@ const BackendApi = {
                     },
                     passthroughBehavior: 'when_no_match',
                     type: 'mock',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/mcp': {
+            get: {
+                operationId: 'McpGET',
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:mcp-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
+                },
+            },
+            post: {
+                operationId: 'McpPOST',
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:mcp-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
+                },
+            },
+            delete: {
+                operationId: 'McpDELETE',
+                'x-amazon-apigateway-integration': {
+                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:mcp-handler-dev/invocations',
+                    httpMethod: 'POST',
+                    passthroughBehavior: 'when_no_match',
+                    responseTransferMode: 'BUFFERED',
+                    type: 'aws_proxy',
                 },
             },
             options: {
@@ -2621,6 +3294,94 @@ const BackendApi = {
                 },
             },
         },
+        '/.well-known/oauth-protected-resource/mcp': {
+            get: {
+                operationId: 'GetProtectedResourceMetadata',
+                responses: {
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Origin': "'*'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '{"resource":"https://$context.domainName/mcp","resource_name":"Home Automation","authorization_servers":["https://angry-raja-5591.customers.stytch.dev"],"scopes_supported":["openid","email","profile","offline_access"],"bearer_methods_supported":["header"]}',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{"statusCode": 200}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
         '/images/{service}/{filekey}': {
             get: {
                 operationId: 'GetImage',
@@ -3014,6 +3775,191 @@ const BackendApi = {
                 },
             },
         },
+        '/bellboard/{bellboardName}/ring': {
+            post: {
+                operationId: 'PostBellboardRing',
+                parameters: [
+                    {
+                        name: 'bellboardName',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/PostBellboardRingBodyModel',
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/PostBellboardRingSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-request-validator':
+                    'post-bellboard-ring-request-validator-dev',
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/put-events-bellboard-rung-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:events:action/PutEvents',
+                    httpMethod: 'POST',
+                    responses: {
+                        '(4|5)\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to put BellboardRung event on the shared event bus","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'POST,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        #set($failedEntryCount = $input.path(\'$.FailedEntryCount\'))\n\n        #if("$failedEntryCount" != "0")\n            #set($context.responseOverride.status = 500)\n            {"message":"Failed to put BellboardRung event on the shared event bus","reason":"internal_server_error"}\n        #else\n            {"eventId":"$context.authorizer.uniqueRequestId"}\n        #end\n    ',
+                            },
+                        },
+                    },
+                    requestParameters: {
+                        'integration.request.header.X-Amz-Target': "'AWSEvents.PutEvents'",
+                        'integration.request.header.Content-Type': "'application/x-amz-json-1.1'",
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n        #set($id = $context.authorizer.uniqueRequestId)\n\n        {"Entries":[{"EventBusName":"home-automation-shared-event-bus-dev","Source":"Bellboard","DetailType":"BellboardRung","Detail":"{\\"metadata\\":{\\"source\\":\\"Bellboard\\",\\"eventType\\":\\"BellboardRung\\",\\"version\\":1,\\"id\\":\\"$id\\",\\"causationId\\":\\"$id\\",\\"correlationId\\":\\"$id\\",\\"environment\\":\\"dev\\"},\\"payload\\":{\\"userId\\":\\"$context.authorizer.userId\\",\\"bellboardName\\":\\"$util.escapeJavaScript($util.escapeJavaScript($util.urlDecode($input.params(\'bellboardName\'))).replace("\\\'", "\'")).replace("\\\'", "\'")\\",$util.escapeJavaScript($input.json(\'$\').trim().substring(1)).replace("\\\'", "\'")}"}]}',
+                    },
+                    passthroughBehavior: 'never',
+                    type: 'aws',
+                },
+            },
+            options: {
+                parameters: [
+                    {
+                        name: 'bellboardName',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
         '/records': {
             get: {
                 operationId: 'GetRecords',
@@ -3040,7 +3986,7 @@ const BackendApi = {
                         name: 'filters',
                         in: 'query',
                         description:
-                            'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "formats": {\n      "description": "Records matching any of these formats are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "12\\"",\n          "10\\"",\n          "7\\""\n        ]\n      }\n    },\n    "types": {\n      "description": "Records matching any of these release types are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "album",\n          "ep",\n          "single"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
+                            'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "formats": {\n      "description": "Records matching any of these formats are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "12\\"",\n          "10\\"",\n          "7\\""\n        ]\n      }\n    },\n    "types": {\n      "description": "Records matching any of these release types are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "album",\n          "ep",\n          "single",\n          "non music"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
                         schema: {
                             type: 'string',
                         },
@@ -3049,7 +3995,7 @@ const BackendApi = {
                         name: 'tags',
                         in: 'query',
                         description:
-                            'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "genres": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "pop",\n          "hip hop",\n          "electronic",\n          "r and b",\n          "indie",\n          "rock",\n          "jazz",\n          "classical",\n          "folk",\n          "acoustic",\n          "country",\n          "metal",\n          "blues",\n          "punk",\n          "ska",\n          "prog rock"\n        ]\n      }\n    },\n    "colours": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "red",\n          "pink",\n          "orange",\n          "yellow",\n          "purple",\n          "green",\n          "blue",\n          "brown",\n          "white",\n          "grey",\n          "black",\n          "clear",\n          "picture",\n          "gold"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
+                            'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "genres": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "pop",\n          "hip hop",\n          "electronic",\n          "r and b",\n          "indie",\n          "rock",\n          "jazz",\n          "classical",\n          "folk",\n          "acoustic",\n          "country",\n          "metal",\n          "blues",\n          "punk",\n          "ska",\n          "prog rock",\n          "stand up"\n        ]\n      }\n    },\n    "colours": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "red",\n          "pink",\n          "orange",\n          "yellow",\n          "purple",\n          "green",\n          "blue",\n          "brown",\n          "white",\n          "grey",\n          "black",\n          "clear",\n          "picture",\n          "gold"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
                         schema: {
                             type: 'string',
                         },
@@ -3459,176 +4405,6 @@ const BackendApi = {
         },
         '/': {
             options: {
-                responses: {
-                    '204': {
-                        description: '204 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            Vary: {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {},
-                    },
-                },
-                'x-amazon-apigateway-integration': {
-                    responses: {
-                        default: {
-                            statusCode: '204',
-                            responseParameters: {
-                                'method.response.header.Access-Control-Allow-Methods':
-                                    "'GET,POST,PUT,DELETE,OPTIONS'",
-                                'method.response.header.Access-Control-Allow-Headers':
-                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
-                                'method.response.header.Access-Control-Allow-Origin':
-                                    "'http://localhost:3000'",
-                                'method.response.header.Vary': "'Origin'",
-                            },
-                        },
-                    },
-                    requestTemplates: {
-                        'application/json': '{ statusCode: 200 }',
-                    },
-                    passthroughBehavior: 'when_no_match',
-                    type: 'mock',
-                },
-            },
-        },
-        '/records/external/{musicBrainzId}': {
-            get: {
-                operationId: 'GetExternalRecord',
-                parameters: [
-                    {
-                        name: 'musicBrainzId',
-                        in: 'path',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
-                responses: {
-                    '503': {
-                        description: '503 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '404': {
-                        description: '404 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '200': {
-                        description: '200 response',
-                        headers: {
-                            'Access-Control-Allow-Origin': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Methods': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                            'Access-Control-Allow-Headers': {
-                                schema: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/GetExternalRecordSuccessResponse',
-                                },
-                            },
-                        },
-                    },
-                    '400': {
-                        description: '400 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '401': {
-                        description: '401 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                    '500': {
-                        description: '500 response',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        'home-automation-api-v2-basic-user-authorizer-dev': [],
-                    },
-                    {
-                        api_key: [],
-                    },
-                ],
-                'x-amazon-apigateway-integration': {
-                    uri: 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:558946902552:function:get-external-record-handler-dev/invocations',
-                    httpMethod: 'POST',
-                    passthroughBehavior: 'when_no_match',
-                    responseTransferMode: 'BUFFERED',
-                    type: 'aws_proxy',
-                },
-            },
-            options: {
-                parameters: [
-                    {
-                        name: 'musicBrainzId',
-                        in: 'path',
-                        required: true,
-                        schema: {
-                            type: 'string',
-                        },
-                    },
-                ],
                 responses: {
                     '204': {
                         description: '204 response',
@@ -4193,6 +4969,59 @@ const BackendApi = {
                 },
             },
         },
+        '/.well-known': {
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
         '/records/{id}': {
             get: {
                 operationId: 'GetRecord',
@@ -4429,6 +5258,119 @@ const BackendApi = {
                     type: 'aws',
                 },
             },
+            delete: {
+                operationId: 'DeleteRecord',
+                parameters: [
+                    {
+                        name: 'id',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '400': {
+                        description: '400 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: '500 response',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/HomeAutomationApiV2ErrorResponseModel',
+                                },
+                            },
+                        },
+                    },
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/schemas/DeleteRecordSuccessResponse',
+                                },
+                            },
+                        },
+                    },
+                },
+                security: [
+                    {
+                        'home-automation-api-v2-basic-user-authorizer-dev': [],
+                    },
+                    {
+                        api_key: [],
+                    },
+                ],
+                'x-amazon-apigateway-integration': {
+                    credentials:
+                        'arn:aws:iam::558946902552:role/delete-record-integration-role-dev',
+                    uri: 'arn:aws:apigateway:eu-west-1:dynamodb:action/DeleteItem',
+                    httpMethod: 'POST',
+                    responses: {
+                        '400': {
+                            statusCode: '400',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to delete item in DynamoDB to remove Record","reason":"bad_request"}',
+                            },
+                        },
+                        '5\\d{2}': {
+                            statusCode: '500',
+                            responseTemplates: {
+                                'application/json':
+                                    '{"message":"Failed to delete item in DynamoDB to remove Record","reason":"internal_server_error"}',
+                            },
+                        },
+                        '2\\d{2}': {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '\n        \n\n        #set($id = $context.requestOverride.path.id)\n\n        {"id":"$id"}\n    ',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json':
+                            '\n    #set($id = $input.params(\'id\'))\n\n    #set($context.requestOverride.path.id = $id)\n\n        #if(!$id.matches(\'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\'))\n            #set($context.responseOverride.status = 400)\n\n            {"message":"Invalid id format. Expected UUID. Got \'$id\'.","reason":"bad_request"}\n        #else\n            {"TableName":"home-automation-read-store-v2-dev","Key":{"pk":{"S":"RECORD~$context.authorizer.userId"},"sk":{"S":"$id"}},"ConditionExpression":"attribute_exists(pk) AND attribute_exists(sk)"}\n        #end',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'aws',
+                },
+            },
             options: {
                 parameters: [
                     {
@@ -4491,9 +5433,185 @@ const BackendApi = {
                 },
             },
         },
+        '/.well-known/oauth-protected-resource': {
+            get: {
+                operationId: 'GetProtectedResourceMetadata',
+                responses: {
+                    '200': {
+                        description: '200 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '200',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Origin': "'*'",
+                            },
+                            responseTemplates: {
+                                'application/json':
+                                    '{"resource":"https://$context.domainName/mcp","resource_name":"Home Automation","authorization_servers":["https://angry-raja-5591.customers.stytch.dev"],"scopes_supported":["openid","email","profile","offline_access"],"bearer_methods_supported":["header"]}',
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{"statusCode": 200}',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
+        '/bellboard': {
+            options: {
+                responses: {
+                    '204': {
+                        description: '204 response',
+                        headers: {
+                            'Access-Control-Allow-Origin': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Methods': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            Vary: {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                            'Access-Control-Allow-Headers': {
+                                schema: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                        content: {},
+                    },
+                },
+                'x-amazon-apigateway-integration': {
+                    responses: {
+                        default: {
+                            statusCode: '204',
+                            responseParameters: {
+                                'method.response.header.Access-Control-Allow-Methods':
+                                    "'GET,POST,PUT,DELETE,OPTIONS'",
+                                'method.response.header.Access-Control-Allow-Headers':
+                                    "'Content-Type,Authorization,Origin,x-api-key,access-control-allow-origin'",
+                                'method.response.header.Access-Control-Allow-Origin':
+                                    "'http://localhost:3000'",
+                                'method.response.header.Vary': "'Origin'",
+                            },
+                        },
+                    },
+                    requestTemplates: {
+                        'application/json': '{ statusCode: 200 }',
+                    },
+                    passthroughBehavior: 'when_no_match',
+                    type: 'mock',
+                },
+            },
+        },
     },
     components: {
         schemas: {
+            GetBellboardsSuccessResponse: {
+                title: 'GetBellboardsSuccessResponse',
+                type: 'array',
+                items: {
+                    required: ['bellboardName', 'lastUpdated', 'rooms', 'version'],
+                    type: 'object',
+                    properties: {
+                        lastUpdated: {
+                            pattern:
+                                '^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$',
+                            type: 'string',
+                            description: 'timestamp when the latest bellboard status was processed',
+                        },
+                        rooms: {
+                            type: 'array',
+                            description: 'Room each bell on the bellboard rings for, in bell order',
+                            items: {
+                                minLength: 1,
+                                type: 'string',
+                            },
+                        },
+                        bellboardName: {
+                            minLength: 1,
+                            type: 'string',
+                            description: 'Name of the bellboard, from the topic',
+                        },
+                        version: {
+                            minLength: 1,
+                            type: 'string',
+                            description: 'Firmware version the bellboard is running',
+                        },
+                    },
+                    additionalProperties: false,
+                },
+            },
             PostCalculateCaloriesResponseModel: {
                 title: 'PostCalculateCaloriesResponseModel',
                 required: ['calories', 'unresolvedIngredients'],
@@ -5151,7 +6269,7 @@ const BackendApi = {
                         type: {
                             type: 'string',
                             description: 'The type of release: album, ep or single',
-                            enum: ['album', 'ep', 'single'],
+                            enum: ['album', 'ep', 'single', 'non music'],
                         },
                         labels: {
                             type: 'array',
@@ -5184,6 +6302,7 @@ const BackendApi = {
                                             'punk',
                                             'ska',
                                             'prog rock',
+                                            'stand up',
                                         ],
                                     },
                                 },
@@ -5235,6 +6354,19 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
+            DeleteRecordSuccessResponse: {
+                title: 'DeleteRecordSuccessResponse',
+                required: ['id'],
+                type: 'object',
+                properties: {
+                    id: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                    },
+                },
+                additionalProperties: false,
+            },
             PostImageBodyModel: {
                 title: 'PostImageBodyModel',
                 required: ['contentType', 'service'],
@@ -5265,7 +6397,7 @@ const BackendApi = {
                                     'Records matching any of these release types are returned',
                                 items: {
                                     type: 'string',
-                                    enum: ['album', 'ep', 'single'],
+                                    enum: ['album', 'ep', 'single', 'non music'],
                                 },
                             },
                             formats: {
@@ -5304,6 +6436,7 @@ const BackendApi = {
                                         'punk',
                                         'ska',
                                         'prog rock',
+                                        'stand up',
                                     ],
                                 },
                             },
@@ -5433,7 +6566,7 @@ const BackendApi = {
                             type: {
                                 type: 'string',
                                 description: 'The type of release: album, ep or single',
-                                enum: ['album', 'ep', 'single'],
+                                enum: ['album', 'ep', 'single', 'non music'],
                             },
                             labels: {
                                 type: 'array',
@@ -5466,6 +6599,7 @@ const BackendApi = {
                                                 'punk',
                                                 'ska',
                                                 'prog rock',
+                                                'stand up',
                                             ],
                                         },
                                     },
@@ -5598,7 +6732,7 @@ const BackendApi = {
                             type: {
                                 type: 'string',
                                 description: 'The type of release: album, ep or single',
-                                enum: ['album', 'ep', 'single'],
+                                enum: ['album', 'ep', 'single', 'non music'],
                             },
                             labels: {
                                 type: 'array',
@@ -5631,6 +6765,7 @@ const BackendApi = {
                                                 'punk',
                                                 'ska',
                                                 'prog rock',
+                                                'stand up',
                                             ],
                                         },
                                     },
@@ -6204,7 +7339,7 @@ const BackendApi = {
                     type: {
                         type: 'string',
                         description: 'The type of release: album, ep or single',
-                        enum: ['album', 'ep', 'single'],
+                        enum: ['album', 'ep', 'single', 'non music'],
                     },
                     labels: {
                         type: 'array',
@@ -6237,6 +7372,7 @@ const BackendApi = {
                                         'punk',
                                         'ska',
                                         'prog rock',
+                                        'stand up',
                                     ],
                                 },
                             },
@@ -6264,6 +7400,19 @@ const BackendApi = {
                             },
                         },
                         additionalProperties: false,
+                    },
+                },
+                additionalProperties: false,
+            },
+            PostBellboardRingBodyModel: {
+                title: 'PostBellboardRingBodyModel',
+                required: ['room'],
+                type: 'object',
+                properties: {
+                    room: {
+                        minLength: 1,
+                        type: 'string',
+                        description: 'Name of the room on the bellboard to ring',
                     },
                 },
                 additionalProperties: false,
@@ -6323,7 +7472,7 @@ const BackendApi = {
                             type: {
                                 type: 'string',
                                 description: 'The type of release: album, ep or single',
-                                enum: ['album', 'ep', 'single'],
+                                enum: ['album', 'ep', 'single', 'non music'],
                             },
                             labels: {
                                 type: 'array',
@@ -6356,6 +7505,7 @@ const BackendApi = {
                                                 'punk',
                                                 'ska',
                                                 'prog rock',
+                                                'stand up',
                                             ],
                                         },
                                     },
@@ -6488,7 +7638,7 @@ const BackendApi = {
                             type: {
                                 type: 'string',
                                 description: 'The type of release: album, ep or single',
-                                enum: ['album', 'ep', 'single'],
+                                enum: ['album', 'ep', 'single', 'non music'],
                             },
                             labels: {
                                 type: 'array',
@@ -6521,6 +7671,7 @@ const BackendApi = {
                                                 'punk',
                                                 'ska',
                                                 'prog rock',
+                                                'stand up',
                                             ],
                                         },
                                     },
@@ -7021,6 +8172,38 @@ const BackendApi = {
                 },
                 additionalProperties: false,
             },
+            GetBellboardSuccessResponse: {
+                title: 'GetBellboardSuccessResponse',
+                required: ['bellboardName', 'lastUpdated', 'rooms', 'version'],
+                type: 'object',
+                properties: {
+                    lastUpdated: {
+                        pattern:
+                            '^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$',
+                        type: 'string',
+                        description: 'timestamp when the latest bellboard status was processed',
+                    },
+                    rooms: {
+                        type: 'array',
+                        description: 'Room each bell on the bellboard rings for, in bell order',
+                        items: {
+                            minLength: 1,
+                            type: 'string',
+                        },
+                    },
+                    bellboardName: {
+                        minLength: 1,
+                        type: 'string',
+                        description: 'Name of the bellboard, from the topic',
+                    },
+                    version: {
+                        minLength: 1,
+                        type: 'string',
+                        description: 'Firmware version the bellboard is running',
+                    },
+                },
+                additionalProperties: false,
+            },
             PutMealPlanSuccessResponse: {
                 title: 'PutMealPlanSuccessResponse',
                 required: ['date', 'mealTime'],
@@ -7165,7 +8348,7 @@ const BackendApi = {
                     type: {
                         type: 'string',
                         description: 'The type of release: album, ep or single',
-                        enum: ['album', 'ep', 'single'],
+                        enum: ['album', 'ep', 'single', 'non music'],
                     },
                     labels: {
                         type: 'array',
@@ -7198,6 +8381,7 @@ const BackendApi = {
                                         'punk',
                                         'ska',
                                         'prog rock',
+                                        'stand up',
                                     ],
                                 },
                             },
@@ -7270,165 +8454,6 @@ const BackendApi = {
                     },
                 },
                 additionalProperties: false,
-            },
-            GetExternalRecordSuccessResponse: {
-                title: 'GetExternalRecordSuccessResponse',
-                required: ['artists', 'catNo', 'labels', 'musicBrainzId', 'sides', 'tags', 'title'],
-                type: 'object',
-                properties: {
-                    country: {
-                        type: 'string',
-                        description:
-                            'Where this pressing was released, usually an ISO 3166-1 code like GB',
-                    },
-                    releaseDate: {
-                        type: 'string',
-                        description:
-                            'When this pressing was released, as YYYY, YYYY-MM or YYYY-MM-DD',
-                    },
-                    year: {
-                        maximum: 9007199254740991,
-                        minimum: -9007199254740991,
-                        type: 'integer',
-                    },
-                    musicBrainzId: {
-                        pattern:
-                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
-                        type: 'string',
-                        description: 'The MusicBrainz release ID, used to get the full release',
-                    },
-                    format: {
-                        type: 'string',
-                        description: 'The physical size of the record: 12", 10" or 7"',
-                        enum: ['12"', '10"', '7"'],
-                    },
-                    title: {
-                        type: 'string',
-                    },
-                    type: {
-                        type: 'string',
-                        description: 'The type of release: album, ep or single',
-                        enum: ['album', 'ep', 'single'],
-                    },
-                    labels: {
-                        type: 'array',
-                        items: {
-                            type: 'string',
-                        },
-                    },
-                    tags: {
-                        required: ['colours', 'genres'],
-                        type: 'object',
-                        properties: {
-                            genres: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: [
-                                        'pop',
-                                        'hip hop',
-                                        'electronic',
-                                        'r and b',
-                                        'indie',
-                                        'rock',
-                                        'jazz',
-                                        'classical',
-                                        'folk',
-                                        'acoustic',
-                                        'country',
-                                        'metal',
-                                        'blues',
-                                        'punk',
-                                        'ska',
-                                        'prog rock',
-                                    ],
-                                },
-                            },
-                            colours: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    enum: [
-                                        'red',
-                                        'pink',
-                                        'orange',
-                                        'yellow',
-                                        'purple',
-                                        'green',
-                                        'blue',
-                                        'brown',
-                                        'white',
-                                        'grey',
-                                        'black',
-                                        'clear',
-                                        'picture',
-                                        'gold',
-                                    ],
-                                },
-                            },
-                        },
-                        additionalProperties: false,
-                    },
-                    originalImageUrl: {
-                        type: 'string',
-                        description:
-                            'Cover art from the Cover Art Archive, only present when the release has some',
-                    },
-                    artists: {
-                        type: 'array',
-                        items: {
-                            type: 'string',
-                        },
-                    },
-                    catNo: {
-                        type: 'string',
-                        description: 'The catalogue number assigned to the release by its label',
-                    },
-                    disambiguation: {
-                        type: 'string',
-                        description:
-                            'Notes that tell pressings apart, e.g. "red vinyl" or "textured sleeve"',
-                    },
-                    sides: {
-                        type: 'array',
-                        items: {
-                            required: ['name', 'songs'],
-                            type: 'object',
-                            properties: {
-                                songs: {
-                                    type: 'array',
-                                    items: {
-                                        required: ['duration', 'title'],
-                                        type: 'object',
-                                        properties: {
-                                            duration: {
-                                                maximum: 9007199254740991,
-                                                minimum: 0,
-                                                type: 'integer',
-                                                description: 'In seconds the length of the song',
-                                            },
-                                            title: {
-                                                type: 'string',
-                                            },
-                                        },
-                                        additionalProperties: false,
-                                    },
-                                },
-                                name: {
-                                    type: 'string',
-                                    description: 'The name of the side, e.g. "A" or "B"',
-                                },
-                            },
-                            additionalProperties: false,
-                        },
-                    },
-                    barcode: {
-                        type: 'string',
-                    },
-                },
-                additionalProperties: false,
-                description:
-                    'A MusicBrainz release in the shape of a record, to fill out a new record. Fields MusicBrainz does not know are left out.',
             },
             PostMealPlanBodyModel: {
                 title: 'PostMealPlanBodyModel',
@@ -8624,7 +9649,7 @@ const BackendApi = {
                                 type: {
                                     type: 'string',
                                     description: 'The type of release: album, ep or single',
-                                    enum: ['album', 'ep', 'single'],
+                                    enum: ['album', 'ep', 'single', 'non music'],
                                 },
                                 labels: {
                                     type: 'array',
@@ -8731,7 +9756,7 @@ const BackendApi = {
                                 type: {
                                     type: 'string',
                                     description: 'The type of release: album, ep or single',
-                                    enum: ['album', 'ep', 'single'],
+                                    enum: ['album', 'ep', 'single', 'non music'],
                                 },
                                 labels: {
                                     type: 'array',
@@ -8899,7 +9924,7 @@ const BackendApi = {
                     type: {
                         type: 'string',
                         description: 'The type of release: album, ep or single',
-                        enum: ['album', 'ep', 'single'],
+                        enum: ['album', 'ep', 'single', 'non music'],
                     },
                     labels: {
                         type: 'array',
@@ -8932,6 +9957,7 @@ const BackendApi = {
                                         'punk',
                                         'ska',
                                         'prog rock',
+                                        'stand up',
                                     ],
                                 },
                             },
@@ -8959,6 +9985,20 @@ const BackendApi = {
                             },
                         },
                         additionalProperties: false,
+                    },
+                },
+                additionalProperties: false,
+            },
+            PostBellboardRingSuccessResponse: {
+                title: 'PostBellboardRingSuccessResponse',
+                required: ['eventId'],
+                type: 'object',
+                properties: {
+                    eventId: {
+                        pattern:
+                            '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
+                        type: 'string',
+                        description: 'id of the BellboardRung event put on the shared event bus',
                     },
                 },
                 additionalProperties: false,
@@ -8999,8 +10039,8 @@ const BackendApi = {
         },
     },
     'x-amazon-apigateway-documentation': {
-        version: 'petcr5',
-        createdDate: '2026-10-04T10:31:35Z',
+        version: '7u6b1r',
+        createdDate: '2026-10-23T09:00:55Z',
         documentationParts: [
             {
                 location: {
@@ -9059,7 +10099,7 @@ const BackendApi = {
                 },
                 properties: {
                     description:
-                        'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "formats": {\n      "description": "Records matching any of these formats are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "12\\"",\n          "10\\"",\n          "7\\""\n        ]\n      }\n    },\n    "types": {\n      "description": "Records matching any of these release types are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "album",\n          "ep",\n          "single"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
+                        'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "formats": {\n      "description": "Records matching any of these formats are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "12\\"",\n          "10\\"",\n          "7\\""\n        ]\n      }\n    },\n    "types": {\n      "description": "Records matching any of these release types are returned",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "album",\n          "ep",\n          "single",\n          "non music"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
                 },
             },
             {
@@ -9143,7 +10183,7 @@ const BackendApi = {
                 },
                 properties: {
                     description:
-                        'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "genres": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "pop",\n          "hip hop",\n          "electronic",\n          "r and b",\n          "indie",\n          "rock",\n          "jazz",\n          "classical",\n          "folk",\n          "acoustic",\n          "country",\n          "metal",\n          "blues",\n          "punk",\n          "ska",\n          "prog rock"\n        ]\n      }\n    },\n    "colours": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "red",\n          "pink",\n          "orange",\n          "yellow",\n          "purple",\n          "green",\n          "blue",\n          "brown",\n          "white",\n          "grey",\n          "black",\n          "clear",\n          "picture",\n          "gold"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
+                        'Pass this value as a JSON-encoded object in the query string.\n\nSchema:\n{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "genres": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "pop",\n          "hip hop",\n          "electronic",\n          "r and b",\n          "indie",\n          "rock",\n          "jazz",\n          "classical",\n          "folk",\n          "acoustic",\n          "country",\n          "metal",\n          "blues",\n          "punk",\n          "ska",\n          "prog rock",\n          "stand up"\n        ]\n      }\n    },\n    "colours": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": [\n          "red",\n          "pink",\n          "orange",\n          "yellow",\n          "purple",\n          "green",\n          "blue",\n          "brown",\n          "white",\n          "grey",\n          "black",\n          "clear",\n          "picture",\n          "gold"\n        ]\n      }\n    }\n  },\n  "additionalProperties": false\n}',
                 },
             },
             {
@@ -9177,6 +10217,10 @@ const BackendApi = {
         'get-recipes-request-validator-dev': {
             validateRequestParameters: true,
             validateRequestBody: false,
+        },
+        'post-bellboard-ring-request-validator-dev': {
+            validateRequestParameters: true,
+            validateRequestBody: true,
         },
         'put-meal-plan-request-validator-dev': {
             validateRequestParameters: false,

@@ -41,6 +41,7 @@ export default function NavBar({ showLinks = true }: NavBarProps) {
                         { href: '/recipes', label: 'recipes' },
                         { href: '/meal-plans', label: 'meal plans' },
                         { href: '/records', label: 'records' },
+                        { href: '/bellboards', label: 'bellboards' },
                         { href: '/logout', label: 'logout' },
                     ]}
                 />
