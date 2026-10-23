@@ -118,14 +118,25 @@ jobs:
             --cli-binary-format raw-in-base64-out \
             --payload file://cypress/fixtures/bellboards/hallwayboardStatus.json
 
+      - name: Build app
+        run: yarn build
+
+      # The Cypress action's own wait-on gives up on some connection errors rather than retrying,
+      # so start the server and wait for it here
+      - name: Start app
+        run: |
+          yarn start > next-start.log 2>&1 &
+          curl --silent --fail --output /dev/null --retry 60 --retry-delay 2 --retry-all-errors \
+            http://localhost:3000/login
+
       - name: Cypress E2E tests
         uses: cypress-io/github-action@v6
         with:
           install: false
-          build: yarn build
-          start: yarn start
-          wait-on: http://localhost:3000/login
-          wait-on-timeout: 120
+
+      - name: Show app server log
+        if: failure()
+        run: cat next-start.log || true
 
       - name: Upload Cypress screenshots
         if: failure()
